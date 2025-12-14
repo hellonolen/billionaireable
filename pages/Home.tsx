@@ -40,7 +40,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.5 }}
                             className="inline-flex items-center bg-black dark:bg-white text-white dark:text-black px-5 py-2 rounded-full mb-8"
                         >
-                            <span className="font-mono text-xs font-bold uppercase tracking-widest">Your Framework for the Why Not</span>
+                            <span className="font-mono text-xs font-bold uppercase tracking-widest">Your Framework for Why the F Not</span>
                         </motion.div>
 
                         {/* Main Headline */}
