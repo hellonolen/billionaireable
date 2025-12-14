@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Mic, Loader2 } from 'lucide-react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { useAction } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 interface Message {
     role: 'user' | 'model';
     text: string;
 }
-
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
 // System prompt for Billionaireable
 const SYSTEM_PROMPT = `You are Billionaireable.
@@ -43,8 +41,11 @@ const ConciergeWidget: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [conversationHistory, setConversationHistory] = useState<Array<{role: string, text: string}>>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const chatRef = useRef<any>(null);
+    
+    // Convex action - calls Gemini with key from Convex env
+    const chat = useAction(api.billionaireable.chat);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,41 +55,33 @@ const ConciergeWidget: React.FC = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Initialize chat session
+    // Initialize chat when opened
     useEffect(() => {
         const initChat = async () => {
             try {
-                const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-                chatRef.current = model.startChat({
-                    history: [
-                        {
-                            role: 'user',
-                            parts: [{ text: SYSTEM_PROMPT }],
-                        },
-                        {
-                            role: 'model',
-                            parts: [{ text: 'Understood. I am Billionaireable. Ready to guide.' }],
-                        },
-                    ],
+                const response = await chat({
+                    message: "The user just opened the chat. Give a brief, direct welcome.",
+                    history: [],
+                    systemPrompt: SYSTEM_PROMPT,
                 });
-                
-                // Get opening message
-                const result = await chatRef.current.sendMessage("The user just opened the chat. Give a brief, direct welcome.");
-                const response = result.response.text();
                 setMessages([{ role: 'model', text: response }]);
+                setConversationHistory([
+                    { role: 'user', text: "The user just opened the chat. Give a brief, direct welcome." },
+                    { role: 'model', text: response }
+                ]);
             } catch (error) {
-                console.error('Failed to initialize Gemini chat:', error);
+                console.error('Failed to initialize chat:', error);
                 setMessages([{ role: 'model', text: "Welcome. What's on your mind?" }]);
             }
         };
 
-        if (isOpen && !chatRef.current) {
+        if (isOpen && messages.length === 0) {
             initChat();
         }
-    }, [isOpen]);
+    }, [isOpen, chat, messages.length]);
 
     const handleSend = async () => {
-        if (!input.trim() || isLoading || !chatRef.current) return;
+        if (!input.trim() || isLoading) return;
         
         const userMessage = input.trim();
         setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
@@ -96,9 +89,16 @@ const ConciergeWidget: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const result = await chatRef.current.sendMessage(userMessage);
-            const response = result.response.text();
+            const newHistory = [...conversationHistory, { role: 'user', text: userMessage }];
+            
+            const response = await chat({
+                message: userMessage,
+                history: newHistory,
+                systemPrompt: SYSTEM_PROMPT,
+            });
+            
             setMessages(prev => [...prev, { role: 'model', text: response }]);
+            setConversationHistory([...newHistory, { role: 'model', text: response }]);
         } catch (error) {
             console.error('Chat error:', error);
             setMessages(prev => [...prev, { 

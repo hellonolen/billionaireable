@@ -1,98 +1,57 @@
 import { v } from "convex/values";
-import { action, internalQuery } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { action } from "./_generated/server";
 
-// Internal query to get user context for AI
-export const getUserContext = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) return null;
-
-    // Get recent messages for memory
-    const conversations = await ctx.db
-      .query("conversations")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .order("desc")
-      .take(5);
-
-    const recentMessages = [];
-    for (const conv of conversations) {
-      const messages = await ctx.db
-        .query("messages")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-        .order("desc")
-        .take(10);
-      recentMessages.push(...messages);
-    }
-
-    // Get progress
-    const progress = await ctx.db
-      .query("progress")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .collect();
-
-    return {
-      user,
-      recentMessages: recentMessages.slice(0, 20).reverse(),
-      progress,
-    };
-  },
-});
-
-// Main AI chat action
+// Simple chat action - direct Gemini call with history
 export const chat = action({
   args: {
-    userId: v.id("users"),
     message: v.string(),
-    skillId: v.optional(v.string()),
-    moduleId: v.optional(v.string()),
+    history: v.array(v.object({
+      role: v.string(),
+      text: v.string(),
+    })),
+    systemPrompt: v.string(),
   },
   handler: async (ctx, args) => {
-    // Get user context
-    const context = await ctx.runQuery(internal.billionaireable.getUserContext, {
-      userId: args.userId,
-    });
-
-    if (!context) {
-      throw new Error("User not found");
-    }
-
-    // Build the system prompt with user context
-    const systemPrompt = buildSystemPrompt(context);
-
-    // Build conversation history
-    const conversationHistory = context.recentMessages.map((msg) => ({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }],
-    }));
-
-    // Add current message
-    conversationHistory.push({
-      role: "user",
-      parts: [{ text: args.message }],
-    });
-
-    // Call Gemini API
     const apiKey = process.env.GEMINI_API_KEY;
+    
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY not configured");
+      throw new Error("GEMINI_API_KEY not configured in Convex");
     }
+
+    // Build conversation history for Gemini
+    const contents = [
+      // System prompt as first exchange
+      {
+        role: "user",
+        parts: [{ text: args.systemPrompt }],
+      },
+      {
+        role: "model", 
+        parts: [{ text: "Understood. I am Billionaireable. Ready to guide." }],
+      },
+      // Previous conversation
+      ...args.history.map((msg) => ({
+        role: msg.role === "user" ? "user" : "model",
+        parts: [{ text: msg.text }],
+      })),
+      // Current message
+      {
+        role: "user",
+        parts: [{ text: args.message }],
+      },
+    ];
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contents: conversationHistory,
-          systemInstruction: {
-            parts: [{ text: systemPrompt }],
-          },
+          contents,
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.8,
             topK: 40,
             topP: 0.95,
             maxOutputTokens: 1024,
@@ -103,116 +62,14 @@ export const chat = action({
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`Gemini API error: ${error}`);
+      console.error("Gemini API error:", error);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-      "I apologize, but I couldn't generate a response. Please try again.";
+      "Let's refocus. What are you working on?";
 
     return aiResponse;
   },
 });
-
-function buildSystemPrompt(context: {
-  user: any;
-  recentMessages: any[];
-  progress: any[];
-}): string {
-  const { user, progress } = context;
-
-  // Build user situation summary
-  let situationSummary = "";
-  if (user.netWorth || user.revenue || user.businessType || user.goals) {
-    situationSummary = `
-USER'S CURRENT SITUATION:
-${user.netWorth ? `- Net Worth: $${user.netWorth.toLocaleString()}` : ""}
-${user.revenue ? `- Annual Revenue: $${user.revenue.toLocaleString()}` : ""}
-${user.businessType ? `- Business Type: ${user.businessType}` : ""}
-${user.goals ? `- Goals: ${user.goals}` : ""}
-`;
-  }
-
-  // Build progress summary - determine current Pillar
-  const pillarOrder = [
-    'reality-distortion',
-    'liquidity-allocation', 
-    'holding-co',
-    'time-arbitrage',
-    'bio-availability',
-    'political-capital',
-    'syndicate',
-    'family-office',
-    'dynasty-design',
-    'sovereign-flags',
-    'asymmetric-bets',
-    'ascendance'
-  ];
-  
-  const pillarNames: Record<string, string> = {
-    'reality-distortion': 'Reality Distortion',
-    'liquidity-allocation': 'Liquidity & Allocation',
-    'holding-co': 'The Holding Co',
-    'time-arbitrage': 'Time Arbitrage',
-    'bio-availability': 'Bio-Availability',
-    'political-capital': 'Political Capital',
-    'syndicate': 'The Syndicate',
-    'family-office': 'Family Office',
-    'dynasty-design': 'Dynasty Design',
-    'sovereign-flags': 'Sovereign Flags',
-    'asymmetric-bets': 'Asymmetric Bets',
-    'ascendance': 'Ascendance'
-  };
-
-  // Find current pillar (first incomplete one)
-  const completedPillars = progress.filter((p) => p.completedAt).map((p) => p.skillId);
-  let currentPillarIndex = 0;
-  for (let i = 0; i < pillarOrder.length; i++) {
-    if (!completedPillars.includes(pillarOrder[i])) {
-      currentPillarIndex = i;
-      break;
-    }
-  }
-  const currentPillar = pillarOrder[currentPillarIndex];
-  const currentPillarName = pillarNames[currentPillar] || currentPillar;
-  const pillarNumber = currentPillarIndex + 1;
-
-  let progressSummary = `
-CURRENT STEP:
-- They are on Pillar ${pillarNumber}: ${currentPillarName}
-- Pillars completed: ${completedPillars.length}/12
-- Always reference their current Pillar when bringing them back to the path.
-- Guide them through Pillar ${pillarNumber} before moving to the next.
-`;
-
-  return `You are Billionaireable.
-
-GOAL: Guide them to become billionaireable through the 12 Pillars. This is the path. They align to it.
-
-GUARDRAILS:
-- If they go off-topic, acknowledge briefly and bring it back to the program. Never look stupid. Never say "I can't help with that." Handle it, then redirect.
-- You lead the conversation. You tell them what to focus on. You give directives.
-- No coddling. No "how does that make you feel?" This is what billionaires do. Do this.
-- Direct. Clear. Commanding. You embody Warren Buffett, Elon Musk, Ray Dalio.
-- Never say "personalized for you" or "your situation." This is the path. They align to it.
-
-THE 12 PILLARS:
-1. Reality Distortion - Vision that attracts capital
-2. Liquidity & Allocation - Capital architecture
-3. The Holding Co - Systems building
-4. Time Arbitrage - Leverage and delegation
-5. Bio-Availability - Peak performance
-6. Political Capital - Power and influence
-7. The Syndicate - Deal flow and partnerships
-8. Family Office - Wealth operations
-9. Dynasty Design - Generational legacy
-10. Sovereign Flags - Global optionality
-11. Asymmetric Bets - High-upside investments
-12. Ascendance - Mental models and clarity
-
-${situationSummary}
-${progressSummary}
-
-Keep responses concise (2-3 paragraphs max). End with a directive or a question that moves them forward on the path.`;
-}
-
