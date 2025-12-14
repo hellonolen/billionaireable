@@ -24,11 +24,15 @@ import {
   Mail,
   UserPlus,
   Trash2,
-  Send
+  Send,
+  Building2,
+  CreditCard,
+  FileText,
+  XCircle
 } from 'lucide-react';
 import { Id } from '../convex/_generated/dataModel';
 
-type TabType = 'overview' | 'customers' | 'subscriptions' | 'waitlist' | 'integrations';
+type TabType = 'overview' | 'customers' | 'subscriptions' | 'applications' | 'waitlist' | 'integrations';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -43,6 +47,9 @@ const AdminDashboard: React.FC = () => {
   const waitlistStats = useQuery(api.waitlist.getWaitlistStats);
   const updateWaitlistStatus = useMutation(api.waitlist.updateWaitlistStatus);
   const removeFromWaitlist = useMutation(api.waitlist.removeFromWaitlist);
+  const paymentApplications = useQuery(api.payments.getAllApplications);
+  const pendingApplications = useQuery(api.payments.getPendingApplications);
+  const updateApplicationStatus = useMutation(api.payments.updateApplicationStatus);
   const userDetail = useQuery(
     api.admin.getUserDetail,
     selectedUser ? { userId: selectedUser } : "skip"
@@ -120,6 +127,7 @@ const AdminDashboard: React.FC = () => {
               { id: 'overview', label: 'Overview', icon: BarChart3 },
               { id: 'customers', label: 'Customers', icon: Users },
               { id: 'subscriptions', label: 'Subscriptions', icon: DollarSign },
+              { id: 'applications', label: 'Applications', icon: FileText },
               { id: 'waitlist', label: 'Waitlist', icon: Mail },
               { id: 'integrations', label: 'Integrations', icon: Zap },
             ].map((tab) => (
@@ -699,6 +707,268 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
 
+        {/* Applications Tab */}
+        {activeTab === 'applications' && (
+          <div className="space-y-6">
+            {/* Application Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <Clock className="w-5 h-5 text-art-orange" />
+                  <p className="font-mono text-xs font-bold uppercase text-gray-400">
+                    Pending
+                  </p>
+                </div>
+                <p className="font-sans text-3xl font-black text-art-orange">
+                  {pendingApplications?.length || 0}
+                </p>
+              </div>
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <p className="font-mono text-xs font-bold uppercase text-gray-400">
+                    Approved
+                  </p>
+                </div>
+                <p className="font-sans text-3xl font-black text-green-500">
+                  {paymentApplications?.filter(a => a.status === 'approved').length || 0}
+                </p>
+              </div>
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <Building2 className="w-5 h-5 text-blue-500" />
+                  <p className="font-mono text-xs font-bold uppercase text-gray-400">
+                    Wire Transfer
+                  </p>
+                </div>
+                <p className="font-sans text-3xl font-black text-blue-500">
+                  {paymentApplications?.filter(a => a.paymentMethod === 'wire').length || 0}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-black to-gray-800 p-6 rounded-2xl text-white">
+                <div className="flex items-center gap-3 mb-2">
+                  <DollarSign className="w-5 h-5 text-art-green" />
+                  <p className="font-mono text-xs font-bold uppercase text-gray-400">
+                    Pending Value
+                  </p>
+                </div>
+                <p className="font-sans text-3xl font-black">
+                  {formatCurrency(pendingApplications?.reduce((sum, a) => sum + a.amount, 0) || 0)}
+                </p>
+              </div>
+            </div>
+
+            {/* Applications Table */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <h3 className="font-sans text-lg font-bold text-black dark:text-white">
+                  Payment Applications
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-art-orange font-mono text-xs font-bold">
+                    {pendingApplications?.length || 0} pending review
+                  </span>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Customer
+                      </th>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Tier
+                      </th>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Billing
+                      </th>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Method
+                      </th>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Submitted
+                      </th>
+                      <th className="px-6 py-3 text-left font-mono text-xs font-bold uppercase text-gray-400">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {paymentApplications?.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                          No payment applications yet
+                        </td>
+                      </tr>
+                    )}
+                    {paymentApplications?.map((app) => (
+                      <tr
+                        key={app._id}
+                        className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
+                          app.status === 'pending' ? 'bg-orange-50/50 dark:bg-orange-900/10' : ''
+                        }`}
+                      >
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-sans font-medium text-black dark:text-white">
+                              {app.userName || 'No name'}
+                            </p>
+                            <p className="font-mono text-xs text-gray-500">
+                              {app.userEmail}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-mono text-sm font-bold text-black dark:text-white uppercase">
+                            {app.tier}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-mono text-xs text-gray-600 dark:text-gray-400 uppercase">
+                            {app.billingCycle}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-sans font-bold text-black dark:text-white">
+                            {formatCurrency(app.amount)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            {app.paymentMethod === 'wire' && <Building2 className="w-4 h-4 text-blue-500" />}
+                            {app.paymentMethod === 'whop' && <Zap className="w-4 h-4 text-purple-500" />}
+                            {app.paymentMethod === 'stripe' && <CreditCard className="w-4 h-4 text-[#635BFF]" />}
+                            <span className="font-mono text-xs uppercase text-gray-600 dark:text-gray-400">
+                              {app.paymentMethod}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-mono text-xs font-bold uppercase ${
+                              app.status === 'pending'
+                                ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                                : app.status === 'approved'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : app.status === 'rejected'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            }`}
+                          >
+                            {app.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 font-mono text-sm text-gray-600 dark:text-gray-400">
+                          {formatDate(app.createdAt)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            {app.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    updateApplicationStatus({
+                                      applicationId: app._id,
+                                      status: 'approved',
+                                    })
+                                  }
+                                  className="p-2 text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                                  title="Approve & Activate"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    updateApplicationStatus({
+                                      applicationId: app._id,
+                                      status: 'rejected',
+                                    })
+                                  }
+                                  className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                  title="Reject"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
+                            {app.status !== 'pending' && (
+                              <span className="font-mono text-xs text-gray-400">
+                                {app.status === 'approved' ? 'Active' : 'Closed'}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Payment Method Summary */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+              <h3 className="font-sans text-lg font-bold text-black dark:text-white mb-4">
+                Payment Methods Configuration
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <CreditCard className="w-5 h-5 text-[#635BFF]" />
+                    <span className="font-sans font-bold text-black dark:text-white">Stripe</span>
+                  </div>
+                  <p className="font-mono text-xs text-gray-500 mb-2">
+                    Monthly Founder ($497) only
+                  </p>
+                  <a
+                    href="https://dashboard.stripe.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-xs text-[#635BFF] hover:underline"
+                  >
+                    Manage →
+                  </a>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Zap className="w-5 h-5 text-purple-500" />
+                    <span className="font-sans font-bold text-black dark:text-white">Whop</span>
+                  </div>
+                  <p className="font-mono text-xs text-gray-500 mb-2">
+                    Monthly Founder + Scaler
+                  </p>
+                  <a
+                    href="https://whop.com/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-xs text-purple-500 hover:underline"
+                  >
+                    Manage →
+                  </a>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Building2 className="w-5 h-5 text-blue-500" />
+                    <span className="font-sans font-bold text-black dark:text-white">Wire Transfer</span>
+                  </div>
+                  <p className="font-mono text-xs text-gray-500 mb-2">
+                    All annual + Monthly Owner
+                  </p>
+                  <span className="font-mono text-xs text-blue-500">
+                    Manual invoice required
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Waitlist Tab */}
         {activeTab === 'waitlist' && (
           <div className="space-y-6">
@@ -1010,6 +1280,40 @@ const AdminDashboard: React.FC = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-mono text-xs font-bold uppercase hover:bg-blue-700 transition-colors"
               >
                 Open Console
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+
+            {/* Whop */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-sans text-xl font-bold text-black dark:text-white">
+                    Whop
+                  </h3>
+                  <p className="font-mono text-xs text-gray-500">
+                    High-Ticket Subscriptions
+                  </p>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                  <span className="font-mono text-xs text-yellow-500">Setup Required</span>
+                </div>
+              </div>
+              <p className="font-serif text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Alternative payment processor for high-ticket subscriptions.
+                More friendly than Stripe for premium pricing.
+              </p>
+              <a
+                href="https://whop.com/dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-mono text-xs font-bold uppercase hover:from-purple-600 hover:to-pink-600 transition-colors"
+              >
+                Open Dashboard
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>

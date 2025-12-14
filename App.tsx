@@ -40,6 +40,7 @@ import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import ProtectedSubscriberRoute from './components/ProtectedSubscriberRoute';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCanceled from './pages/PaymentCanceled';
+import PaymentApplicationSubmitted from './pages/PaymentApplicationSubmitted';
 import FreeAssessment from './pages/FreeAssessment';
 
 import Footer from './components/Footer';
@@ -99,6 +100,7 @@ const App: React.FC = () => {
               <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />
               <Route path="/payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
               <Route path="/payment-canceled" element={<PageTransition><PaymentCanceled /></PageTransition>} />
+              <Route path="/payment-application-submitted" element={<PageTransition><PaymentApplicationSubmitted /></PageTransition>} />
               <Route path="/free-assessment" element={<PageTransition><FreeAssessment /></PageTransition>} />
               <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
               <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />

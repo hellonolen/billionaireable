@@ -71,16 +71,20 @@ export default defineSchema({
   })
     .index("by_user", ["userId"]),
 
-  // Subscriptions - Stripe subscription data
+  // Subscriptions - all payment sources
   subscriptions: defineTable({
     userId: v.id("users"),
-    stripeCustomerId: v.string(),
-    stripeSubscriptionId: v.string(),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
     status: v.string(), // active, canceled, past_due, etc.
-    plan: v.string(), // foundation, accelerator, inner-circle
+    plan: v.string(), // founder, scaler, owner
+    paymentMethod: v.optional(v.string()), // stripe, whop, wire
+    amount: v.optional(v.number()),
+    billingCycle: v.optional(v.string()), // monthly, annual
+    currentPeriodStart: v.optional(v.number()),
     currentPeriodEnd: v.number(),
     createdAt: v.number(),
-    updatedAt: v.number(),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])
     .index("by_stripe_customer", ["stripeCustomerId"]),
@@ -97,6 +101,23 @@ export default defineSchema({
     convertedAt: v.optional(v.number()),
   })
     .index("by_email", ["email"])
+    .index("by_status", ["status"]),
+
+  // Payment Applications - for wire transfer / high-ticket payments
+  paymentApplications: defineTable({
+    userId: v.id("users"),
+    userEmail: v.string(),
+    userName: v.string(),
+    tier: v.string(), // founder, scaler, owner
+    billingCycle: v.string(), // monthly, annual
+    amount: v.number(),
+    paymentMethod: v.string(), // wire, whop, stripe
+    status: v.string(), // pending, approved, rejected, paid
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
     .index("by_status", ["status"]),
 });
 

@@ -1,23 +1,49 @@
 import React, { useState } from 'react';
-import { Check, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, ArrowRight, Loader2, CreditCard, Building2, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import { useAction, useQuery } from 'convex/react';
+import { useAction, useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
-// Stripe Price IDs - REPLACE THESE with your real Stripe price IDs
-// To get these:
-// 1. Go to Stripe Dashboard > Products
-// 2. Create products for Founder, Scaler, Owner (monthly & annual variants)
-// 3. Copy the price IDs (start with "price_")
-// 4. Set STRIPE_SECRET_KEY in Convex environment variables
-const PRICE_IDS = {
-    founder_monthly: process.env.STRIPE_FOUNDER_MONTHLY || 'price_founder_monthly',
-    founder_annual: process.env.STRIPE_FOUNDER_ANNUAL || 'price_founder_annual',
-    scaler_monthly: process.env.STRIPE_SCALER_MONTHLY || 'price_scaler_monthly',
-    scaler_annual: process.env.STRIPE_SCALER_ANNUAL || 'price_scaler_annual',
-    owner_monthly: process.env.STRIPE_OWNER_MONTHLY || 'price_owner_monthly',
-    owner_annual: process.env.STRIPE_OWNER_ANNUAL || 'price_owner_annual',
+// Payment method types
+type PaymentMethod = 'stripe' | 'whop' | 'wire';
+
+// Payment availability rules
+const getAvailablePaymentMethods = (tier: string, isAnnual: boolean): PaymentMethod[] => {
+    // Annual = Wire only (all tiers)
+    if (isAnnual) {
+        return ['wire'];
+    }
+    
+    // Monthly by tier
+    switch (tier) {
+        case 'founder':
+            return ['stripe', 'whop', 'wire']; // All options
+        case 'scaler':
+            return ['whop', 'wire']; // No Stripe (too high)
+        case 'owner':
+            return ['wire']; // Wire only (way too high)
+        default:
+            return ['wire'];
+    }
+};
+
+const PAYMENT_METHOD_INFO: Record<PaymentMethod, { name: string; icon: React.ReactNode; description: string }> = {
+    stripe: {
+        name: 'Credit Card',
+        icon: <CreditCard className="w-5 h-5" />,
+        description: 'Pay instantly with card'
+    },
+    whop: {
+        name: 'Whop',
+        icon: <Zap className="w-5 h-5" />,
+        description: 'Secure subscription'
+    },
+    wire: {
+        name: 'Wire Transfer',
+        icon: <Building2 className="w-5 h-5" />,
+        description: 'Bank transfer (recommended)'
+    }
 };
 
 const Pricing: React.FC = () => {
@@ -25,6 +51,8 @@ const Pricing: React.FC = () => {
     const { user: clerkUser, isSignedIn } = useUser();
     const [isAnnual, setIsAnnual] = useState(true);
     const [loading, setLoading] = useState<string | null>(null);
+    const [selectedTier, setSelectedTier] = useState<string | null>(null);
+    const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
     // Convex
     const convexUser = useQuery(
@@ -32,37 +60,65 @@ const Pricing: React.FC = () => {
         isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
     );
     const createCheckout = useAction(api.stripe.createCheckoutSession);
+    const createApplication = useMutation(api.payments.createPaymentApplication);
 
-    const handleSubscribe = async (tierName: string, priceId: string) => {
+    const handleSelectTier = (tierName: string) => {
         if (!isSignedIn) {
             navigate('/waitlist');
             return;
         }
+        setSelectedTier(tierName.toLowerCase());
+        setShowPaymentOptions(true);
+    };
 
-        if (!convexUser) {
-            console.error('User not found in Convex');
-            return;
-        }
-
-        setLoading(tierName);
+    const handlePaymentMethod = async (method: PaymentMethod, tier: typeof tiers[0]) => {
+        if (!convexUser) return;
+        
+        setLoading(tier.name);
 
         try {
-            const { url } = await createCheckout({
-                priceId,
-                userId: convexUser._id,
-                successUrl: `${window.location.origin}/payment-success`,
-                cancelUrl: `${window.location.origin}/payment-canceled`,
-            });
-
-            if (url) {
-                window.location.href = url;
+            if (method === 'wire') {
+                // Create application for wire transfer
+                await createApplication({
+                    userId: convexUser._id,
+                    tier: tier.name.toLowerCase(),
+                    billingCycle: isAnnual ? 'annual' : 'monthly',
+                    amount: isAnnual ? tier.annualPrice : tier.monthlyPrice,
+                    paymentMethod: 'wire',
+                });
+                navigate('/payment-application-submitted');
+            } else if (method === 'whop') {
+                // Redirect to Whop checkout
+                // You'll set these URLs in your Whop dashboard
+                const whopUrls: Record<string, string> = {
+                    founder_monthly: process.env.VITE_WHOP_FOUNDER_MONTHLY || '/payment-application-submitted',
+                    scaler_monthly: process.env.VITE_WHOP_SCALER_MONTHLY || '/payment-application-submitted',
+                };
+                const key = `${tier.name.toLowerCase()}_monthly`;
+                window.location.href = whopUrls[key] || '/payment-application-submitted';
+            } else if (method === 'stripe') {
+                // Stripe checkout (only for low amounts)
+                const priceId = isAnnual ? tier.annualPriceId : tier.monthlyPriceId;
+                const { url } = await createCheckout({
+                    priceId,
+                    userId: convexUser._id,
+                    successUrl: `${window.location.origin}/payment-success`,
+                    cancelUrl: `${window.location.origin}/pricing?canceled=true`,
+                });
+                if (url) {
+                    window.location.href = url;
+                }
             }
         } catch (error) {
-            console.error('Checkout error:', error);
-            // Fall back to waitlist if Stripe isn't configured
-            navigate('/waitlist');
+            console.error('Payment error:', error);
+            // For wire/whop, still show application submitted
+            if (method !== 'stripe') {
+                navigate('/payment-application-submitted');
+            }
         } finally {
             setLoading(null);
+            setShowPaymentOptions(false);
+            setSelectedTier(null);
         }
     };
 
@@ -73,8 +129,8 @@ const Pricing: React.FC = () => {
             monthlyPrice: 497,
             annualPrice: 4997,
             annualSavings: 967,
-            monthlyPriceId: PRICE_IDS.founder_monthly,
-            annualPriceId: PRICE_IDS.founder_annual,
+            monthlyPriceId: 'price_founder_monthly',
+            annualPriceId: 'price_founder_annual',
             features: [
                 'Unlimited Billionaireable access',
                 'The 12 Pillars curriculum',
@@ -85,7 +141,7 @@ const Pricing: React.FC = () => {
             ],
             cta: 'Start Now',
             popular: false,
-            color: 'border-gray-200',
+            color: 'border-gray-200 dark:border-gray-700',
             barColor: 'bg-art-orange',
         },
         {
@@ -94,8 +150,8 @@ const Pricing: React.FC = () => {
             monthlyPrice: 1497,
             annualPrice: 14997,
             annualSavings: 2967,
-            monthlyPriceId: PRICE_IDS.scaler_monthly,
-            annualPriceId: PRICE_IDS.scaler_annual,
+            monthlyPriceId: 'price_scaler_monthly',
+            annualPriceId: 'price_scaler_annual',
             features: [
                 'Everything in Founder',
                 'Time Arbitrage mastery',
@@ -117,47 +173,49 @@ const Pricing: React.FC = () => {
             monthlyPrice: 4997,
             annualPrice: 49997,
             annualSavings: 9967,
-            monthlyPriceId: PRICE_IDS.owner_monthly,
-            annualPriceId: PRICE_IDS.owner_annual,
+            monthlyPriceId: 'price_owner_monthly',
+            annualPriceId: 'price_owner_annual',
             features: [
                 'Everything in Scaler',
                 'Family Office frameworks',
                 'Dynasty Design training',
-                'Sovereign Flags intelligence',
-                'Asymmetric Bets analysis',
-                'Ascendance program',
-                'Complete playbook library',
+                'Sovereign Flags strategies',
+                'Asymmetric Bets methodology',
+                'Ascendance protocols',
+                'Full pillar access forever',
+                'Dedicated Billionaireable instance',
             ],
             cta: 'Apply Now',
             popular: false,
-            color: 'border-gray-200',
+            color: 'border-gray-200 dark:border-gray-700',
             barColor: 'bg-art-blue',
-            requiresApplication: true,
         },
     ];
 
+    const selectedTierData = tiers.find(t => t.name.toLowerCase() === selectedTier);
+    const availableMethods = selectedTier ? getAvailablePaymentMethods(selectedTier, isAnnual) : [];
+
     return (
-        <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 py-20 px-4">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 pt-20 pb-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <div className="inline-flex items-center bg-black dark:bg-white text-white dark:text-black px-5 py-2 rounded-full mb-6">
-                        <span className="font-mono text-xs font-bold uppercase tracking-widest">Investment in Your Future</span>
-                    </div>
-                    <h1 className="font-serif text-5xl md:text-7xl font-black text-black dark:text-white tracking-tighter mb-6">
-                        Choose Your Path
+                    <h1 className="font-serif text-5xl md:text-7xl font-black text-black dark:text-white tracking-tighter mb-4">
+                        The Path Awaits
                     </h1>
-                    <p className="font-serif text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8">
-                        The cost of this program is trivial compared to the cost of another year without a strategy.
+                    <p className="font-serif text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                        This is what billionaires do. Choose your level.
                     </p>
+                </div>
 
-                    {/* Billing Toggle */}
-                    <div className="inline-flex items-center gap-4 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg">
+                {/* Billing Toggle */}
+                <div className="flex justify-center mb-12">
+                    <div className="bg-white dark:bg-gray-900 rounded-full p-1 shadow-soft-xl border border-gray-200 dark:border-gray-800">
                         <button
                             onClick={() => setIsAnnual(false)}
-                            className={`px-6 py-2 rounded-full font-mono text-xs font-bold uppercase transition-all ${
-                                !isAnnual 
-                                    ? 'bg-black text-white dark:bg-white dark:text-black' 
+                            className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${
+                                !isAnnual
+                                    ? 'bg-black dark:bg-white text-white dark:text-black'
                                     : 'text-gray-500 hover:text-black dark:hover:text-white'
                             }`}
                         >
@@ -165,114 +223,203 @@ const Pricing: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setIsAnnual(true)}
-                            className={`px-6 py-2 rounded-full font-mono text-xs font-bold uppercase transition-all flex items-center gap-2 ${
-                                isAnnual 
-                                    ? 'bg-black text-white dark:bg-white dark:text-black' 
+                            className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${
+                                isAnnual
+                                    ? 'bg-black dark:bg-white text-white dark:text-black'
                                     : 'text-gray-500 hover:text-black dark:hover:text-white'
                             }`}
                         >
-                            Annual
-                            <span className="bg-art-green text-black px-2 py-0.5 rounded-full text-[10px]">Save 2 months</span>
+                            Annual <span className="text-art-green ml-1">Save 2 months</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Pricing Cards */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                {/* Annual = Wire Transfer Note */}
+                {isAnnual && (
+                    <div className="max-w-2xl mx-auto mb-8 bg-art-blue/10 border border-art-blue/20 rounded-2xl p-4 text-center">
+                        <p className="font-mono text-sm text-art-blue">
+                            <Building2 className="w-4 h-4 inline mr-2" />
+                            Annual plans are paid via wire transfer
+                        </p>
+                    </div>
+                )}
+
+                {/* Pricing Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     {tiers.map((tier) => (
                         <div
                             key={tier.name}
-                            className={`relative bg-white dark:bg-gray-900 p-8 lg:p-10 rounded-[32px] shadow-soft-xl border-2 ${tier.color} transition-all hover:-translate-y-2 duration-500 ${
-                                tier.popular ? 'lg:scale-105 lg:shadow-2xl' : ''
-                            }`}
+                            className={`relative bg-white dark:bg-gray-900 rounded-[32px] shadow-soft-xl border-2 ${tier.color} overflow-hidden flex flex-col`}
                         >
-                            {/* Top Bar */}
-                            <div className={`absolute top-0 left-0 w-full h-2 ${tier.barColor} rounded-t-[32px]`}></div>
-
                             {/* Popular Badge */}
                             {tier.popular && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-art-orange text-black px-4 py-1 rounded-full font-mono text-xs font-bold uppercase">
+                                <div className="absolute top-0 left-0 right-0 bg-art-orange text-black text-center py-2 font-mono text-xs font-bold uppercase">
                                     Most Popular
                                 </div>
                             )}
 
-                            {/* Tier Name */}
-                            <h3 className={`font-mono text-sm font-bold uppercase tracking-widest mb-2 ${
-                                tier.popular ? 'text-art-orange' : 'text-gray-400'
-                            }`}>
-                                {tier.name}
-                            </h3>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{tier.description}</p>
+                            {/* Color Bar */}
+                            <div className={`h-2 ${tier.barColor}`} />
 
-                            {/* Price */}
-                            <div className="mb-8">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="font-serif text-5xl font-black text-black dark:text-white">
-                                        ${isAnnual ? tier.annualPrice.toLocaleString() : tier.monthlyPrice.toLocaleString()}
-                                    </span>
-                                    <span className="font-mono text-sm text-gray-400">
-                                        /{isAnnual ? 'year' : 'month'}
-                                    </span>
+                            <div className={`p-8 flex-grow flex flex-col ${tier.popular ? 'pt-12' : ''}`}>
+                                {/* Tier Info */}
+                                <div className="mb-6">
+                                    <h3 className="font-sans text-2xl font-black text-black dark:text-white mb-1">
+                                        {tier.name}
+                                    </h3>
+                                    <p className="font-serif text-gray-500 dark:text-gray-400">{tier.description}</p>
                                 </div>
-                                {isAnnual && (
-                                    <p className="font-mono text-xs text-art-green mt-2">
-                                        Save ${tier.annualSavings.toLocaleString()} vs monthly
-                                    </p>
-                                )}
-                            </div>
 
-                            {/* Features */}
-                            <ul className="space-y-4 mb-8">
-                                {tier.features.map((feature, i) => (
-                                    <li key={i} className="flex items-start gap-3">
-                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                                            tier.popular ? 'bg-art-orange/20' : 'bg-black/5 dark:bg-white/10'
-                                        }`}>
-                                            <Check className={`w-3 h-3 ${tier.popular ? 'text-art-orange' : 'text-black dark:text-white'}`} />
-                                        </div>
-                                        <span className="font-sans text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {feature}
+                                {/* Price */}
+                                <div className="mb-6">
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="font-sans text-5xl font-black text-black dark:text-white">
+                                            ${isAnnual ? tier.annualPrice.toLocaleString() : tier.monthlyPrice.toLocaleString()}
                                         </span>
-                                    </li>
-                                ))}
-                            </ul>
+                                        <span className="font-mono text-sm text-gray-400">
+                                            /{isAnnual ? 'year' : 'month'}
+                                        </span>
+                                    </div>
+                                    {isAnnual && (
+                                        <p className="font-mono text-xs text-art-green mt-1">
+                                            Save ${tier.annualSavings.toLocaleString()}/year
+                                        </p>
+                                    )}
+                                </div>
 
-                            {/* CTA */}
-                            <button
-                                onClick={() => handleSubscribe(
-                                    tier.name, 
-                                    isAnnual ? tier.annualPriceId : tier.monthlyPriceId
-                                )}
-                                disabled={loading === tier.name}
-                                className={`w-full py-4 rounded-full font-mono text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 group disabled:opacity-50 ${
-                                    tier.popular
-                                        ? 'bg-art-orange text-black hover:bg-art-green shadow-lg'
-                                        : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
-                                }`}
-                            >
-                                {loading === tier.name ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <>
-                                        {tier.cta}
-                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </>
-                                )}
-                            </button>
+                                {/* Features */}
+                                <ul className="space-y-3 mb-8 flex-grow">
+                                    {tier.features.map((feature, i) => (
+                                        <li key={i} className="flex items-start gap-3">
+                                            <Check className="w-5 h-5 text-art-green flex-shrink-0 mt-0.5" />
+                                            <span className="font-serif text-sm text-gray-600 dark:text-gray-400">
+                                                {feature}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                {/* CTA */}
+                                <button
+                                    onClick={() => handleSelectTier(tier.name)}
+                                    disabled={loading === tier.name}
+                                    className={`w-full py-4 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-2 ${
+                                        tier.popular
+                                            ? 'bg-art-orange text-black hover:bg-art-orange/90'
+                                            : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {loading === tier.name ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <>
+                                            {tier.cta}
+                                            <ArrowRight className="w-4 h-4" />
+                                        </>
+                                    )}
+                                </button>
+
+                                {/* Payment Methods Available */}
+                                <div className="mt-4 flex items-center justify-center gap-2">
+                                    {getAvailablePaymentMethods(tier.name.toLowerCase(), isAnnual).map(method => (
+                                        <div key={method} className="text-gray-400" title={PAYMENT_METHOD_INFO[method].name}>
+                                            {PAYMENT_METHOD_INFO[method].icon}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Bottom Note */}
-                <div className="text-center mt-16 max-w-2xl mx-auto">
-                    <p className="font-serif text-lg text-gray-500 dark:text-gray-400 mb-4">
-                        Not sure where to start?
+                {/* Payment Method Modal */}
+                {showPaymentOptions && selectedTierData && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 max-w-md w-full shadow-2xl">
+                            <h3 className="font-sans text-2xl font-black text-black dark:text-white mb-2">
+                                Choose Payment Method
+                            </h3>
+                            <p className="font-serif text-gray-500 dark:text-gray-400 mb-6">
+                                {selectedTierData.name} - ${isAnnual ? selectedTierData.annualPrice.toLocaleString() : selectedTierData.monthlyPrice.toLocaleString()}/{isAnnual ? 'year' : 'month'}
+                            </p>
+
+                            <div className="space-y-3">
+                                {availableMethods.map(method => (
+                                    <button
+                                        key={method}
+                                        onClick={() => handlePaymentMethod(method, selectedTierData)}
+                                        className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-art-orange dark:hover:border-art-orange transition-colors flex items-center gap-4"
+                                    >
+                                        <div className="w-12 h-12 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                            {PAYMENT_METHOD_INFO[method].icon}
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="font-sans font-bold text-black dark:text-white">
+                                                {PAYMENT_METHOD_INFO[method].name}
+                                            </p>
+                                            <p className="font-serif text-sm text-gray-500 dark:text-gray-400">
+                                                {PAYMENT_METHOD_INFO[method].description}
+                                            </p>
+                                        </div>
+                                        {method === 'wire' && (
+                                            <span className="ml-auto px-2 py-1 bg-art-green/10 text-art-green rounded-full font-mono text-xs">
+                                                Recommended
+                                            </span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    setShowPaymentOptions(false);
+                                    setSelectedTier(null);
+                                }}
+                                className="w-full mt-6 py-3 text-gray-500 font-mono text-sm hover:text-black dark:hover:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* FAQ */}
+                <div className="mt-20 max-w-3xl mx-auto">
+                    <h2 className="font-sans text-3xl font-black text-center text-black dark:text-white mb-8">
+                        Questions
+                    </h2>
+                    <div className="space-y-4">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
+                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">Can I cancel anytime?</h3>
+                            <p className="font-serif text-gray-500 dark:text-gray-400">
+                                Yes. Cancel whenever you want. No contracts, no obligations. You keep access until your current period ends.
+                            </p>
+                        </div>
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
+                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">Why wire transfer?</h3>
+                            <p className="font-serif text-gray-500 dark:text-gray-400">
+                                This is how serious money moves. Wire transfer is standard for high-value transactions. It's secure, professional, and what you'll use at this level.
+                            </p>
+                        </div>
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
+                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">What happens after I apply?</h3>
+                            <p className="font-serif text-gray-500 dark:text-gray-400">
+                                You'll receive an invoice with wire instructions within 24 hours. Once payment clears, your access is activated immediately.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Not Sure */}
+                <div className="mt-16 text-center">
+                    <p className="font-serif text-gray-500 dark:text-gray-400 mb-4">
+                        Not sure which tier? Start with the free module.
                     </p>
                     <button
-                        onClick={() => navigate('/waitlist')}
+                        onClick={() => navigate('/skills/reality-distortion/1')}
                         className="font-mono text-sm font-bold uppercase tracking-widest text-art-orange hover:underline"
                     >
-                        Talk to Billionaireable first →
+                        Try Pillar 1 Free →
                     </button>
                 </div>
 
