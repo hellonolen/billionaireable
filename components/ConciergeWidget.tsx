@@ -198,7 +198,7 @@ const ConciergeWidget: React.FC = () => {
     };
 
     return (
-        <div className="fixed bottom-8 right-8 z-50">
+        <div className="fixed bottom-20 right-8 z-50">
             {/* Chat Window */}
             <div className={`absolute bottom-20 right-0 w-[380px] bg-white rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}>
                 {/* Header */}
