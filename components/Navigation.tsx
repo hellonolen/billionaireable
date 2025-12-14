@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Search, Mic, MonitorPlay, LayoutGrid, Activity, Cpu, X, Banknote, ChevronDown, User, Lock, Globe, History, GraduationCap, TrendingUp, Target, Triangle } from 'lucide-react';
+import { Menu, Search, Mic, MonitorPlay, LayoutGrid, Activity, Cpu, X, Banknote, ChevronDown, User, Lock, Globe, History, GraduationCap, TrendingUp, Target, Triangle, Sun, Moon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -8,6 +9,7 @@ const Navigation: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme, isDark } = useTheme();
 
   const navItems = [
     { path: '/', label: 'DASHBOARD', icon: <LayoutGrid className="w-4 h-4" /> },
@@ -47,28 +49,28 @@ const Navigation: React.FC = () => {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 bg-art-offwhite/90 backdrop-blur-md border-b border-black/5">
-      <div className="max-w-[1800px] mx-auto px-4 md:px-8 h-24 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-art-offwhite/95 dark:bg-gray-900/95 backdrop-blur-lg border-b border-black/10 dark:border-white/10 shadow-sm transition-colors duration-300">
+      <div className="max-w-[1800px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between gap-6">
 
         {/* Logo */}
         <button
           onClick={() => navigate('/')}
           className="group flex items-center"
         >
-          <span className="font-serif text-3xl md:text-4xl font-black text-black tracking-tighter hover:text-art-orange transition-colors">
+          <span className="font-serif text-2xl lg:text-3xl font-black text-black dark:text-white tracking-tighter hover:text-art-orange transition-colors whitespace-nowrap">
             billionaireable.
           </span>
         </button>
 
         {/* Desktop Nav - Floating Pill Style */}
-        <div className="hidden xl:flex items-center bg-white px-2 py-2 rounded-full shadow-soft-xl border border-gray-100 gap-2">
+        <div className="hidden xl:flex items-center bg-white dark:bg-gray-800 px-1.5 py-1.5 rounded-full shadow-soft-xl border border-gray-100 dark:border-gray-700 gap-1 flex-shrink-0 transition-colors duration-300">
           {navItems.map((item) => (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex items-center gap-2 px-6 py-3 text-xs font-bold tracking-widest uppercase rounded-full transition-all duration-300 ${isActive(item.path)
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-bold tracking-widest uppercase rounded-full transition-all duration-300 ${isActive(item.path)
                 ? 'bg-art-orange text-white shadow-lg transform scale-105'
-                : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-black'
+                : 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white'
                 }`}
             >
               {item.label}
@@ -78,6 +80,19 @@ const Navigation: React.FC = () => {
 
         {/* Right Side - Profile Dropdown */}
         <div className="flex items-center gap-4">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-full bg-white dark:bg-gray-800 shadow-soft-xl hover:scale-105 transition-all border border-gray-100 dark:border-gray-700"
+            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {isDark ? (
+              <Sun className="w-5 h-5 text-art-yellow" />
+            ) : (
+              <Moon className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
+
           {/* Desktop Profile Dropdown */}
           <div className="hidden md:block relative" ref={dropdownRef}>
             <button

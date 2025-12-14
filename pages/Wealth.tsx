@@ -101,8 +101,8 @@ const Wealth: React.FC = () => {
     return (
         <div className="min-h-screen animate-fade-in">
             {/* Live Ticker Marquee */}
-            <div className="bg-black text-white overflow-hidden py-4 border-b border-white/10 shadow-soft-xl mb-12 relative z-10">
-                <div className="whitespace-nowrap animate-marquee flex gap-12 items-center">
+            <div className="bg-black text-white overflow-hidden py-4 border-b border-white/10 shadow-soft-xl mb-12 relative z-10 group">
+                <div className="whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused] flex gap-12 items-center">
                     {MOCK_MARKETS.concat(MOCK_MARKETS).map((market, i) => (
                         <div key={i} className="flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-widest">
                             <span className="text-white/50">{market.category} ///</span>

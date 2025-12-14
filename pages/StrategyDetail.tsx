@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, ArrowUpRight } from 'lucide-react';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ExternalLink, BookOpen, Target, TrendingUp, Zap } from 'lucide-react';
 
 interface StrategyCase {
   id: string;
@@ -198,144 +198,155 @@ const STRATEGY_CASES: StrategyCase[] = [
   },
 ];
 
-const Strategy: React.FC = () => {
+const StrategyDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  
+  const caseStudy = STRATEGY_CASES.find(c => c.id === id);
+  
+  if (!caseStudy) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="font-serif text-4xl font-black mb-4">Case Study Not Found</h1>
+          <button 
+            onClick={() => navigate('/strategy')}
+            className="text-art-orange hover:underline"
+          >
+            Return to Strategy
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const categories = ['All', 'Founder', 'Scaler', 'Owner'];
-
-  const filteredCases = STRATEGY_CASES.filter(case_ => {
-    const matchesSearch = case_.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      case_.founder.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      case_.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || case_.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const getCategoryColor = () => {
+    switch (caseStudy.category) {
+      case 'Founder': return 'bg-art-orange';
+      case 'Scaler': return 'bg-art-green';
+      case 'Owner': return 'bg-art-blue';
+    }
+  };
 
   return (
-    <div className="min-h-screen animate-fade-in">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 pt-20 pb-20">
+    <div className="min-h-screen bg-art-offwhite dark:bg-gray-950">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-12 py-12">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/strategy')}
+          className="flex items-center gap-2 text-gray-500 hover:text-black dark:hover:text-white transition-colors mb-8 group"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="font-mono text-sm uppercase tracking-widest">Back to Strategy</span>
+        </button>
 
         {/* Header */}
         <div className="mb-12">
-          <h1 className="font-serif text-6xl md:text-8xl font-black text-black tracking-tighter leading-[0.9] mb-4">
-            STRATEGY
+          <div className="flex items-center gap-4 mb-6">
+            <span className={`px-4 py-2 rounded-full font-mono text-xs font-bold uppercase text-white ${getCategoryColor()}`}>
+              {caseStudy.category}
+            </span>
+            <span className="font-mono text-sm text-gray-400">{caseStudy.year}</span>
+          </div>
+          
+          <h1 className="font-serif text-5xl md:text-7xl font-black text-black dark:text-white tracking-tighter mb-4">
+            {caseStudy.title}
           </h1>
-          <p className="font-serif text-2xl text-gray-400 mb-2">
-            "Learn from the best. 25 years of proven business models."
-          </p>
-          <p className="font-mono text-xs text-gray-400 uppercase">
-            * All case studies based on publicly available information
-          </p>
-
-          {/* Stats */}
-          <div className="flex gap-6 mt-8">
-            <div className="bg-art-green rounded-2xl px-6 py-3">
-              <p className="font-mono text-xs text-white/80 uppercase mb-1">Case Studies</p>
-              <p className="font-sans text-3xl font-black text-white">{STRATEGY_CASES.length}</p>
-            </div>
-            <div className="bg-black rounded-2xl px-6 py-3">
-              <p className="font-mono text-xs text-white/80 uppercase mb-1">Industries</p>
-              <p className="font-sans text-3xl font-black text-white">15</p>
-            </div>
-            <div className="bg-art-blue rounded-2xl px-6 py-3">
-              <p className="font-mono text-xs text-white/80 uppercase mb-1">Combined Value</p>
-              <p className="font-sans text-3xl font-black text-white">$10T+</p>
-            </div>
+          
+          <div className="flex flex-wrap items-center gap-4">
+            <p className="font-serif text-2xl text-gray-600 dark:text-gray-300">{caseStudy.founder}</p>
+            <span className="text-gray-300 dark:text-gray-600">•</span>
+            <p className="font-mono text-sm text-gray-400 uppercase">{caseStudy.company}</p>
+            <span className="text-gray-300 dark:text-gray-600">•</span>
+            <p className="font-mono text-sm text-gray-400 uppercase">{caseStudy.industry}</p>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-[24px] shadow-soft-xl border border-black/10">
-          {/* Category Filters */}
-          <div className="flex gap-2">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${selectedCategory === cat
-                    ? 'bg-art-green text-white'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                  }`}
-              >
-                {cat}
-              </button>
-            ))}
+        {/* Content Sections */}
+        <div className="space-y-8">
+          {/* The Story */}
+          <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-soft-xl border border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-art-orange/10 flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-art-orange" />
+              </div>
+              <h2 className="font-sans text-xl font-black uppercase tracking-tight dark:text-white">The Origin Story</h2>
+            </div>
+            <p className="font-serif text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              {caseStudy.story}
+            </p>
           </div>
 
-          {/* Search */}
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search founders, companies, industries..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-xl font-mono text-sm focus:ring-2 focus:ring-art-green transition-all"
-            />
+          {/* Business Model */}
+          <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-soft-xl border border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-art-green/10 flex items-center justify-center">
+                <Target className="w-5 h-5 text-art-green" />
+              </div>
+              <h2 className="font-sans text-xl font-black uppercase tracking-tight dark:text-white">The Business Model</h2>
+            </div>
+            <p className="font-serif text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              {caseStudy.businessModel}
+            </p>
+          </div>
+
+          {/* Impact */}
+          <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-soft-xl border border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-art-blue/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-art-blue" />
+              </div>
+              <h2 className="font-sans text-xl font-black uppercase tracking-tight dark:text-white">The Impact</h2>
+            </div>
+            <p className="font-serif text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              {caseStudy.impact}
+            </p>
+          </div>
+
+          {/* Key Takeaways */}
+          <div className="bg-black dark:bg-white rounded-[32px] p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-art-yellow" />
+              </div>
+              <h2 className="font-sans text-xl font-black uppercase tracking-tight text-white dark:text-black">Key Takeaway</h2>
+            </div>
+            <p className="font-serif text-xl text-white/80 dark:text-black/80 leading-relaxed italic">
+              "{caseStudy.category === 'Founder' 
+                ? 'Build something people want so badly they\'ll tell others about it.' 
+                : caseStudy.category === 'Scaler' 
+                ? 'Growth comes from systems, not heroics. Build the machine that builds the machine.'
+                : 'Own the asset. Control the outcome. Compound forever.'}"
+            </p>
           </div>
         </div>
 
-        {/* Strategy Cases Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredCases.map((case_) => (
-            <div
-              key={case_.id}
-              onClick={() => navigate(`/strategy/${case_.id}`)}
-              className="group bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-soft-xl border border-black/20 dark:border-gray-700 hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer relative"
+        {/* Navigation */}
+        <div className="mt-12 flex justify-between items-center">
+          {parseInt(id || '1') > 1 && (
+            <button
+              onClick={() => navigate(`/strategy/${parseInt(id || '1') - 1}`)}
+              className="flex items-center gap-2 text-gray-500 hover:text-art-orange transition-colors"
             >
-              {/* Arrow Icon */}
-              <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-art-green group-hover:text-white transition-all">
-                <ArrowUpRight className="w-5 h-5" />
-              </div>
-
-              {/* Category Badge */}
-              <div className="flex items-center justify-between mb-6">
-                <span className={`px-4 py-2 rounded-full font-mono text-xs font-bold uppercase ${case_.category === 'Founder' ? 'bg-art-orange text-white' :
-                    case_.category === 'Scaler' ? 'bg-art-green text-white' :
-                      'bg-art-blue text-white'
-                  }`}>
-                  {case_.category}
-                </span>
-                <span className="font-mono text-xs text-gray-400">{case_.year}</span>
-              </div>
-
-              {/* Title */}
-              <h3 className="font-sans text-2xl font-black mb-3 pr-8">
-                {case_.title}
-              </h3>
-
-              {/* Founder & Company */}
-              <div className="mb-6">
-                <p className="font-serif text-lg text-gray-700">{case_.founder}</p>
-                <p className="font-mono text-xs text-gray-400 uppercase">{case_.company} • {case_.industry}</p>
-              </div>
-
-              {/* Story */}
-              <div className="mb-4">
-                <p className="font-mono text-xs text-gray-400 uppercase mb-2">The Story</p>
-                <p className="font-serif text-sm text-gray-700 leading-relaxed">{case_.story}</p>
-              </div>
-
-              {/* Business Model */}
-              <div className="mb-4">
-                <p className="font-mono text-xs text-gray-400 uppercase mb-2">Business Model</p>
-                <p className="font-serif text-sm text-gray-700 leading-relaxed">{case_.businessModel}</p>
-              </div>
-
-              {/* Impact */}
-              <div className="pt-4 border-t border-gray-100">
-                <p className="font-mono text-xs text-gray-400 uppercase mb-2">Impact</p>
-                <p className="font-sans text-sm font-bold text-black">{case_.impact}</p>
-              </div>
-            </div>
-          ))}
+              <ArrowLeft className="w-4 h-4" />
+              <span className="font-mono text-sm uppercase">Previous Case</span>
+            </button>
+          )}
+          <div className="flex-grow" />
+          {parseInt(id || '1') < STRATEGY_CASES.length && (
+            <button
+              onClick={() => navigate(`/strategy/${parseInt(id || '1') + 1}`)}
+              className="flex items-center gap-2 text-gray-500 hover:text-art-orange transition-colors"
+            >
+              <span className="font-mono text-sm uppercase">Next Case</span>
+              <ArrowLeft className="w-4 h-4 rotate-180" />
+            </button>
+          )}
         </div>
-
       </div>
     </div>
   );
 };
 
-export default Strategy;
+export default StrategyDetail;
+
