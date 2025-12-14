@@ -39,17 +39,17 @@ const Waitlist: React.FC = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-160px)] bg-art-offwhite dark:bg-gray-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-            <div className="max-w-2xl w-full text-center relative z-10">
-                <h1 className="font-serif text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none text-black dark:text-white">
+        <div className="min-h-[calc(100vh-160px)] bg-art-offwhite dark:bg-gray-950 flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
+            <div className="w-full flex flex-col items-center relative z-10">
+                <h1 className="font-serif text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none text-black dark:text-white text-center">
                     BILLIONAIREABLE.
                 </h1>
-                <p className="font-serif text-xl md:text-2xl text-gray-400 mb-12">
+                <p className="font-serif text-xl md:text-2xl text-gray-400 mb-12 text-center max-w-2xl">
                     "The second billion is inevitable. The first one is engineered."
                 </p>
 
                 {!submitted ? (
-                    <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
+                    <form onSubmit={handleSubmit} className="w-full max-w-md">
                         <div className="flex flex-col gap-4">
                             <input
                                 type="text"
@@ -87,19 +87,19 @@ const Waitlist: React.FC = () => {
                                 )}
                             </button>
                         </div>
-                        <p className="mt-6 font-mono text-xs text-gray-400 uppercase tracking-widest">
+                        <p className="mt-6 font-mono text-xs text-gray-400 uppercase tracking-widest text-center">
                             Limited spots available for Q4 2025
                         </p>
                     </form>
                 ) : (
-                    <div className="animate-fade-in bg-white dark:bg-gray-900 p-12 rounded-[32px] shadow-soft-xl border border-gray-100 dark:border-gray-800">
+                    <div className="animate-fade-in bg-white dark:bg-gray-900 p-12 rounded-[32px] shadow-soft-xl border border-gray-100 dark:border-gray-800 max-w-md w-full">
                         <div className={`w-16 h-16 ${alreadyExists ? 'bg-art-orange' : 'bg-art-green'} rounded-full flex items-center justify-center mx-auto mb-6`}>
                             <Check className="w-8 h-8 text-white" />
                         </div>
-                        <h3 className="font-sans text-2xl font-bold uppercase mb-2 text-black dark:text-white">
+                        <h3 className="font-sans text-2xl font-bold uppercase mb-2 text-black dark:text-white text-center">
                             {alreadyExists ? "You're Already Listed" : "Access Requested"}
                         </h3>
-                        <p className="font-serif text-gray-500 dark:text-gray-400">
+                        <p className="font-serif text-gray-500 dark:text-gray-400 text-center">
                             {alreadyExists
                                 ? "You're already on the waitlist. We'll notify you when your spot opens."
                                 : "We will notify you when your spot opens up."}
