@@ -62,7 +62,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="font-serif text-xl md:text-2xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
                         >
-                            Your guide to a billion dollars. 12 pillars. 12 months. No excuses.
+                            12 pillars. 12 months. No excuses.
                         </motion.p>
 
                         {/* CTA */}
