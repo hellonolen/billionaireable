@@ -1,118 +1,143 @@
 import React, { useState } from 'react';
 import { ArrowRight, Check, Target, TrendingUp, Globe, Brain, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
-const GOALS = [
-    { id: 'wealth', label: 'Wealth Preservation', icon: <TrendingUp className="w-6 h-6" />, description: 'Multi-generational asset protection' },
-    { id: 'growth', label: 'Portfolio Growth', icon: <Target className="w-6 h-6" />, description: 'Strategic capital allocation' },
-    { id: 'legacy', label: 'Legacy Building', icon: <Globe className="w-6 h-6" />, description: '100-year family dynasty' },
-    { id: 'health', label: 'Longevity', icon: <Heart className="w-6 h-6" />, description: 'Peak healthspan optimization' },
-    { id: 'sovereignty', label: 'Global Sovereignty', icon: <Globe className="w-6 h-6" />, description: 'Jurisdictional freedom' },
+const FOCUS_AREAS = [
+    { id: 'reality-distortion', label: 'Reality Distortion', icon: <Brain className="w-6 h-6" />, description: 'Vision that attracts capital' },
+    { id: 'liquidity-allocation', label: 'Liquidity & Allocation', icon: <TrendingUp className="w-6 h-6" />, description: 'Capital architecture' },
+    { id: 'holding-co', label: 'The Holding Co', icon: <Target className="w-6 h-6" />, description: 'Systems building' },
+    { id: 'time-arbitrage', label: 'Time Arbitrage', icon: <Globe className="w-6 h-6" />, description: 'Leverage and delegation' },
+    { id: 'syndicate', label: 'The Syndicate', icon: <Heart className="w-6 h-6" />, description: 'Deal flow and partnerships' },
 ];
 
 const Onboarding: React.FC = () => {
     const navigate = useNavigate();
+    const { user: clerkUser, isSignedIn } = useUser();
     const [step, setStep] = useState(1);
-    const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-    const [netWorth, setNetWorth] = useState<string>('');
+    const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+    const [saving, setSaving] = useState(false);
 
-    const handleGoalToggle = (goalId: string) => {
-        setSelectedGoals(prev =>
-            prev.includes(goalId) ? prev.filter(g => g !== goalId) : [...prev, goalId]
+    // Convex
+    const convexUser = useQuery(
+        api.users.getUserByClerkId,
+        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
+    );
+    const updateUser = useMutation(api.users.updateUserGoals);
+
+    const handleAreaToggle = (areaId: string) => {
+        setSelectedAreas(prev =>
+            prev.includes(areaId) ? prev.filter(g => g !== areaId) : [...prev, areaId]
         );
     };
 
-    const handleComplete = () => {
-        // Save onboarding state to localStorage
-        localStorage.setItem('onboarding_complete', 'true');
-        localStorage.setItem('user_goals', JSON.stringify(selectedGoals));
-        localStorage.setItem('net_worth_range', netWorth);
+    const handleComplete = async () => {
+        setSaving(true);
+        
+        try {
+            // Save to Convex if signed in
+            if (convexUser) {
+                await updateUser({
+                    userId: convexUser._id,
+                    goals: selectedAreas,
+                });
+            }
+            
+            // Also save to localStorage as backup
+            localStorage.setItem('onboarding_complete', 'true');
+            localStorage.setItem('focus_areas', JSON.stringify(selectedAreas));
 
-        // Navigate to assessment
-        navigate('/assessment');
+            // Navigate to dashboard
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Failed to save onboarding:', error);
+            // Still navigate even if save fails
+            navigate('/dashboard');
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
-        <div className="min-h-screen bg-art-offwhite">
+        <div className="min-h-screen bg-art-offwhite dark:bg-gray-950">
             {/* Progress Bar */}
-            <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 z-50">
+            <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-800 z-50">
                 <div
-                    className="h-full bg-black transition-all duration-500"
-                    style={{ width: `${(step / 5) * 100}%` }}
+                    className="h-full bg-black dark:bg-white transition-all duration-500"
+                    style={{ width: `${(step / 3) * 100}%` }}
                 ></div>
             </div>
 
             <div className="max-w-4xl mx-auto px-4 py-20">
-                {/* Step 1: The Backstory */}
+                {/* Step 1: The Path */}
                 {step === 1 && (
                     <div className="animate-fade-in">
                         <div className="text-center mb-12">
-                            <div className="w-16 h-16 mx-auto mb-6 bg-art-orange rounded-full flex items-center justify-center"><span className="font-serif text-3xl font-black text-black">B</span></div>
-                            <h1 className="font-serif text-6xl md:text-7xl font-black text-black tracking-tighter leading-[0.9] mb-8">
-                                You've Built Wealth.
+                            <div className="w-16 h-16 mx-auto mb-6 bg-black rounded-full flex items-center justify-center">
+                                <span className="font-serif text-3xl font-black text-white">B</span>
+                            </div>
+                            <h1 className="font-serif text-5xl md:text-6xl font-black text-black dark:text-white tracking-tighter leading-[0.9] mb-8">
+                                This Is The Path.
                             </h1>
-                            <p className="font-serif text-3xl text-gray-600 mb-8">
-                                Now it's time to <span className="text-black font-bold">multiply</span> it,
-                                <span className="text-black font-bold"> protect</span> it, and make it
-                                <span className="text-black font-bold"> immortal</span>.
+                            <p className="font-serif text-2xl text-gray-600 dark:text-gray-400 mb-8">
+                                12 Pillars. This is what billionaires do.
                             </p>
                         </div>
 
-                        <div className="bg-white rounded-[32px] p-12 shadow-soft-xl border border-gray-100 mb-8">
-                            <p className="font-serif text-xl text-gray-700 leading-relaxed mb-6">
-                                Money is power. But <span className="font-bold text-art-orange">unstructured wealth</span> is vulnerability.
-                                Without the right <span className="font-bold text-black">systems</span>,
-                                <span className="font-bold text-art-green"> intelligence</span>, and
-                                <span className="font-bold text-art-blue"> strategy</span>, even nine-figure fortunes erode.
+                        <div className="bg-white dark:bg-gray-900 rounded-[32px] p-12 shadow-soft-xl border border-gray-100 dark:border-gray-800 mb-8">
+                            <p className="font-serif text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+                                You're here to be guided through the billionaire path.
                             </p>
-                            <p className="font-serif text-xl text-gray-700 leading-relaxed">
-                                The wealthiest don't just accumulate. They <span className="font-bold text-black">architect</span>.
+                            <p className="font-serif text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Not theory. Not motivation. <span className="font-bold text-black dark:text-white">Directives.</span>
                             </p>
                         </div>
 
                         <button
                             onClick={() => setStep(2)}
-                            className="w-full bg-black text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 transition-colors flex items-center justify-center gap-3"
+                            className="w-full bg-black dark:bg-white text-white dark:text-black py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center gap-3"
                         >
-                            Show Me How
+                            Let's Go
                             <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
                 )}
 
-                {/* Step 2: The Desires (Goal Selection) */}
+                {/* Step 2: Focus Areas */}
                 {step === 2 && (
                     <div className="animate-fade-in">
                         <div className="mb-12">
-                            <h2 className="font-serif text-5xl font-black text-black tracking-tighter mb-4">
-                                What Do You Truly Want?
+                            <h2 className="font-serif text-4xl md:text-5xl font-black text-black dark:text-white tracking-tighter mb-4">
+                                Where Do You Start?
                             </h2>
-                            <p className="font-serif text-xl text-gray-600">
-                                Select your primary objectives. Be honest.
+                            <p className="font-serif text-xl text-gray-600 dark:text-gray-400">
+                                Pick the pillars that matter most right now. You'll do all of them.
                             </p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            {GOALS.map(goal => (
+                            {FOCUS_AREAS.map(area => (
                                 <div
-                                    key={goal.id}
-                                    onClick={() => handleGoalToggle(goal.id)}
-                                    className={`p-8 rounded-[32px] border-2 cursor-pointer transition-all ${selectedGoals.includes(goal.id)
-                                        ? 'border-black bg-black text-white shadow-2xl'
-                                        : 'border-gray-200 bg-white hover:border-gray-300'
+                                    key={area.id}
+                                    onClick={() => handleAreaToggle(area.id)}
+                                    className={`p-8 rounded-[32px] border-2 cursor-pointer transition-all ${selectedAreas.includes(area.id)
+                                        ? 'border-black dark:border-white bg-black dark:bg-white text-white dark:text-black shadow-2xl'
+                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600'
                                         }`}
                                 >
                                     <div className="flex items-start justify-between mb-4">
-                                        <div className={selectedGoals.includes(goal.id) ? 'text-white' : 'text-black'}>
-                                            {goal.icon}
+                                        <div className={selectedAreas.includes(area.id) ? 'text-white dark:text-black' : 'text-black dark:text-white'}>
+                                            {area.icon}
                                         </div>
-                                        {selectedGoals.includes(goal.id) && (
+                                        {selectedAreas.includes(area.id) && (
                                             <Check className="w-5 h-5" />
                                         )}
                                     </div>
-                                    <h3 className="font-sans text-xl font-bold uppercase mb-2">{goal.label}</h3>
-                                    <p className={`font-serif text-sm ${selectedGoals.includes(goal.id) ? 'text-white/80' : 'text-gray-600'}`}>
-                                        {goal.description}
+                                    <h3 className="font-sans text-xl font-bold uppercase mb-2">{area.label}</h3>
+                                    <p className={`font-serif text-sm ${selectedAreas.includes(area.id) ? 'text-white/80 dark:text-black/80' : 'text-gray-600 dark:text-gray-400'}`}>
+                                        {area.description}
                                     </p>
                                 </div>
                             ))}
@@ -120,8 +145,8 @@ const Onboarding: React.FC = () => {
 
                         <button
                             onClick={() => setStep(3)}
-                            disabled={selectedGoals.length === 0}
-                            className="w-full bg-black text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={selectedAreas.length === 0}
+                            className="w-full bg-black dark:bg-white text-white dark:text-black py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Continue
                             <ArrowRight className="w-5 h-5" />
@@ -129,104 +154,25 @@ const Onboarding: React.FC = () => {
                     </div>
                 )}
 
-                {/* Step 3: Current State Assessment */}
+                {/* Step 3: Meet Billionaireable */}
                 {step === 3 && (
                     <div className="animate-fade-in">
-                        <div className="mb-12">
-                            <h2 className="font-serif text-5xl font-black text-black tracking-tighter mb-4">
-                                Where Are You Now?
-                            </h2>
-                            <p className="font-serif text-xl text-gray-600">
-                                This helps us personalize your experience. (All data is encrypted)
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-[32px] p-12 shadow-soft-xl border border-gray-100 mb-8">
-                            <div className="mb-8">
-                                <label className="font-mono text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 block">
-                                    Net Worth Range (Optional)
-                                </label>
-                                <select
-                                    value={netWorth}
-                                    onChange={(e) => setNetWorth(e.target.value)}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-full px-6 py-4 font-serif text-lg focus:outline-none focus:border-black transition-colors"
-                                >
-                                    <option value="">Prefer not to say</option>
-                                    <option value="1-10m">$1M - $10M</option>
-                                    <option value="10-50m">$10M - $50M</option>
-                                    <option value="50-100m">$50M - $100M</option>
-                                    <option value="100m+">$100M+</option>
-                                </select>
-                            </div>
-
-                            <p className="font-mono text-xs text-gray-400 text-center">
-                                We'll use this to calibrate your dashboard. You can change this later.
-                            </p>
-                        </div>
-
-                        <button
-                            onClick={() => setStep(4)}
-                            className="w-full bg-black text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 transition-colors flex items-center justify-center gap-3"
-                        >
-                            Continue
-                            <ArrowRight className="w-5 h-5" />
-                        </button>
-                    </div>
-                )}
-
-                {/* Step 4: Connect Your Ecosystem */}
-                {step === 4 && (
-                    <div className="animate-fade-in">
-                        <div className="mb-12">
-                            <h2 className="font-serif text-5xl font-black text-black tracking-tighter mb-4">
-                                Connect Your Ecosystem
-                            </h2>
-                            <p className="font-serif text-xl text-gray-600">
-                                We'll sync data automatically. You can do this later too.
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 mb-8">
-                            {['Oura Ring', 'Whoop', 'Apple Health', 'Google Calendar'].map((device) => (
-                                <div key={device} className="bg-white rounded-[24px] p-6 shadow-soft-xl border border-gray-100 text-center">
-                                    <Brain className="w-8 h-8 mx-auto mb-3 text-gray-400" />
-                                    <p className="font-sans text-sm font-bold">{device}</p>
-                                    <button className="mt-3 text-xs font-mono uppercase text-gray-400 hover:text-black transition-colors">
-                                        Skip for now
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-
-                        <button
-                            onClick={() => setStep(5)}
-                            className="w-full bg-black text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 transition-colors flex items-center justify-center gap-3"
-                        >
-                            Continue
-                            <ArrowRight className="w-5 h-5" />
-                        </button>
-                    </div>
-                )}
-
-                {/* Step 5: Meet Billionaireable */}
-                {step === 5 && (
-                    <div className="animate-fade-in">
                         <div className="text-center mb-12">
-                            <div className="w-24 h-24 rounded-full bg-black mx-auto mb-6 flex items-center justify-center">
-                                <div className="w-12 h-12 bg-art-orange rounded-full flex items-center justify-center"><span className="font-serif text-2xl font-black text-black">B</span></div>
+                            <div className="w-24 h-24 rounded-full bg-black dark:bg-white mx-auto mb-6 flex items-center justify-center">
+                                <span className="font-serif text-4xl font-black text-white dark:text-black">B</span>
                             </div>
-                            <h2 className="font-serif text-5xl font-black text-black tracking-tighter mb-4">
-                                Meet Billionaireable
+                            <h2 className="font-serif text-4xl md:text-5xl font-black text-black dark:text-white tracking-tighter mb-4">
+                                Billionaireable
                             </h2>
-                            <p className="font-serif text-xl text-gray-600 mb-8">
-                                I'll guide you through your transformation.
+                            <p className="font-serif text-xl text-gray-600 dark:text-gray-400 mb-8">
+                                I guide. You follow. Let's go.
                             </p>
                         </div>
 
-                        <div className="bg-white rounded-[32px] p-12 shadow-soft-xl border border-gray-100 mb-8">
-                            <p className="font-serif text-lg text-gray-700 leading-relaxed mb-6 italic">
-                                "Good morning. Here's today's assessment.
-                                Let's discover where you are on the path to becoming <span className="font-bold text-black">Billionaireable</span>."
+                        <div className="bg-white dark:bg-gray-900 rounded-[32px] p-12 shadow-soft-xl border border-gray-100 dark:border-gray-800 mb-8">
+                            <p className="font-serif text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+                                "This is what billionaires do. Starting with {selectedAreas.length > 0 ? FOCUS_AREAS.find(a => a.id === selectedAreas[0])?.label : 'Reality Distortion'}.
+                                Open the dashboard. Start the first module. Move."
                             </p>
                             <p className="font-mono text-xs text-gray-400 uppercase">
                                 — Billionaireable
@@ -235,9 +181,10 @@ const Onboarding: React.FC = () => {
 
                         <button
                             onClick={handleComplete}
-                            className="w-full bg-art-orange text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-opacity-90 transition-all flex items-center justify-center gap-3 shadow-xl"
+                            disabled={saving}
+                            className="w-full bg-art-orange text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-opacity-90 transition-all flex items-center justify-center gap-3 shadow-xl disabled:opacity-50"
                         >
-                            Begin Assessment
+                            {saving ? 'Saving...' : 'Enter Dashboard'}
                             <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>

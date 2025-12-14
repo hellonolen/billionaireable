@@ -13,6 +13,11 @@ export default defineSchema({
     revenue: v.optional(v.number()),
     businessType: v.optional(v.string()),
     goals: v.optional(v.string()),
+    // Onboarding
+    focusAreas: v.optional(v.array(v.string())),
+    onboardingComplete: v.optional(v.boolean()),
+    // Current step in the program (1-12)
+    currentPillar: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -45,6 +50,7 @@ export default defineSchema({
   progress: defineTable({
     userId: v.id("users"),
     skillId: v.string(),
+    completedModules: v.optional(v.array(v.number())),
     modulesCompleted: v.number(),
     totalModules: v.number(),
     lastAccessedAt: v.number(),
@@ -62,5 +68,19 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"]),
+
+  // Subscriptions - Stripe subscription data
+  subscriptions: defineTable({
+    userId: v.id("users"),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.string(),
+    status: v.string(), // active, canceled, past_due, etc.
+    plan: v.string(), // foundation, accelerator, inner-circle
+    currentPeriodEnd: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_stripe_customer", ["stripeCustomerId"]),
 });
 

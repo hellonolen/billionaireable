@@ -12,6 +12,7 @@ import type * as billionaireable from "../billionaireable.js";
 import type * as conversations from "../conversations.js";
 import type * as progress from "../progress.js";
 import type * as speech from "../speech.js";
+import type * as stripe from "../stripe.js";
 import type * as users from "../users.js";
 
 import type {
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
   progress: typeof progress;
   speech: typeof speech;
+  stripe: typeof stripe;
   users: typeof users;
 }>;
 

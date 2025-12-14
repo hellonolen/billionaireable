@@ -106,3 +106,45 @@ export const completeModule = mutation({
   },
 });
 
+// Save progress - simplified version for ProgressContext
+export const saveProgress = mutation({
+  args: {
+    userId: v.id("users"),
+    skillId: v.string(),
+    moduleId: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("progress")
+      .withIndex("by_user_skill", (q) => 
+        q.eq("userId", args.userId).eq("skillId", args.skillId)
+      )
+      .first();
+
+    if (existing) {
+      // Add module to completed list if not already there
+      const completedModules = existing.completedModules || [];
+      if (!completedModules.includes(args.moduleId)) {
+        completedModules.push(args.moduleId);
+        completedModules.sort((a, b) => a - b);
+      }
+      
+      await ctx.db.patch(existing._id, {
+        completedModules,
+        modulesCompleted: completedModules.length,
+        lastAccessedAt: Date.now(),
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert("progress", {
+      userId: args.userId,
+      skillId: args.skillId,
+      completedModules: [args.moduleId],
+      modulesCompleted: 1,
+      totalModules: 4, // Default 4 modules per skill
+      lastAccessedAt: Date.now(),
+    });
+  },
+});
+

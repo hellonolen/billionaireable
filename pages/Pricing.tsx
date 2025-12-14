@@ -1,18 +1,75 @@
 import React, { useState } from 'react';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
+import { useAction, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
+
+// Stripe Price IDs - set these in Stripe Dashboard
+const PRICE_IDS = {
+    pathfinder_monthly: 'price_pathfinder_monthly', // Replace with real Stripe price IDs
+    pathfinder_annual: 'price_pathfinder_annual',
+    ascendant_monthly: 'price_ascendant_monthly',
+    ascendant_annual: 'price_ascendant_annual',
+    principal_monthly: 'price_principal_monthly',
+    principal_annual: 'price_principal_annual',
+};
 
 const Pricing: React.FC = () => {
     const navigate = useNavigate();
+    const { user: clerkUser, isSignedIn } = useUser();
     const [isAnnual, setIsAnnual] = useState(true);
+    const [loading, setLoading] = useState<string | null>(null);
+
+    // Convex
+    const convexUser = useQuery(
+        api.users.getUserByClerkId,
+        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
+    );
+    const createCheckout = useAction(api.stripe.createCheckoutSession);
+
+    const handleSubscribe = async (tierName: string, priceId: string) => {
+        if (!isSignedIn) {
+            navigate('/waitlist');
+            return;
+        }
+
+        if (!convexUser) {
+            console.error('User not found in Convex');
+            return;
+        }
+
+        setLoading(tierName);
+
+        try {
+            const { url } = await createCheckout({
+                priceId,
+                userId: convexUser._id,
+                successUrl: `${window.location.origin}/dashboard?success=true`,
+                cancelUrl: `${window.location.origin}/pricing?canceled=true`,
+            });
+
+            if (url) {
+                window.location.href = url;
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            // Fall back to waitlist if Stripe isn't configured
+            navigate('/waitlist');
+        } finally {
+            setLoading(null);
+        }
+    };
 
     const tiers = [
         {
             name: 'Pathfinder',
-            description: 'For those ready to begin the journey',
+            description: 'For those ready to begin',
             monthlyPrice: 497,
             annualPrice: 4997,
             annualSavings: 967,
+            monthlyPriceId: PRICE_IDS.pathfinder_monthly,
+            annualPriceId: PRICE_IDS.pathfinder_annual,
             features: [
                 'Unlimited Billionaireable access',
                 'The 12-month roadmap',
@@ -28,10 +85,12 @@ const Pricing: React.FC = () => {
         },
         {
             name: 'Ascendant',
-            description: 'For serious wealth builders',
+            description: 'For serious builders',
             monthlyPrice: 1497,
             annualPrice: 14997,
             annualSavings: 2967,
+            monthlyPriceId: PRICE_IDS.ascendant_monthly,
+            annualPriceId: PRICE_IDS.ascendant_annual,
             features: [
                 'Everything in Pathfinder',
                 'Weekly live strategy calls',
@@ -53,6 +112,8 @@ const Pricing: React.FC = () => {
             monthlyPrice: 4997,
             annualPrice: 49997,
             annualSavings: 9967,
+            monthlyPriceId: PRICE_IDS.principal_monthly,
+            annualPriceId: PRICE_IDS.principal_annual,
             features: [
                 'Everything in Ascendant',
                 'Monthly 1:1 strategy sessions',
@@ -174,15 +235,25 @@ const Pricing: React.FC = () => {
 
                             {/* CTA */}
                             <button
-                                onClick={() => navigate('/waitlist')}
-                                className={`w-full py-4 rounded-full font-mono text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 group ${
+                                onClick={() => handleSubscribe(
+                                    tier.name, 
+                                    isAnnual ? tier.annualPriceId : tier.monthlyPriceId
+                                )}
+                                disabled={loading === tier.name}
+                                className={`w-full py-4 rounded-full font-mono text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 group disabled:opacity-50 ${
                                     tier.popular
                                         ? 'bg-art-orange text-black hover:bg-art-green shadow-lg'
                                         : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
                                 }`}
                             >
-                                {tier.cta}
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                {loading === tier.name ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        {tier.cta}
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </>
+                                )}
                             </button>
                         </div>
                     ))}

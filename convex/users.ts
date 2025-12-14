@@ -83,3 +83,19 @@ export const updateUserSituation = mutation({
   },
 });
 
+// Update user goals/focus areas from onboarding
+export const updateUserGoals = mutation({
+  args: {
+    userId: v.id("users"),
+    goals: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      focusAreas: args.goals,
+      onboardingComplete: true,
+      updatedAt: Date.now(),
+    });
+    return args.userId;
+  },
+});
+

@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProgress } from '../contexts/ProgressContext';
-import { ChevronLeft, CheckCircle, Lock, Play } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Play, Pause, Volume2, Loader2 } from 'lucide-react';
 import { SKILL_DATA } from '../constants';
+import { LESSON_CONTENT, PILLAR_NAMES } from '../lessonContent';
+import { useAction } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 const Lesson: React.FC = () => {
     const { skillId, moduleId } = useParams<{ skillId: string; moduleId: string }>();
     const { getSkillCompletion, completeModule } = useProgress();
     const navigate = useNavigate();
     const [completed, setCompleted] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentSection, setCurrentSection] = useState(0);
+    
+    // Billionaireable chat for interactive guidance
+    const chat = useAction(api.billionaireable.chat);
+    const [chatMessages, setChatMessages] = useState<{role: string, text: string}[]>([]);
+    const [chatInput, setChatInput] = useState('');
+    const [chatLoading, setChatLoading] = useState(false);
 
     if (!skillId || !moduleId) {
         return <div>Invalid lesson</div>;
@@ -17,6 +29,7 @@ const Lesson: React.FC = () => {
     const skillData = SKILL_DATA[skillId];
     const moduleIndex = parseInt(moduleId) - 1;
     const module = skillData?.modules[moduleIndex];
+    const lessonContent = LESSON_CONTENT[skillId]?.[parseInt(moduleId)];
 
     if (!module) {
         return <div>Module not found</div>;
@@ -24,6 +37,7 @@ const Lesson: React.FC = () => {
 
     const completion = getSkillCompletion(skillId);
     const isCompleted = completion > moduleIndex;
+    const pillarName = PILLAR_NAMES[skillId] || skillId;
 
     const handleComplete = () => {
         completeModule(skillId, moduleIndex + 1);
@@ -38,140 +52,265 @@ const Lesson: React.FC = () => {
             'reality-distortion': 'orange',
             'liquidity-allocation': 'green',
             'holding-co': 'blue',
-            'time-arbitrage': 'yellow',
-            'bio-availability': 'orange',
-            'political-capital': 'green',
-            'syndicate': 'blue',
-            'family-office': 'yellow',
-            'dynasty-design': 'orange',
-            'sovereign-flags': 'green',
-            'asymmetric-bets': 'blue',
-            'ascendance': 'yellow'
+            'time-arbitrage': 'orange',
+            'bio-availability': 'green',
+            'political-capital': 'blue',
+            'syndicate': 'orange',
+            'family-office': 'green',
+            'dynasty-design': 'blue',
+            'sovereign-flags': 'orange',
+            'asymmetric-bets': 'green',
+            'ascendance': 'blue'
         };
         return colors[skillId] || 'orange';
     };
 
     const color = getColorClass();
 
+    // Handle Listen button - uses browser speech synthesis for now
+    const handleListen = () => {
+        if (isPlaying) {
+            window.speechSynthesis.cancel();
+            setIsPlaying(false);
+            return;
+        }
+
+        if (!lessonContent) return;
+
+        setIsPlaying(true);
+        
+        // Build the full lesson text
+        const fullText = `${lessonContent.intro} ${lessonContent.sections.map(s => `${s.heading}. ${s.content}`).join(' ')} Your directive: ${lessonContent.directive}`;
+        
+        const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.rate = 0.95;
+        utterance.onend = () => setIsPlaying(false);
+        utterance.onerror = () => setIsPlaying(false);
+        
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // Handle chat with Billionaireable about this lesson
+    const handleChatSend = async () => {
+        if (!chatInput.trim() || chatLoading) return;
+
+        const userMessage = chatInput.trim();
+        setChatMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+        setChatInput('');
+        setChatLoading(true);
+
+        try {
+            const systemPrompt = `You are Billionaireable guiding someone through the ${pillarName} pillar, specifically the "${module.title}" module.
+
+Context: ${lessonContent?.intro || skillData?.insight}
+
+You guide. You don't teach. You already know. They follow. Keep responses to 2-3 sentences. Direct. No fluff.`;
+
+            const response = await chat({
+                message: userMessage,
+                history: chatMessages,
+                systemPrompt,
+            });
+
+            setChatMessages(prev => [...prev, { role: 'model', text: response }]);
+        } catch (error) {
+            console.error('Chat error:', error);
+            setChatMessages(prev => [...prev, { role: 'model', text: "Let's refocus on the lesson. What's unclear?" }]);
+        } finally {
+            setChatLoading(false);
+        }
+    };
+
     return (
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 pt-20 pb-20 animate-fade-in">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-20 pb-20 animate-fade-in">
 
             {/* Back Button */}
             <button
                 onClick={() => navigate(`/skills/${skillId}`)}
-                className="flex items-center gap-2 mb-8 font-mono text-sm font-bold uppercase text-gray-400 hover:text-black transition-colors"
+                className="flex items-center gap-2 mb-8 font-mono text-sm font-bold uppercase text-gray-400 hover:text-black dark:hover:text-white transition-colors"
             >
                 <ChevronLeft className="w-4 h-4" />
-                Back to Skill
+                Back to {pillarName}
             </button>
 
-            {/* Module Header */}
-            <div className={`bg-art-${color} rounded-[32px] p-12 mb-12 shadow-2xl`}>
-                <div className="flex items-center gap-3 mb-4">
-                    <span className="px-4 py-2 bg-black/20 rounded-full font-mono text-xs font-bold uppercase text-white">
-                        Module {moduleId}
-                    </span>
-                    {isCompleted && (
-                        <span className="px-4 py-2 bg-white/20 rounded-full font-mono text-xs font-bold uppercase text-white flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4" />
-                            Completed
-                        </span>
-                    )}
-                </div>
-                <h1 className="font-sans text-5xl font-black text-white mb-3">{module.title}</h1>
-                <p className="font-mono text-sm text-white/80 uppercase">{module.duration}</p>
-            </div>
-
-            {/* Lesson Content */}
-            <div className="bg-white rounded-[32px] p-12 shadow-soft-xl border border-black/10 mb-8">
-                <div className="prose prose-lg max-w-none">
-                    <h2 className="font-sans text-3xl font-black uppercase mb-6">Lesson Overview</h2>
-
-                    <p className="font-serif text-lg text-gray-700 leading-relaxed mb-8">
-                        {skillData?.insight || "This module contains critical frameworks and tools for mastering this skill. Complete the exercises below to mark this module as complete."}
-                    </p>
-
-                    <div className="bg-gray-50 rounded-2xl p-8 mb-8">
-                        <h3 className="font-sans text-xl font-bold uppercase mb-4">Key Frameworks</h3>
-                        <ul className="space-y-3">
-                            <li className="flex items-start gap-3">
-                                <div className={`w-2 h-2 rounded-full bg-art-${color} mt-2`}></div>
-                                <span className="font-serif text-base text-gray-700">First principles thinking applied to {module.title.toLowerCase()}</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className={`w-2 h-2 rounded-full bg-art-${color} mt-2`}></div>
-                                <span className="font-serif text-base text-gray-700">Practical templates and worksheets</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className={`w-2 h-2 rounded-full bg-art-${color} mt-2`}></div>
-                                <span className="font-serif text-base text-gray-700">Real-world case studies from billionaires</span>
-                            </li>
-                        </ul>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content */}
+                <div className="lg:col-span-2">
+                    {/* Module Header */}
+                    <div className={`bg-art-${color} rounded-[32px] p-8 md:p-12 mb-8 shadow-2xl`}>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="px-4 py-2 bg-black/20 rounded-full font-mono text-xs font-bold uppercase text-white">
+                                    Module {moduleId}
+                                </span>
+                                {isCompleted && (
+                                    <span className="px-4 py-2 bg-white/20 rounded-full font-mono text-xs font-bold uppercase text-white flex items-center gap-2">
+                                        <CheckCircle className="w-4 h-4" />
+                                        Completed
+                                    </span>
+                                )}
+                            </div>
+                            <button
+                                onClick={handleListen}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-white font-mono text-xs font-bold uppercase transition-colors"
+                            >
+                                {isPlaying ? (
+                                    <>
+                                        <Pause className="w-4 h-4" />
+                                        Pause
+                                    </>
+                                ) : (
+                                    <>
+                                        <Volume2 className="w-4 h-4" />
+                                        Listen
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                        <h1 className="font-sans text-3xl md:text-5xl font-black text-white mb-3">{module.title}</h1>
+                        <p className="font-mono text-sm text-white/80 uppercase">{module.duration}</p>
                     </div>
 
-                    <h3 className="font-sans text-xl font-bold uppercase mb-4">Exercise: Apply the Framework</h3>
-                    <div className="bg-gray-50 rounded-2xl p-6 mb-8">
-                        <p className="font-serif text-base text-gray-600 mb-4">
-                            To complete this module, apply what you've learned:
-                        </p>
-                        <textarea
-                            placeholder="Describe how you'll implement this in your business/life..."
-                            rows={6}
-                            className="w-full px-6 py-4 bg-white border border-gray-200 rounded-xl font-serif text-base resize-none focus:ring-2 focus:ring-black transition-all"
-                        />
-                    </div>
+                    {/* Lesson Content */}
+                    <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 md:p-12 shadow-soft-xl border border-black/10 dark:border-white/10 mb-8">
+                        {lessonContent ? (
+                            <div className="space-y-8">
+                                {/* Intro */}
+                                <p className="font-serif text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+                                    {lessonContent.intro}
+                                </p>
 
-                    {/* Tools/Downloads */}
-                    {skillData?.tools && skillData.tools.length > 0 && (
-                        <div className="mb-8">
-                            <h3 className="font-sans text-xl font-bold uppercase mb-4">Tools & Templates</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {skillData.tools.map((tool, idx) => (
-                                    <div key={idx} className="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
-                                        <span className="font-mono text-sm">{tool}</span>
-                                        <button className="px-4 py-2 bg-black text-white rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 transition-colors">
-                                            Download
-                                        </button>
+                                {/* Sections */}
+                                {lessonContent.sections.map((section, idx) => (
+                                    <div key={idx} className="border-l-4 border-art-orange pl-6">
+                                        <h3 className="font-sans text-xl font-bold uppercase mb-3 dark:text-white">{section.heading}</h3>
+                                        <p className="font-serif text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                                            {section.content}
+                                        </p>
                                     </div>
                                 ))}
+
+                                {/* Directive */}
+                                <div className={`bg-art-${color}/10 rounded-2xl p-6`}>
+                                    <h3 className="font-sans text-lg font-bold uppercase mb-2 dark:text-white">Your Directive</h3>
+                                    <p className="font-serif text-base text-gray-700 dark:text-gray-300">
+                                        {lessonContent.directive}
+                                    </p>
+                                </div>
                             </div>
+                        ) : (
+                            <div className="text-center py-12">
+                                <p className="font-serif text-lg text-gray-500">
+                                    {skillData?.insight || "This module content is being prepared."}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Complete Button */}
+                    {!isCompleted && (
+                        <button
+                            onClick={handleComplete}
+                            className={`w-full py-6 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-3 shadow-xl ${completed
+                                    ? 'bg-art-green text-white'
+                                    : `bg-art-${color} text-white hover:opacity-90`
+                                }`}
+                        >
+                            {completed ? (
+                                <>
+                                    <CheckCircle className="w-5 h-5" />
+                                    Module Completed!
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle className="w-5 h-5" />
+                                    Mark as Complete
+                                </>
+                            )}
+                        </button>
+                    )}
+
+                    {isCompleted && (
+                        <div className="bg-art-green rounded-[24px] p-6 text-center">
+                            <p className="font-mono text-sm font-bold uppercase text-white flex items-center justify-center gap-2">
+                                <CheckCircle className="w-5 h-5" />
+                                You've completed this module
+                            </p>
                         </div>
                     )}
                 </div>
-            </div>
 
-            {/* Complete Button */}
-            {!isCompleted && (
-                <button
-                    onClick={handleComplete}
-                    className={`w-full py-6 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-3 shadow-xl ${completed
-                            ? 'bg-art-green text-white'
-                            : `bg-art-${color} text-white hover:opacity-90`
-                        }`}
-                >
-                    {completed ? (
-                        <>
-                            <CheckCircle className="w-5 h-5" />
-                            Module Completed!
-                        </>
-                    ) : (
-                        <>
-                            <CheckCircle className="w-5 h-5" />
-                            Mark as Complete
-                        </>
-                    )}
-                </button>
-            )}
+                {/* Sidebar - Billionaireable Chat */}
+                <div className="lg:col-span-1">
+                    <div className="bg-white dark:bg-gray-900 rounded-[32px] shadow-soft-xl border border-black/10 dark:border-white/10 overflow-hidden sticky top-24">
+                        {/* Chat Header */}
+                        <div className="bg-black text-white p-4 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-black">
+                                B
+                            </div>
+                            <div>
+                                <h3 className="font-black font-sans text-sm">Ask Billionaireable</h3>
+                                <p className="text-xs text-gray-400">About this module</p>
+                            </div>
+                        </div>
 
-            {isCompleted && (
-                <div className="bg-art-green rounded-[24px] p-6 text-center">
-                    <p className="font-mono text-sm font-bold uppercase text-white flex items-center justify-center gap-2">
-                        <CheckCircle className="w-5 h-5" />
-                        You've already completed this module
-                    </p>
+                        {/* Chat Messages */}
+                        <div className="h-[300px] overflow-y-auto p-4 space-y-3">
+                            {chatMessages.length === 0 && (
+                                <div className="text-center py-8">
+                                    <p className="text-sm text-gray-400">
+                                        Have a question about {module.title}? Ask here.
+                                    </p>
+                                </div>
+                            )}
+                            {chatMessages.map((msg, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div
+                                        className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
+                                            msg.role === 'user'
+                                                ? 'bg-black text-white'
+                                                : 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white'
+                                        }`}
+                                    >
+                                        {msg.text}
+                                    </div>
+                                </div>
+                            ))}
+                            {chatLoading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-2">
+                                        <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Chat Input */}
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
+                                    placeholder="Ask about this module..."
+                                    className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                                />
+                                <button
+                                    onClick={handleChatSend}
+                                    disabled={!chatInput.trim() || chatLoading}
+                                    className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                                >
+                                    <ChevronLeft className="w-4 h-4 rotate-180" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            )}
-
+            </div>
         </div>
     );
 };

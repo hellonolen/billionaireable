@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 export type Level = 'Architect' | 'Accumulator' | 'Optimizer' | 'Autonomy' | 'Perpetual';
 
@@ -39,19 +42,73 @@ interface ProgressContextType {
     updateDecision: (key: string, value: string) => void;
     getSkillCompletion: (skillId: string) => number;
     getNextLevelThreshold: (level: Level) => number;
+    isLoading: boolean;
 }
 
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
 
+const DEFAULT_PROGRESS: UserProgress = {
+    currentLevel: 'Architect',
+    netWorth: 0,
+    revenue: 0,
+    skillProgress: [],
+    triangleHistory: [],
+    decisions: {},
+};
+
 export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [progress, setProgress] = useState<UserProgress>({
-        currentLevel: 'Architect',
-        netWorth: 5000000,
-        revenue: 0,
-        skillProgress: [],
-        triangleHistory: [],
-        decisions: {},
-    });
+    const { user: clerkUser, isSignedIn } = useUser();
+    const [progress, setProgress] = useState<UserProgress>(DEFAULT_PROGRESS);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Convex queries and mutations
+    const convexUser = useQuery(
+        api.users.getUserByClerkId,
+        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
+    );
+    
+    const convexProgress = useQuery(
+        api.progress.getUserProgress,
+        convexUser ? { userId: convexUser._id } : "skip"
+    );
+
+    const saveProgress = useMutation(api.progress.saveProgress);
+
+    // Load progress from Convex or localStorage
+    useEffect(() => {
+        if (convexProgress) {
+            // Convert Convex progress format to local format
+            const skillProgress: SkillProgress[] = convexProgress.map((p: any) => ({
+                skillId: p.skillId,
+                completedModules: p.completedModules || [],
+            }));
+            
+            setProgress(prev => ({
+                ...prev,
+                skillProgress,
+            }));
+            setIsLoading(false);
+        } else if (!isSignedIn) {
+            // Load from localStorage for non-signed-in users
+            const saved = localStorage.getItem('billionaireable_progress');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    setProgress(prev => ({ ...prev, ...parsed }));
+                } catch (e) {
+                    console.error('Failed to parse saved progress:', e);
+                }
+            }
+            setIsLoading(false);
+        }
+    }, [convexProgress, isSignedIn]);
+
+    // Save to localStorage for non-signed-in users
+    useEffect(() => {
+        if (!isSignedIn) {
+            localStorage.setItem('billionaireable_progress', JSON.stringify(progress));
+        }
+    }, [progress, isSignedIn]);
 
     const updateNetWorth = (amount: number) => {
         setProgress(prev => {
@@ -68,7 +125,8 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
         });
     };
 
-    const completeModule = (skillId: string, moduleId: number) => {
+    const completeModule = async (skillId: string, moduleId: number) => {
+        // Update local state immediately
         setProgress(prev => {
             const existing = prev.skillProgress.find(s => s.skillId === skillId);
             const newProgress = prev.skillProgress.filter(s => s.skillId !== skillId);
@@ -88,6 +146,19 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
 
             return { ...prev, skillProgress: newProgress };
         });
+
+        // Save to Convex if signed in
+        if (convexUser) {
+            try {
+                await saveProgress({
+                    userId: convexUser._id,
+                    skillId,
+                    moduleId,
+                });
+            } catch (error) {
+                console.error('Failed to save progress to Convex:', error);
+            }
+        }
     };
 
     const addTriangleScore = (scores: Omit<TriangleScores, 'date'>) => {
@@ -134,6 +205,7 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
             updateDecision,
             getSkillCompletion,
             getNextLevelThreshold,
+            isLoading,
         }}>
             {children}
         </ProgressContext.Provider>
