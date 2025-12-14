@@ -6,7 +6,7 @@ import { ArrowRight, ChevronRight } from 'lucide-react';
 const Home: React.FC = () => {
     const navigate = useNavigate();
     const [typedText, setTypedText] = useState('');
-    const fullText = "I want to build generational wealth...";
+    const fullText = "I'm ready. What's first?";
 
     useEffect(() => {
         let index = 0;
@@ -62,7 +62,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="font-serif text-xl md:text-2xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
                         >
-                            12 pillars. 12 months. No excuses.
+                            The system that separates those who talk about it from those who become it.
                         </motion.p>
 
                         {/* CTA */}
@@ -123,11 +123,8 @@ const Home: React.FC = () => {
                                     className="flex justify-start"
                                 >
                                     <div className="bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 dark:border-gray-700 max-w-md">
-                                        <p className="text-gray-800 dark:text-gray-200 font-medium mb-3">
-                                            Good. Let's get you there. What's your current net worth and primary income source?
-                                        </p>
-                                        <p className="text-gray-500 dark:text-gray-400 text-sm">
-                                            We'll map out your 12-month path across all 12 pillars.
+                                        <p className="text-gray-800 dark:text-gray-200 font-medium">
+                                            Good. We start with clarity. Tell me where you are right now — and where you refuse to stay.
                                         </p>
                                     </div>
                                 </motion.div>
