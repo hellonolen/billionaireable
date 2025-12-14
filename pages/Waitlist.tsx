@@ -87,9 +87,6 @@ const Waitlist: React.FC = () => {
                                 )}
                             </button>
                         </div>
-                        <p className="mt-6 font-mono text-xs text-gray-400 uppercase tracking-widest text-center">
-                            Limited spots available for Q4 2025
-                        </p>
                     </form>
                 ) : (
                     <div className="animate-fade-in bg-white dark:bg-gray-900 p-12 rounded-[32px] shadow-soft-xl border border-gray-100 dark:border-gray-800 max-w-md w-full">
