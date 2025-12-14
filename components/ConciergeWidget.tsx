@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Send, Loader2 } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useAction, useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { useProgress } from '../contexts/ProgressContext';
@@ -37,18 +37,13 @@ const ConciergeWidget: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     
     // User and progress context
-    const { user: clerkUser, isSignedIn } = useUser();
+    const { user, isSignedIn } = useAuth();
     const { progress, getSkillCompletion } = useProgress();
     
     // Convex queries and mutations
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
-    
     const recentMessages = useQuery(
         api.conversations.getRecentMessages,
-        convexUser ? { userId: convexUser._id, limit: 20 } : "skip"
+        user ? { userId: user._id, limit: 20 } : "skip"
     );
     
     const createConversation = useMutation(api.conversations.createConversation);
@@ -67,7 +62,7 @@ const ConciergeWidget: React.FC = () => {
     const buildSystemPrompt = () => {
         let contextInfo = '';
         
-        if (isSignedIn && convexUser) {
+        if (isSignedIn && user) {
             // Calculate current pillar based on progress
             let currentPillarIndex = 0;
             for (let i = 0; i < PILLAR_ORDER.length; i++) {
@@ -93,12 +88,12 @@ const ConciergeWidget: React.FC = () => {
             
             contextInfo = `
 USER CONTEXT (remember this - never ask them about it):
-- Name: ${convexUser.name || clerkUser?.firstName || 'Unknown'}
+- Name: ${user.name || 'Unknown'}
 - Current Pillar: ${currentPillarIndex + 1}. ${currentPillarName}
 - Modules completed in current pillar: ${modulesCompleted}/4
 - Total progress: ${totalModulesCompleted}/48 modules across 12 pillars
-${convexUser.focusAreas?.length ? `- Focus areas: ${convexUser.focusAreas.join(', ')}` : ''}
-${convexUser.netWorth ? `- Net worth tier: ${convexUser.netWorth > 10000000 ? 'Eight figures+' : convexUser.netWorth > 1000000 ? 'Seven figures' : 'Building'}` : ''}
+${user.focusAreas?.length ? `- Focus areas: ${user.focusAreas.join(', ')}` : ''}
+${user.netWorth ? `- Net worth tier: ${user.netWorth > 10000000 ? 'Eight figures+' : user.netWorth > 1000000 ? 'Seven figures' : 'Building'}` : ''}
 
 When they ask about their progress or where they are, tell them exactly: Pillar ${currentPillarIndex + 1}, ${currentPillarName}, Module ${modulesCompleted + 1}.
 Guide them to continue that pillar. Move them forward.`;
@@ -179,12 +174,12 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
                     setMessages(prev => [...prev, { role: 'model', text: response }]);
                     
                     // Save the welcome message
-                    if (convexUser) {
-                        const convId = await createConversation({ userId: convexUser._id });
+                    if (user) {
+                        const convId = await createConversation({ userId: user._id });
                         setConversationId(convId);
                         await addMessage({
                             conversationId: convId,
-                            userId: convexUser._id,
+                            userId: user._id,
                             role: 'assistant',
                             content: response,
                         });
@@ -201,12 +196,12 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
                     setMessages([{ role: 'model', text: response }]);
                     
                     // Create conversation and save
-                    if (convexUser) {
-                        const convId = await createConversation({ userId: convexUser._id });
+                    if (user) {
+                        const convId = await createConversation({ userId: user._id });
                         setConversationId(convId);
                         await addMessage({
                             conversationId: convId,
-                            userId: convexUser._id,
+                            userId: user._id,
                             role: 'assistant',
                             content: response,
                         });
@@ -221,7 +216,7 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
         };
 
         initChat();
-    }, [isOpen, recentMessages, convexUser]);
+    }, [isOpen, recentMessages, user]);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -250,32 +245,32 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
             setMessages(prev => [...prev, { role: 'model', text: response }]);
             
             // Save both messages to Convex
-            if (convexUser && conversationId) {
+            if (user && conversationId) {
                 await addMessage({
                     conversationId: conversationId as any,
-                    userId: convexUser._id,
+                    userId: user._id,
                     role: 'user',
                     content: userMessage,
                 });
                 await addMessage({
                     conversationId: conversationId as any,
-                    userId: convexUser._id,
+                    userId: user._id,
                     role: 'assistant',
                     content: response,
                 });
-            } else if (convexUser && !conversationId) {
+            } else if (user && !conversationId) {
                 // Create new conversation if needed
-                const convId = await createConversation({ userId: convexUser._id });
+                const convId = await createConversation({ userId: user._id });
                 setConversationId(convId);
                 await addMessage({
                     conversationId: convId,
-                    userId: convexUser._id,
+                    userId: user._id,
                     role: 'user',
                     content: userMessage,
                 });
                 await addMessage({
                     conversationId: convId,
-                    userId: convexUser._id,
+                    userId: user._id,
                     role: 'assistant',
                     content: response,
                 });

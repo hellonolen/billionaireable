@@ -4,7 +4,7 @@ import DashboardCard from '../components/DashboardCard';
 import { DASHBOARD_CARDS, MOCK_MARKETS } from '../constants';
 import { CardData } from '../types';
 import { useProgress } from '../contexts/ProgressContext';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { Lock, Crown } from 'lucide-react';
@@ -15,16 +15,11 @@ const FREE_PILLARS = ['reality-distortion'];
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { progress, getSkillCompletion } = useProgress();
-  const { user: clerkUser, isSignedIn } = useUser();
-  
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-  );
+  const { user, isSignedIn } = useAuth();
   
   const subscription = useQuery(
     api.stripe.hasActiveSubscription,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    user?._id ? { userId: user._id } : "skip"
   );
 
   const handleCardClick = (id: string) => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, CheckCircle, Target, TrendingUp, Clock, Users, Building, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
@@ -96,15 +96,10 @@ const QUESTIONS: Question[] = [
 
 const Assessment: React.FC = () => {
     const navigate = useNavigate();
-    const { user: clerkUser, isSignedIn } = useUser();
+    const { user, isSignedIn } = useAuth();
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [showResults, setShowResults] = useState(false);
-
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
 
     const handleAnswer = (questionId: string, value: string) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));

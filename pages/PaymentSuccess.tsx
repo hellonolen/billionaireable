@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
 const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
-    const { user: clerkUser, isSignedIn } = useUser();
+    const { user, isSignedIn } = useAuth();
     const [countdown, setCountdown] = useState(10);
-    
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
     
     const subscription = useQuery(
         api.stripe.hasActiveSubscription,
-        convexUser?._id ? { userId: convexUser._id } : "skip"
+        user?._id ? { userId: user._id } : "skip"
     );
 
     useEffect(() => {

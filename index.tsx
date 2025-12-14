@@ -3,16 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { BrowserRouter } from 'react-router-dom';
-import { ClerkProvider, useAuth } from '@clerk/clerk-react';
-import { ConvexProviderWithClerk } from 'convex/react-clerk';
-import { ConvexReactClient } from 'convex/react';
+import { ConvexProvider, ConvexReactClient } from 'convex/react';
+import { AuthProvider } from './contexts/AuthContext';
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const CONVEX_URL = import.meta.env.VITE_CONVEX_URL;
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk Publishable Key. Add VITE_CLERK_PUBLISHABLE_KEY to your .env.local file.");
-}
 
 if (!CONVEX_URL) {
   throw new Error("Missing Convex URL. Add VITE_CONVEX_URL to your .env.local file.");
@@ -28,12 +22,12 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-        <BrowserRouter>
+    <ConvexProvider client={convex}>
+      <BrowserRouter>
+        <AuthProvider>
           <App />
-        </BrowserRouter>
-      </ConvexProviderWithClerk>
-    </ClerkProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ConvexProvider>
   </React.StrictMode>
 );

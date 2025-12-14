@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
-import { useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Hook that redirects users to onboarding if they haven't completed it
@@ -10,27 +8,21 @@ import { api } from '../convex/_generated/api';
  */
 export function useRequireOnboarding() {
   const navigate = useNavigate();
-  const { user: clerkUser, isSignedIn, isLoaded } = useUser();
+  const { user, isLoaded, isSignedIn } = useAuth();
 
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-  );
-
-  const isLoading = !isLoaded || (isSignedIn && convexUser === undefined);
-  const onboardingComplete = convexUser?.onboardingComplete === true;
+  const isLoading = !isLoaded;
+  const onboardingComplete = user?.onboardingComplete === true;
 
   useEffect(() => {
     // Only redirect once we have loaded the user data
-    if (!isLoading && isSignedIn && convexUser && !onboardingComplete) {
+    if (!isLoading && isSignedIn && user && !onboardingComplete) {
       navigate('/onboarding', { replace: true });
     }
-  }, [isLoading, isSignedIn, convexUser, onboardingComplete, navigate]);
+  }, [isLoading, isSignedIn, user, onboardingComplete, navigate]);
 
   return {
     isLoading,
     onboardingComplete,
-    user: convexUser,
+    user,
   };
 }
-

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from './AuthContext';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
@@ -57,19 +57,14 @@ const DEFAULT_PROGRESS: UserProgress = {
 };
 
 export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { user: clerkUser, isSignedIn } = useUser();
+    const { user, isSignedIn } = useAuth();
     const [progress, setProgress] = useState<UserProgress>(DEFAULT_PROGRESS);
     const [isLoading, setIsLoading] = useState(true);
 
     // Convex queries and mutations
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
-    
     const convexProgress = useQuery(
         api.progress.getUserProgress,
-        convexUser ? { userId: convexUser._id } : "skip"
+        user ? { userId: user._id } : "skip"
     );
 
     const saveProgress = useMutation(api.progress.saveProgress);
@@ -148,10 +143,10 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
         });
 
         // Save to Convex if signed in
-        if (convexUser) {
+        if (user) {
             try {
                 await saveProgress({
-                    userId: convexUser._id,
+                    userId: user._id,
                     skillId,
                     moduleId,
                 });

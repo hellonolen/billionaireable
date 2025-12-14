@@ -35,6 +35,7 @@ import CommandCenter from './pages/CommandCenter';
 import Progress from './pages/Progress';
 import Lesson from './pages/Lesson';
 import Waitlist from './pages/Waitlist';
+import Auth from './pages/Auth';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import ProtectedSubscriberRoute from './components/ProtectedSubscriberRoute';
@@ -95,6 +96,8 @@ const App: React.FC = () => {
               <Route path="/command-center" element={<PageTransition><CommandCenter /></PageTransition>} />
               <Route path="/admin" element={<ProtectedAdminRoute><PageTransition><AdminDashboard /></PageTransition></ProtectedAdminRoute>} />
               <Route path="/waitlist" element={<PageTransition><Waitlist /></PageTransition>} />
+              <Route path="/login" element={<PageTransition><Auth /></PageTransition>} />
+              <Route path="/signup" element={<PageTransition><Auth /></PageTransition>} />
               <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
               <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
               <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />

@@ -1,8 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useUser, SignedIn, SignedOut } from '@clerk/clerk-react';
-import { useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
+import { useAuth } from '../contexts/AuthContext';
 import { Loader2, ShieldX } from 'lucide-react';
 
 interface ProtectedAdminRouteProps {
@@ -10,12 +8,7 @@ interface ProtectedAdminRouteProps {
 }
 
 const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) => {
-  const { user, isLoaded } = useUser();
-  
-  const isAdmin = useQuery(
-    api.users.isUserAdmin,
-    user?.id ? { clerkId: user.id } : "skip"
-  );
+  const { user, isLoaded, isSignedIn } = useAuth();
 
   // Show loading while checking auth
   if (!isLoaded) {
@@ -26,22 +19,13 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) =
     );
   }
 
-  // Not signed in - redirect to home
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-
-  // Still checking admin status
-  if (isAdmin === undefined) {
-    return (
-      <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    );
+  // Not signed in - redirect to login
+  if (!isSignedIn) {
+    return <Navigate to="/login" replace />;
   }
 
   // Not an admin - show access denied
-  if (!isAdmin) {
+  if (!user?.isAdmin) {
     return (
       <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex flex-col items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-900 rounded-[32px] p-12 text-center max-w-md shadow-soft-xl border border-gray-200 dark:border-gray-800">
@@ -70,5 +54,3 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) =
 };
 
 export default ProtectedAdminRoute;
-
-

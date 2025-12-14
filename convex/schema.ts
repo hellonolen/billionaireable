@@ -2,9 +2,8 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  // Users table - synced with Clerk
+  // Users table - native Convex auth (no Clerk)
   users: defineTable({
-    clerkId: v.string(),
     email: v.string(),
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
@@ -20,11 +19,25 @@ export default defineSchema({
     currentPillar: v.optional(v.number()),
     // Admin access
     isAdmin: v.optional(v.boolean()),
+    // Session management
+    sessionToken: v.optional(v.string()),
+    sessionExpiresAt: v.optional(v.number()),
+    lastLoginAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_clerk_id", ["clerkId"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_session", ["sessionToken"]),
+
+  // Verification codes for magic link auth
+  verificationCodes: defineTable({
+    email: v.string(),
+    code: v.string(), // 6-digit code
+    type: v.string(), // 'signup', 'login'
+    expiresAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_code", ["code"]),
 
   // Conversations - each chat session
   conversations: defineTable({
@@ -74,11 +87,9 @@ export default defineSchema({
   // Subscriptions - all payment sources
   subscriptions: defineTable({
     userId: v.id("users"),
-    stripeCustomerId: v.optional(v.string()),
-    stripeSubscriptionId: v.optional(v.string()),
     status: v.string(), // active, canceled, past_due, etc.
     plan: v.string(), // founder, scaler, owner
-    paymentMethod: v.optional(v.string()), // stripe, whop, wire
+    paymentMethod: v.optional(v.string()), // wire
     amount: v.optional(v.number()),
     billingCycle: v.optional(v.string()), // monthly, annual
     currentPeriodStart: v.optional(v.number()),
@@ -86,8 +97,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
   })
-    .index("by_user", ["userId"])
-    .index("by_stripe_customer", ["stripeCustomerId"]),
+    .index("by_user", ["userId"]),
 
   // Waitlist - people waiting to join
   waitlist: defineTable({
@@ -103,7 +113,7 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_status", ["status"]),
 
-  // Payment Applications - for wire transfer / high-ticket payments
+  // Payment Applications - for wire transfer payments
   paymentApplications: defineTable({
     userId: v.id("users"),
     userEmail: v.string(),
@@ -111,11 +121,11 @@ export default defineSchema({
     tier: v.string(), // founder, scaler, owner
     billingCycle: v.string(), // monthly, annual
     amount: v.number(),
-    paymentMethod: v.string(), // wire, whop, stripe
-    status: v.string(), // pending, awaiting_payment, approved, rejected, payment_insufficient
-    wireReference: v.optional(v.string()), // Unique reference for wire payments
-    paymentReference: v.optional(v.string()), // Bank/payment processor reference
-    paymentSource: v.optional(v.string()), // Where payment was verified
+    paymentMethod: v.string(), // wire
+    status: v.string(), // awaiting_payment, approved, payment_insufficient
+    wireReference: v.optional(v.string()),
+    paymentReference: v.optional(v.string()),
+    paymentSource: v.optional(v.string()),
     paymentVerifiedAt: v.optional(v.number()),
     amountReceived: v.optional(v.number()),
     notes: v.optional(v.string()),
@@ -126,4 +136,3 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_wire_reference", ["wireReference"]),
 });
-

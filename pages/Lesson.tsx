@@ -5,7 +5,7 @@ import { ChevronLeft, CheckCircle, Play, Pause, Volume2, Loader2 } from 'lucide-
 import { SKILL_DATA } from '../constants';
 import { LESSON_CONTENT, PILLAR_NAMES } from '../lessonContent';
 import { useAction, useMutation, useQuery } from 'convex/react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../convex/_generated/api';
 
 const Lesson: React.FC = () => {
@@ -18,11 +18,7 @@ const Lesson: React.FC = () => {
     const [currentSection, setCurrentSection] = useState(0);
     
     // User context for persistence
-    const { user: clerkUser, isSignedIn } = useUser();
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
+    const { user, isSignedIn } = useAuth();
     
     // Billionaireable chat for interactive guidance
     const chat = useAction(api.billionaireable.chat);
@@ -164,11 +160,11 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
             setChatMessages(prev => [...prev, { role: 'model', text: response }]);
             
             // Save to Convex
-            if (convexUser) {
+            if (user) {
                 let convId = lessonConversationId;
                 if (!convId) {
                     convId = await createConversation({ 
-                        userId: convexUser._id,
+                        userId: user._id,
                         title: `${pillarName} - ${module.title}`
                     });
                     setLessonConversationId(convId);
@@ -176,7 +172,7 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
                 
                 await addMessage({
                     conversationId: convId as any,
-                    userId: convexUser._id,
+                    userId: user._id,
                     role: 'user',
                     content: userMessage,
                     skillId,
@@ -184,7 +180,7 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
                 });
                 await addMessage({
                     conversationId: convId as any,
-                    userId: convexUser._id,
+                    userId: user._id,
                     role: 'assistant',
                     content: response,
                     skillId,

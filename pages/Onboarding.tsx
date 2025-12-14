@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowRight, Check, Target, TrendingUp, Globe, Brain, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
-import { useMutation, useQuery } from 'convex/react';
+import { useAuth } from '../contexts/AuthContext';
+import { useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
 const FOCUS_AREAS = [
@@ -15,16 +15,11 @@ const FOCUS_AREAS = [
 
 const Onboarding: React.FC = () => {
     const navigate = useNavigate();
-    const { user: clerkUser, isSignedIn } = useUser();
+    const { user, isSignedIn } = useAuth();
     const [step, setStep] = useState(1);
     const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
 
-    // Convex
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
     const updateUser = useMutation(api.users.updateUserGoals);
 
     const handleAreaToggle = (areaId: string) => {
@@ -38,9 +33,9 @@ const Onboarding: React.FC = () => {
         
         try {
             // Save to Convex if signed in
-            if (convexUser) {
+            if (user) {
                 await updateUser({
-                    userId: convexUser._id,
+                    userId: user._id,
                     goals: selectedAreas,
                 });
             }

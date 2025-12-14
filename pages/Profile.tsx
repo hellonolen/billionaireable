@@ -1,6 +1,6 @@
 import React from 'react';
 import { LogOut, User, CreditCard, Shield, Bell, Crown, CheckCircle } from 'lucide-react';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { useNavigate } from 'react-router-dom';
@@ -8,18 +8,12 @@ import { useProgress } from '../contexts/ProgressContext';
 
 const Profile: React.FC = () => {
     const navigate = useNavigate();
-    const { user: clerkUser, isSignedIn } = useUser();
-    const { signOut } = useClerk();
+    const { user, isSignedIn, signOut } = useAuth();
     const { progress, getSkillCompletion } = useProgress();
-
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
 
     const subscription = useQuery(
         api.stripe.hasActiveSubscription,
-        convexUser?._id ? { userId: convexUser._id } : "skip"
+        user?._id ? { userId: user._id } : "skip"
     );
 
     const handleSignOut = async () => {
@@ -116,19 +110,19 @@ const Profile: React.FC = () => {
                         <div>
                             <p className="font-mono text-xs text-gray-400 uppercase mb-1">Name</p>
                             <p className="font-sans font-bold text-black dark:text-white">
-                                {clerkUser?.fullName || clerkUser?.firstName || 'Not set'}
+                                {user?.name || 'Not set'}
                             </p>
                         </div>
                         <div>
                             <p className="font-mono text-xs text-gray-400 uppercase mb-1">Email</p>
                             <p className="font-sans font-bold text-black dark:text-white">
-                                {clerkUser?.primaryEmailAddress?.emailAddress || 'Not set'}
+                                {user?.email || 'Not set'}
                             </p>
                         </div>
                         <div>
                             <p className="font-mono text-xs text-gray-400 uppercase mb-1">Member Since</p>
                             <p className="font-sans font-bold text-black dark:text-white">
-                                {formatDate(convexUser?.createdAt)}
+                                {formatDate(user?.createdAt)}
                             </p>
                         </div>
                     </div>
@@ -224,7 +218,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 {/* Focus Areas Card */}
-                {convexUser?.focusAreas && convexUser.focusAreas.length > 0 && (
+                {user?.focusAreas && user.focusAreas.length > 0 && (
                     <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-soft-xl border border-gray-200 dark:border-gray-800">
                         <div className="flex items-center gap-4 mb-6">
                             <div className="w-16 h-16 bg-art-orange/10 rounded-full flex items-center justify-center">
@@ -237,7 +231,7 @@ const Profile: React.FC = () => {
                         </div>
                         
                         <div className="flex flex-wrap gap-2">
-                            {convexUser.focusAreas.map((area, idx) => (
+                            {user.focusAreas.map((area, idx) => (
                                 <span 
                                     key={idx}
                                     className="px-3 py-1 bg-art-orange/10 text-art-orange rounded-full font-mono text-xs font-bold"

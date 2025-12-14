@@ -1,36 +1,29 @@
 import React, { useState } from 'react';
 import { Check, ArrowRight, Loader2, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
-import { useQuery, useMutation } from 'convex/react';
+import { useAuth } from '../contexts/AuthContext';
+import { useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
 const Pricing: React.FC = () => {
     const navigate = useNavigate();
-    const { user: clerkUser, isSignedIn } = useUser();
+    const { user, isSignedIn } = useAuth();
     const [isAnnual, setIsAnnual] = useState(true);
     const [loading, setLoading] = useState<string | null>(null);
 
-    // Convex
-    const convexUser = useQuery(
-        api.users.getUserByClerkId,
-        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
-    );
     const createApplication = useMutation(api.payments.createPaymentApplication);
 
     const handleSelectTier = async (tier: typeof tiers[0]) => {
-        if (!isSignedIn) {
-            navigate('/waitlist');
+        if (!isSignedIn || !user) {
+            navigate('/login');
             return;
         }
-        
-        if (!convexUser) return;
         
         setLoading(tier.name);
 
         try {
-            const result = await createApplication({
-                userId: convexUser._id,
+const result = await createApplication({
+                    userId: user._id,
                 tier: tier.name.toLowerCase(),
                 billingCycle: isAnnual ? 'annual' : 'monthly',
                 amount: isAnnual ? tier.annualPrice : tier.monthlyPrice,

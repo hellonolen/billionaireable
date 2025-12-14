@@ -1,14 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Search, Mic, MonitorPlay, LayoutGrid, Activity, Cpu, X, Banknote, ChevronDown, User, Lock, Globe, History, GraduationCap, TrendingUp, Target, Triangle, Sun, Moon } from 'lucide-react';
+import { Menu, LayoutGrid, Mic, X, Banknote, ChevronDown, User, Lock, Globe, History, Sun, Moon, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +10,8 @@ const Navigation: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
+  const { user, isSignedIn, signOut, isLoaded } = useAuth();
 
   const navItems = [
     { path: '/', label: 'HOME', icon: <LayoutGrid className="w-4 h-4" /> },
@@ -31,7 +26,7 @@ const Navigation: React.FC = () => {
     { path: '/vault', label: 'Vault', icon: <Lock className="w-4 h-4" /> },
     { path: '/community', label: 'The Network', icon: <Globe className="w-4 h-4" /> },
     { path: '/legacy-timeline', label: 'Legacy', icon: <History className="w-4 h-4" /> },
-    { path: '/admin', label: 'Admin', icon: <Lock className="w-4 h-4" /> },
+    ...(user?.isAdmin ? [{ path: '/admin', label: 'Admin', icon: <Lock className="w-4 h-4" /> }] : []),
   ];
 
   const isActive = (path: string) => {
@@ -50,6 +45,12 @@ const Navigation: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+    setIsProfileDropdownOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-art-offwhite/95 dark:bg-gray-900/95 backdrop-blur-lg border-b border-black/10 dark:border-white/10 shadow-sm transition-colors duration-300">
@@ -96,38 +97,35 @@ const Navigation: React.FC = () => {
             )}
           </button>
 
-          {/* Clerk Auth - Signed Out State */}
-          <SignedOut>
+          {/* Auth - Signed Out State */}
+          {isLoaded && !isSignedIn && (
             <div className="hidden md:flex items-center gap-2">
-              <SignInButton mode="modal">
-                <button className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
-                  Sign In
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase bg-black dark:bg-white text-white dark:text-black rounded-full hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-colors shadow-lg">
-                  Get Started
-                </button>
-              </SignUpButton>
+              <button 
+                onClick={() => navigate('/login')}
+                className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+              >
+                Sign In
+              </button>
+              <button 
+                onClick={() => navigate('/signup')}
+                className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase bg-black dark:bg-white text-white dark:text-black rounded-full hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-colors shadow-lg"
+              >
+                Get Started
+              </button>
             </div>
-          </SignedOut>
+          )}
 
-          {/* Clerk Auth - Signed In State */}
-          <SignedIn>
+          {/* Auth - Signed In State */}
+          {isLoaded && isSignedIn && user && (
             <div className="hidden md:block relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                 className="flex items-center gap-3 group"
               >
-                <div className="h-12 w-12 bg-white dark:bg-gray-800 p-1 rounded-[18px] shadow-soft-xl cursor-pointer group-hover:scale-105 transition-transform">
-                  <UserButton 
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-full h-full rounded-[14px]",
-                        userButtonPopoverCard: "rounded-[24px] shadow-2xl",
-                      }
-                    }}
-                  />
+                <div className="h-12 w-12 bg-gradient-to-br from-black to-gray-600 rounded-[18px] shadow-soft-xl cursor-pointer group-hover:scale-105 transition-transform flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">
+                    {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                  </span>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform hidden lg:block ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -135,6 +133,16 @@ const Navigation: React.FC = () => {
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-[24px] shadow-2xl border border-gray-100 dark:border-gray-700 py-2 animate-fade-in">
+                  {/* User Info */}
+                  <div className="px-6 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <p className="font-sans font-bold text-black dark:text-white truncate">
+                      {user.name || 'User'}
+                    </p>
+                    <p className="font-mono text-xs text-gray-500 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+
                   {profileMenuItems.map((item) => (
                     <button
                       key={item.path}
@@ -151,10 +159,20 @@ const Navigation: React.FC = () => {
                       <span className="font-sans text-sm font-bold">{item.label}</span>
                     </button>
                   ))}
+
+                  <div className="border-t border-gray-100 dark:border-gray-700 mt-2 pt-2">
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-3 px-6 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="font-sans text-sm font-bold">Sign Out</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-          </SignedIn>
+          )}
 
           {/* Mobile Menu Toggle */}
           <div className="flex xl:hidden">
@@ -173,33 +191,36 @@ const Navigation: React.FC = () => {
         <div className="xl:hidden border-t border-gray-100 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl absolute left-0 right-0 z-40 shadow-2xl">
           <div className="flex flex-col p-4 space-y-2">
             {/* Mobile Auth Buttons */}
-            <SignedOut>
+            {isLoaded && !isSignedIn && (
               <div className="flex gap-2 mb-4">
-                <SignInButton mode="modal">
-                  <button className="flex-1 py-3 text-sm font-bold uppercase text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-2xl">
-                    Sign In
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="flex-1 py-3 text-sm font-bold uppercase text-white bg-black dark:bg-white dark:text-black rounded-2xl">
-                    Get Started
-                  </button>
-                </SignUpButton>
+                <button 
+                  onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
+                  className="flex-1 py-3 text-sm font-bold uppercase text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-2xl"
+                >
+                  Sign In
+                </button>
+                <button 
+                  onClick={() => { navigate('/signup'); setIsMenuOpen(false); }}
+                  className="flex-1 py-3 text-sm font-bold uppercase text-white bg-black dark:bg-white dark:text-black rounded-2xl"
+                >
+                  Get Started
+                </button>
               </div>
-            </SignedOut>
+            )}
 
-            <SignedIn>
+            {isLoaded && isSignedIn && user && (
               <div className="flex items-center gap-3 p-4 mb-2 bg-gray-50 dark:bg-gray-800 rounded-2xl">
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-10 h-10 rounded-xl",
-                    }
-                  }}
-                />
-                <span className="font-bold text-black dark:text-white">Your Account</span>
+                <div className="w-10 h-10 bg-gradient-to-br from-black to-gray-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold">
+                    {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-bold text-black dark:text-white">{user.name || 'User'}</p>
+                  <p className="font-mono text-xs text-gray-500">{user.email}</p>
+                </div>
               </div>
-            </SignedIn>
+            )}
 
             {/* Mobile Menu Items */}
             {navItems.map((item) => (
@@ -217,22 +238,31 @@ const Navigation: React.FC = () => {
               </button>
             ))}
 
-            <SignedIn>
-              <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-              {profileMenuItems.map((item) => (
+            {isLoaded && isSignedIn && (
+              <>
+                <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                {profileMenuItems.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      navigate(item.path);
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 p-4 rounded-2xl text-lg font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    {item.icon}
+                    {item.label}
+                  </button>
+                ))}
                 <button
-                  key={item.path}
-                  onClick={() => {
-                    navigate(item.path);
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3 p-4 rounded-2xl text-lg font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => { handleSignOut(); setIsMenuOpen(false); }}
+                  className="flex items-center gap-3 p-4 rounded-2xl text-lg font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
-                  {item.icon}
-                  {item.label}
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
                 </button>
-              ))}
-            </SignedIn>
+              </>
+            )}
           </div>
         </div>
       )}
