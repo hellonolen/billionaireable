@@ -43,7 +43,7 @@ const ConciergeWidget: React.FC = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Text-to-Speech using Google Cloud TTS via Convex
+    // Text-to-Speech using Gemini's native audio via Convex
     const speak = useCallback(async (text: string) => {
         if (!voiceEnabled) return;
 
@@ -56,11 +56,11 @@ const ConciergeWidget: React.FC = () => {
         setIsSpeaking(true);
 
         try {
-            // Call Convex action to get audio from Google TTS
-            const audioBase64 = await textToSpeech({ text });
+            // Call Convex action to get audio from Gemini
+            const result = await textToSpeech({ text });
             
             // Create audio element and play
-            const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
+            const audio = new Audio(`data:${result.mimeType};base64,${result.audio}`);
             audioRef.current = audio;
             
             audio.onended = () => {
@@ -79,7 +79,7 @@ const ConciergeWidget: React.FC = () => {
             console.error('TTS error:', error);
             setIsSpeaking(false);
             
-            // Fallback to Web Speech API if Google TTS fails
+            // Fallback to Web Speech API if Gemini audio fails
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.rate = 0.95;

@@ -11,6 +11,7 @@
 import type * as billionaireable from "../billionaireable.js";
 import type * as conversations from "../conversations.js";
 import type * as progress from "../progress.js";
+import type * as speech from "../speech.js";
 import type * as users from "../users.js";
 
 import type {
@@ -23,6 +24,7 @@ declare const fullApi: ApiFromModules<{
   billionaireable: typeof billionaireable;
   conversations: typeof conversations;
   progress: typeof progress;
+  speech: typeof speech;
   users: typeof users;
 }>;
 

@@ -1,54 +1,67 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 
-// Text-to-Speech using Google Cloud TTS
+// Text-to-Speech using Gemini's native audio generation
 export const textToSpeech = action({
   args: {
     text: v.string(),
-    voice: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GEMINI_API_KEY; // Same API key works for Google Cloud services
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY not configured");
     }
 
-    // Use a premium male voice for Billionaireable - authoritative and clear
-    const voiceName = args.voice || "en-US-Neural2-J"; // Deep, professional male voice
-    
+    // Use Gemini 2.0 Flash with audio output
     const response = await fetch(
-      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          input: { text: args.text },
-          voice: {
-            languageCode: "en-US",
-            name: voiceName,
-          },
-          audioConfig: {
-            audioEncoding: "MP3",
-            pitch: 0,
-            speakingRate: 0.95, // Slightly slower for authority
-          },
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: `Read the following text aloud in a confident, authoritative voice: "${args.text}"` }]
+            }
+          ],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: {
+                  voiceName: "Kore" // Deep, professional voice
+                }
+              }
+            }
+          }
         }),
       }
     );
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("TTS API error:", error);
-      throw new Error(`Text-to-Speech API error: ${response.status}`);
+      console.error("Gemini Audio API error:", error);
+      throw new Error(`Gemini Audio API error: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // Returns base64 encoded audio
-    return data.audioContent;
+    // Extract audio from response
+    const audioPart = data.candidates?.[0]?.content?.parts?.find(
+      (part: any) => part.inlineData?.mimeType?.startsWith("audio/")
+    );
+
+    if (!audioPart) {
+      throw new Error("No audio in response");
+    }
+
+    return {
+      audio: audioPart.inlineData.data,
+      mimeType: audioPart.inlineData.mimeType
+    };
   },
 });
-
