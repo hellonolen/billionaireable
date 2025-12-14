@@ -26,12 +26,12 @@ const Home: React.FC = () => {
             {/* Hero Section */}
             <section className="relative overflow-hidden">
                 {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0 opacity-5 pointer-events-none">
                     <div className="absolute top-20 left-10 w-96 h-96 bg-art-orange rounded-full blur-3xl" />
                     <div className="absolute bottom-20 right-10 w-96 h-96 bg-art-blue rounded-full blur-3xl" />
                 </div>
 
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-12 pt-20 pb-32">
+                <div className="relative z-10 max-w-[1400px] mx-auto px-6 lg:px-12 pt-20 pb-32">
                     <div className="text-center max-w-4xl mx-auto">
                         {/* Badge */}
                         <motion.div
