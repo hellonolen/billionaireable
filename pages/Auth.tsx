@@ -87,6 +87,19 @@ const Auth: React.FC = () => {
                             <form onSubmit={handleRequestCode} className="space-y-4">
                                 <div>
                                     <label className="block font-mono text-xs font-bold uppercase text-gray-400 mb-2">
+                                        Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="Your name"
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl font-sans text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-mono text-xs font-bold uppercase text-gray-400 mb-2">
                                         Email
                                     </label>
                                     <input
@@ -95,19 +108,6 @@ const Auth: React.FC = () => {
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@example.com"
                                         required
-                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl font-sans text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block font-mono text-xs font-bold uppercase text-gray-400 mb-2">
-                                        Name <span className="text-gray-300">(optional)</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="Your name"
                                         className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl font-sans text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                                     />
                                 </div>
@@ -125,7 +125,7 @@ const Auth: React.FC = () => {
                                         <Loader2 className="w-5 h-5 animate-spin" />
                                     ) : (
                                         <>
-                                            Continue
+                                            Request a Code
                                             <ArrowRight className="w-4 h-4" />
                                         </>
                                     )}
