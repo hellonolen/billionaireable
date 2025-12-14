@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --color-art-black: #000000;
+  --color-art-offwhite: #E6E4DC;
+  --color-art-orange: #ff8c37;
+  --color-art-green: #34d399;
+  --color-art-blue: #3b82f6;
+  --color-art-yellow: #facc15;
+  --color-art-red: #ef4444;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-hard: 8px 8px 0px 0px #000000;
+  --shadow-hard-sm: 4px 4px 0px 0px #000000;
+
+  --animate-marquee: marquee 25s linear infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-art-offwhite);
+  color: var(--color-art-black);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-art-black);
+  border-left: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-art-orange);
+  border: 2px solid #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-art-blue);
+}
+
+.sketch-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: dash 3s ease-out forwards;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.text-stretch {
+  transform: scaleY(1.2);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
