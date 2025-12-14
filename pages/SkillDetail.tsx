@@ -227,7 +227,11 @@ const SkillDetail: React.FC = () => {
                                         {data.modules.map((module, index) => (
                                             <div
                                                 key={module.id}
-                                                onClick={() => setActiveModule(index)}
+                                                onClick={() => {
+                                                    if (module.status !== 'locked') {
+                                                        navigate(`/skills/${skillId}/${index + 1}`);
+                                                    }
+                                                }}
                                                 className={`group relative p-8 rounded-[32px] border-2 transition-all cursor-pointer overflow-hidden ${activeModule === index
                                                     ? 'border-black bg-white text-black shadow-2xl scale-[1.02]'
                                                     : 'border-gray-100 bg-white text-black hover:border-gray-300'

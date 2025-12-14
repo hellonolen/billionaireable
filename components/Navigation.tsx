@@ -31,7 +31,7 @@ const Navigation: React.FC = () => {
     { path: '/vault', label: 'Vault', icon: <Lock className="w-4 h-4" /> },
     { path: '/community', label: 'The Network', icon: <Globe className="w-4 h-4" /> },
     { path: '/legacy-timeline', label: 'Legacy', icon: <History className="w-4 h-4" /> },
-    { path: '/settings', label: 'Admin', icon: <Lock className="w-4 h-4" /> },
+    { path: '/admin', label: 'Admin', icon: <Lock className="w-4 h-4" /> },
   ];
 
   const isActive = (path: string) => {

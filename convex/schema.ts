@@ -18,6 +18,8 @@ export default defineSchema({
     onboardingComplete: v.optional(v.boolean()),
     // Current step in the program (1-12)
     currentPillar: v.optional(v.number()),
+    // Admin access
+    isAdmin: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -82,5 +84,19 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_stripe_customer", ["stripeCustomerId"]),
+
+  // Waitlist - people waiting to join
+  waitlist: defineTable({
+    email: v.string(),
+    name: v.optional(v.string()),
+    source: v.optional(v.string()), // where they came from
+    status: v.string(), // pending, invited, converted
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+    invitedAt: v.optional(v.number()),
+    convertedAt: v.optional(v.number()),
+  })
+    .index("by_email", ["email"])
+    .index("by_status", ["status"]),
 });
 

@@ -67,27 +67,51 @@ const Lesson: React.FC = () => {
 
     const color = getColorClass();
 
-    // Handle Listen button - uses browser speech synthesis for now
-    const handleListen = () => {
+    // Audio ref for Gemini voice
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const textToSpeech = useAction(api.speech.textToSpeech);
+
+    // Handle Listen button - uses Gemini TTS
+    const handleListen = async () => {
         if (isPlaying) {
-            window.speechSynthesis.cancel();
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
             setIsPlaying(false);
             return;
         }
 
         if (!lessonContent) return;
 
+        setIsLoading(true);
         setIsPlaying(true);
         
-        // Build the full lesson text
-        const fullText = `${lessonContent.intro} ${lessonContent.sections.map(s => `${s.heading}. ${s.content}`).join(' ')} Your directive: ${lessonContent.directive}`;
-        
-        const utterance = new SpeechSynthesisUtterance(fullText);
-        utterance.rate = 0.95;
-        utterance.onend = () => setIsPlaying(false);
-        utterance.onerror = () => setIsPlaying(false);
-        
-        window.speechSynthesis.speak(utterance);
+        try {
+            // Build the full lesson text
+            const fullText = `${lessonContent.intro} ${lessonContent.sections.map(s => `${s.heading}. ${s.content}`).join(' ')} Your directive: ${lessonContent.directive}`;
+            
+            // Call Gemini TTS
+            const result = await textToSpeech({ text: fullText });
+            
+            // Create audio from base64
+            const audioSrc = `data:${result.mimeType};base64,${result.audio}`;
+            const audio = new Audio(audioSrc);
+            audioRef.current = audio;
+            
+            audio.onended = () => setIsPlaying(false);
+            audio.onerror = () => {
+                console.error('Audio playback error');
+                setIsPlaying(false);
+            };
+            
+            await audio.play();
+        } catch (error) {
+            console.error('TTS error:', error);
+            setIsPlaying(false);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Handle chat with Billionaireable about this lesson
@@ -174,7 +198,7 @@ You guide. You don't teach. You already know. They follow. Keep responses to 2-3
                     {/* Lesson Content */}
                     <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 md:p-12 shadow-soft-xl border border-black/10 dark:border-white/10 mb-8">
                         {lessonContent ? (
-                            <div className="space-y-8">
+                            <div className="space-y-10">
                                 {/* Intro */}
                                 <p className="font-serif text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
                                     {lessonContent.intro}
@@ -182,18 +206,67 @@ You guide. You don't teach. You already know. They follow. Keep responses to 2-3
 
                                 {/* Sections */}
                                 {lessonContent.sections.map((section, idx) => (
-                                    <div key={idx} className="border-l-4 border-art-orange pl-6">
-                                        <h3 className="font-sans text-xl font-bold uppercase mb-3 dark:text-white">{section.heading}</h3>
-                                        <p className="font-serif text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                                    <div key={idx} className="border-l-4 border-art-orange pl-6 py-2">
+                                        <h3 className="font-sans text-xl font-bold uppercase mb-4 dark:text-white">{section.heading}</h3>
+                                        <p className="font-serif text-base text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
                                             {section.content}
                                         </p>
                                     </div>
                                 ))}
 
+                                {/* Case Study */}
+                                {'caseStudy' in lessonContent && lessonContent.caseStudy && (
+                                    <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700">
+                                        <h3 className="font-sans text-lg font-bold uppercase mb-2 text-art-orange">Case Study</h3>
+                                        <h4 className="font-sans text-2xl font-black mb-4 dark:text-white">{lessonContent.caseStudy.name}</h4>
+                                        <p className="font-serif text-base text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+                                            {lessonContent.caseStudy.story}
+                                        </p>
+                                        <div className="bg-black text-white rounded-xl p-4">
+                                            <p className="font-mono text-xs uppercase tracking-wider mb-1 text-gray-400">Key Lesson</p>
+                                            <p className="font-serif text-base">{lessonContent.caseStudy.lesson}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Framework */}
+                                {'framework' in lessonContent && lessonContent.framework && (
+                                    <div className={`bg-art-${color}/5 rounded-2xl p-8 border-2 border-art-${color}/20`}>
+                                        <h3 className="font-sans text-lg font-bold uppercase mb-2 text-art-orange">Framework</h3>
+                                        <h4 className="font-sans text-2xl font-black mb-6 dark:text-white">{lessonContent.framework.name}</h4>
+                                        <div className="space-y-4">
+                                            {lessonContent.framework.steps.map((step, idx) => (
+                                                <div key={idx} className="flex items-start gap-4">
+                                                    <div className={`w-8 h-8 rounded-full bg-art-${color} text-white flex items-center justify-center font-bold text-sm flex-shrink-0`}>
+                                                        {idx + 1}
+                                                    </div>
+                                                    <p className="font-serif text-base text-gray-700 dark:text-gray-300 pt-1">{step}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Exercise */}
+                                {'exercise' in lessonContent && lessonContent.exercise && (
+                                    <div className="bg-black text-white rounded-2xl p-8">
+                                        <h3 className="font-sans text-lg font-bold uppercase mb-2 text-art-orange">Exercise</h3>
+                                        <p className="font-serif text-xl mb-6">{lessonContent.exercise.instruction}</p>
+                                        <div className="space-y-4">
+                                            {lessonContent.exercise.prompts.map((prompt, idx) => (
+                                                <div key={idx} className="bg-white/10 rounded-xl p-4">
+                                                    <p className="font-mono text-xs uppercase tracking-wider mb-2 text-gray-400">Prompt {idx + 1}</p>
+                                                    <p className="font-serif text-base">{prompt}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Directive */}
-                                <div className={`bg-art-${color}/10 rounded-2xl p-6`}>
-                                    <h3 className="font-sans text-lg font-bold uppercase mb-2 dark:text-white">Your Directive</h3>
-                                    <p className="font-serif text-base text-gray-700 dark:text-gray-300">
+                                <div className={`bg-art-${color} rounded-2xl p-8 text-white`}>
+                                    <h3 className="font-sans text-lg font-bold uppercase mb-3">Your Directive</h3>
+                                    <p className="font-serif text-xl leading-relaxed">
                                         {lessonContent.directive}
                                     </p>
                                 </div>

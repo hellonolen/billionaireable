@@ -36,6 +36,7 @@ import Progress from './pages/Progress';
 import Lesson from './pages/Lesson';
 import Waitlist from './pages/Waitlist';
 import AdminDashboard from './pages/AdminDashboard';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 
 import Footer from './components/Footer';
 import ConciergeWidget from './components/ConciergeWidget';
@@ -87,7 +88,7 @@ const App: React.FC = () => {
 
               {/* New Pages */}
               <Route path="/command-center" element={<PageTransition><CommandCenter /></PageTransition>} />
-              <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
+              <Route path="/admin" element={<ProtectedAdminRoute><PageTransition><AdminDashboard /></PageTransition></ProtectedAdminRoute>} />
               <Route path="/waitlist" element={<PageTransition><Waitlist /></PageTransition>} />
               <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
               <Route path="/community" element={<PageTransition><Community /></PageTransition>} />

@@ -99,3 +99,41 @@ export const updateUserGoals = mutation({
   },
 });
 
+// Check if user is admin
+export const isUserAdmin = query({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+    
+    return user?.isAdmin === true;
+  },
+});
+
+// Set user as admin (for initial setup - run from Convex dashboard)
+export const setUserAsAdmin = mutation({
+  args: { 
+    email: v.string(),
+    isAdmin: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+    
+    if (!user) {
+      throw new Error("User not found with that email");
+    }
+    
+    await ctx.db.patch(user._id, {
+      isAdmin: args.isAdmin,
+      updatedAt: Date.now(),
+    });
+    
+    return { success: true, userId: user._id };
+  },
+});
+
