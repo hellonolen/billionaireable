@@ -4,7 +4,6 @@ import { v } from "convex/values";
 export const textToSpeech = action({
     args: {
         text: v.string(),
-        voiceId: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -13,13 +12,8 @@ export const textToSpeech = action({
             throw new Error("ELEVENLABS_API_KEY not configured");
         }
         
-        // Default to "Adam" - deep, authoritative male voice
-        // Other good options:
-        // "pNInz6obpgDQGcFmaJgB" - Adam (deep, authoritative)
-        // "ErXwobaYiN019PkySvjV" - Antoni (calm, confident)
-        // "VR6AewLTigWG4xSOukaG" - Arnold (strong, commanding)
-        // "yoZ06aMxZJJ28mfd3POQ" - Sam (confident, clear)
-        const voiceId = args.voiceId || "pNInz6obpgDQGcFmaJgB"; // Adam
+        // Rachel - clear, professional female voice (commonly available)
+        const voiceId = "21m00Tcm4TlvDq8ikWAM";
         
         const response = await fetch(
             `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -36,17 +30,15 @@ export const textToSpeech = action({
                     voice_settings: {
                         stability: 0.5,
                         similarity_boost: 0.75,
-                        style: 0.5,
-                        use_speaker_boost: true,
                     },
                 }),
             }
         );
         
         if (!response.ok) {
-            const error = await response.text();
-            console.error("ElevenLabs error:", error);
-            throw new Error(`ElevenLabs API error: ${response.status}`);
+            const errorText = await response.text();
+            console.error("ElevenLabs error:", response.status, errorText);
+            throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
         }
         
         const audioBuffer = await response.arrayBuffer();
@@ -58,4 +50,3 @@ export const textToSpeech = action({
         };
     },
 });
-
