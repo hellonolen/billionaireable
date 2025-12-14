@@ -113,4 +113,84 @@ export const getUser = query({
   },
 });
 
+// Get subscription by Stripe customer ID (for webhooks)
+export const getSubscriptionByCustomerId = query({
+  args: { stripeCustomerId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("subscriptions")
+      .withIndex("by_stripe_customer", (q) => q.eq("stripeCustomerId", args.stripeCustomerId))
+      .first();
+  },
+});
+
+// Update just the status of a subscription
+export const updateSubscriptionStatus = mutation({
+  args: {
+    subscriptionId: v.id("subscriptions"),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.subscriptionId, {
+      status: args.status,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Check if user has active subscription
+export const hasActiveSubscription = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+    
+    if (!subscription) return { hasSubscription: false, plan: null };
+    
+    const isActive = subscription.status === "active" || subscription.status === "trialing";
+    const isNotExpired = subscription.currentPeriodEnd > Date.now();
+    
+    return {
+      hasSubscription: isActive && isNotExpired,
+      plan: subscription.plan,
+      status: subscription.status,
+      expiresAt: subscription.currentPeriodEnd,
+    };
+  },
+});
+// Get subscription by Stripe customer ID
+export const getSubscriptionByCustomer = query({
+  args: { stripeCustomerId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("subscriptions")
+      .withIndex("by_stripe_customer", (q) => q.eq("stripeCustomerId", args.stripeCustomerId))
+      .first();
+  },
+});
+
+// Check if user has active subscription
+export const hasActiveSubscription = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+    
+    if (!subscription) return { hasSubscription: false, plan: null };
+    
+    const isActive = subscription.status === "active" || 
+                     subscription.status === "trialing";
+    const isNotExpired = subscription.currentPeriodEnd > Date.now();
+    
+    return {
+      hasSubscription: isActive && isNotExpired,
+      plan: isActive && isNotExpired ? subscription.plan : null,
+      status: subscription.status,
+    };
+  },
+});
 

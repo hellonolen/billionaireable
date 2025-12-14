@@ -5,14 +5,19 @@ import { useUser } from '@clerk/clerk-react';
 import { useAction, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
-// Stripe Price IDs - set these in Stripe Dashboard
+// Stripe Price IDs - REPLACE THESE with your real Stripe price IDs
+// To get these:
+// 1. Go to Stripe Dashboard > Products
+// 2. Create products for Founder, Scaler, Owner (monthly & annual variants)
+// 3. Copy the price IDs (start with "price_")
+// 4. Set STRIPE_SECRET_KEY in Convex environment variables
 const PRICE_IDS = {
-    pathfinder_monthly: 'price_pathfinder_monthly', // Replace with real Stripe price IDs
-    pathfinder_annual: 'price_pathfinder_annual',
-    ascendant_monthly: 'price_ascendant_monthly',
-    ascendant_annual: 'price_ascendant_annual',
-    principal_monthly: 'price_principal_monthly',
-    principal_annual: 'price_principal_annual',
+    founder_monthly: process.env.STRIPE_FOUNDER_MONTHLY || 'price_founder_monthly',
+    founder_annual: process.env.STRIPE_FOUNDER_ANNUAL || 'price_founder_annual',
+    scaler_monthly: process.env.STRIPE_SCALER_MONTHLY || 'price_scaler_monthly',
+    scaler_annual: process.env.STRIPE_SCALER_ANNUAL || 'price_scaler_annual',
+    owner_monthly: process.env.STRIPE_OWNER_MONTHLY || 'price_owner_monthly',
+    owner_annual: process.env.STRIPE_OWNER_ANNUAL || 'price_owner_annual',
 };
 
 const Pricing: React.FC = () => {
@@ -45,8 +50,8 @@ const Pricing: React.FC = () => {
             const { url } = await createCheckout({
                 priceId,
                 userId: convexUser._id,
-                successUrl: `${window.location.origin}/dashboard?success=true`,
-                cancelUrl: `${window.location.origin}/pricing?canceled=true`,
+                successUrl: `${window.location.origin}/payment-success`,
+                cancelUrl: `${window.location.origin}/payment-canceled`,
             });
 
             if (url) {
@@ -68,8 +73,8 @@ const Pricing: React.FC = () => {
             monthlyPrice: 497,
             annualPrice: 4997,
             annualSavings: 967,
-            monthlyPriceId: PRICE_IDS.pathfinder_monthly,
-            annualPriceId: PRICE_IDS.pathfinder_annual,
+            monthlyPriceId: PRICE_IDS.founder_monthly,
+            annualPriceId: PRICE_IDS.founder_annual,
             features: [
                 'Unlimited Billionaireable access',
                 'The 12 Pillars curriculum',
@@ -89,8 +94,8 @@ const Pricing: React.FC = () => {
             monthlyPrice: 1497,
             annualPrice: 14997,
             annualSavings: 2967,
-            monthlyPriceId: PRICE_IDS.ascendant_monthly,
-            annualPriceId: PRICE_IDS.ascendant_annual,
+            monthlyPriceId: PRICE_IDS.scaler_monthly,
+            annualPriceId: PRICE_IDS.scaler_annual,
             features: [
                 'Everything in Founder',
                 'Time Arbitrage mastery',
@@ -112,8 +117,8 @@ const Pricing: React.FC = () => {
             monthlyPrice: 4997,
             annualPrice: 49997,
             annualSavings: 9967,
-            monthlyPriceId: PRICE_IDS.principal_monthly,
-            annualPriceId: PRICE_IDS.principal_annual,
+            monthlyPriceId: PRICE_IDS.owner_monthly,
+            annualPriceId: PRICE_IDS.owner_annual,
             features: [
                 'Everything in Scaler',
                 'Family Office frameworks',
@@ -123,10 +128,11 @@ const Pricing: React.FC = () => {
                 'Ascendance program',
                 'Complete playbook library',
             ],
-            cta: 'Start Now',
+            cta: 'Apply Now',
             popular: false,
             color: 'border-gray-200',
             barColor: 'bg-art-blue',
+            requiresApplication: true,
         },
     ];
 

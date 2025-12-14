@@ -73,10 +73,10 @@ const Home: React.FC = () => {
                             className="flex flex-col sm:flex-row items-center justify-center gap-4"
                         >
                             <button
-                                onClick={() => navigate('/waitlist')}
+                                onClick={() => navigate('/free-assessment')}
                                 className="group flex items-center gap-3 bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-all shadow-2xl"
                             >
-                                Start Your Transformation
+                                Take Free Assessment
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button

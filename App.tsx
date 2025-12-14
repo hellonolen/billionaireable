@@ -37,6 +37,10 @@ import Lesson from './pages/Lesson';
 import Waitlist from './pages/Waitlist';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
+import ProtectedSubscriberRoute from './components/ProtectedSubscriberRoute';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentCanceled from './pages/PaymentCanceled';
+import FreeAssessment from './pages/FreeAssessment';
 
 import Footer from './components/Footer';
 import ConciergeWidget from './components/ConciergeWidget';
@@ -78,8 +82,8 @@ const App: React.FC = () => {
               <Route path="/integrations" element={<PageTransition><Integrations /></PageTransition>} />
               <Route path="/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
               <Route path="/assessment" element={<PageTransition><Assessment /></PageTransition>} />
-              <Route path="/skills/:skillId" element={<PageTransition><SkillDetail /></PageTransition>} />
-              <Route path="/skills/:skillId/:moduleId" element={<PageTransition><Lesson /></PageTransition>} />
+              <Route path="/skills/:skillId" element={<ProtectedSubscriberRoute allowFreePreview><PageTransition><SkillDetail /></PageTransition></ProtectedSubscriberRoute>} />
+              <Route path="/skills/:skillId/:moduleId" element={<ProtectedSubscriberRoute allowFreePreview><PageTransition><Lesson /></PageTransition></ProtectedSubscriberRoute>} />
               <Route path="/decisions" element={<PageTransition><Decisions /></PageTransition>} />
               <Route path="/levels" element={<PageTransition><Levels /></PageTransition>} />
               <Route path="/progress" element={<PageTransition><Progress /></PageTransition>} />
@@ -93,6 +97,9 @@ const App: React.FC = () => {
               <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
               <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
               <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />
+              <Route path="/payment-success" element={<PageTransition><PaymentSuccess /></PageTransition>} />
+              <Route path="/payment-canceled" element={<PageTransition><PaymentCanceled /></PageTransition>} />
+              <Route path="/free-assessment" element={<PageTransition><FreeAssessment /></PageTransition>} />
               <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
               <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
               <Route path="/disclaimer" element={<PageTransition><Disclaimer /></PageTransition>} />
