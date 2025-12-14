@@ -133,18 +133,57 @@ ${user.goals ? `- Goals: ${user.goals}` : ""}
 `;
   }
 
-  // Build progress summary
-  let progressSummary = "";
-  if (progress.length > 0) {
-    const completedSkills = progress.filter((p) => p.completedAt).length;
-    const inProgressSkills = progress.filter((p) => !p.completedAt && p.modulesCompleted > 0).length;
-    progressSummary = `
-USER'S PROGRESS:
-- Skills completed: ${completedSkills}/12
-- Skills in progress: ${inProgressSkills}
-- Focus areas: ${progress.map((p) => p.skillId).join(", ")}
-`;
+  // Build progress summary - determine current Pillar
+  const pillarOrder = [
+    'reality-distortion',
+    'liquidity-allocation', 
+    'holding-co',
+    'time-arbitrage',
+    'bio-availability',
+    'political-capital',
+    'syndicate',
+    'family-office',
+    'dynasty-design',
+    'sovereign-flags',
+    'asymmetric-bets',
+    'ascendance'
+  ];
+  
+  const pillarNames: Record<string, string> = {
+    'reality-distortion': 'Reality Distortion',
+    'liquidity-allocation': 'Liquidity & Allocation',
+    'holding-co': 'The Holding Co',
+    'time-arbitrage': 'Time Arbitrage',
+    'bio-availability': 'Bio-Availability',
+    'political-capital': 'Political Capital',
+    'syndicate': 'The Syndicate',
+    'family-office': 'Family Office',
+    'dynasty-design': 'Dynasty Design',
+    'sovereign-flags': 'Sovereign Flags',
+    'asymmetric-bets': 'Asymmetric Bets',
+    'ascendance': 'Ascendance'
+  };
+
+  // Find current pillar (first incomplete one)
+  const completedPillars = progress.filter((p) => p.completedAt).map((p) => p.skillId);
+  let currentPillarIndex = 0;
+  for (let i = 0; i < pillarOrder.length; i++) {
+    if (!completedPillars.includes(pillarOrder[i])) {
+      currentPillarIndex = i;
+      break;
+    }
   }
+  const currentPillar = pillarOrder[currentPillarIndex];
+  const currentPillarName = pillarNames[currentPillar] || currentPillar;
+  const pillarNumber = currentPillarIndex + 1;
+
+  let progressSummary = `
+CURRENT STEP:
+- They are on Pillar ${pillarNumber}: ${currentPillarName}
+- Pillars completed: ${completedPillars.length}/12
+- Always reference their current Pillar when bringing them back to the path.
+- Guide them through Pillar ${pillarNumber} before moving to the next.
+`;
 
   return `You are Billionaireable.
 
