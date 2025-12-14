@@ -23,7 +23,7 @@ const CardModal: React.FC<CardModalProps> = ({ card, onClose }) => {
 
     const handleSendMessage = () => {
         if (chatMessage.trim()) {
-            // TODO: Integrate with AI
+            // TODO: Integrate with Billionaireable
             console.log('Sending message:', chatMessage);
             setChatMessage('');
         }
@@ -91,19 +91,19 @@ const CardModal: React.FC<CardModalProps> = ({ card, onClose }) => {
                             </div>
                         </div>
 
-                        {/* Right: AI Chat */}
+                        {/* Right: Chat */}
                         <div className="flex flex-col">
                             <h3 className="font-sans text-xl font-bold uppercase mb-6 flex items-center gap-2">
                                 <MessageCircle className="w-5 h-5" />
-                                Ask AI
+                                Ask Billionaireable
                             </h3>
 
                             {/* Chat Messages */}
                             <div className="flex-1 bg-gray-50 rounded-2xl p-6 mb-4 min-h-[300px] max-h-[400px] overflow-y-auto">
                                 <div className="space-y-4">
                                     <div className="flex gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-art-blue flex items-center justify-center text-white flex-shrink-0">
-                                            AI
+                                        <div className="w-8 h-8 rounded-full bg-art-blue flex items-center justify-center text-white flex-shrink-0 font-black text-sm">
+                                            B
                                         </div>
                                         <div className="bg-white rounded-2xl p-4 flex-1">
                                             <p className="text-sm">How can I help you with {card.title.toLowerCase()}? I can update data, analyze trends, or answer questions.</p>

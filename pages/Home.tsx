@@ -247,7 +247,7 @@ const Home: React.FC = () => {
                     <div className="max-w-4xl mx-auto">
                         <div className="bg-art-orange rounded-[32px] p-12 md:p-16 text-center">
                             <h2 className="font-serif text-3xl md:text-5xl font-black text-black tracking-tighter mb-6 leading-tight">
-                                "This is what billionaires do. Now you do it too."
+                                "This is what billionaires do."
                             </h2>
                             <p className="font-serif text-lg text-black/70 mb-10 max-w-2xl mx-auto">
                                 That changes now.

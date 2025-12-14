@@ -208,7 +208,7 @@ const Onboarding: React.FC = () => {
                     </div>
                 )}
 
-                {/* Step 5: Meet Your AI */}
+                {/* Step 5: Meet Billionaireable */}
                 {step === 5 && (
                     <div className="animate-fade-in">
                         <div className="text-center mb-12">
@@ -216,7 +216,7 @@ const Onboarding: React.FC = () => {
                                 <div className="w-12 h-12 bg-art-orange rounded-full flex items-center justify-center"><span className="font-serif text-2xl font-black text-black">B</span></div>
                             </div>
                             <h2 className="font-serif text-5xl font-black text-black tracking-tighter mb-4">
-                                Meet Your AI Concierge
+                                Meet Billionaireable
                             </h2>
                             <p className="font-serif text-xl text-gray-600 mb-8">
                                 I'll guide you through your transformation.
@@ -229,7 +229,7 @@ const Onboarding: React.FC = () => {
                                 Let's discover where you are on the path to becoming <span className="font-bold text-black">Billionaireable</span>."
                             </p>
                             <p className="font-mono text-xs text-gray-400 uppercase">
-                                — Your AI Concierge
+                                — Billionaireable
                             </p>
                         </div>
 

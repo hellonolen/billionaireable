@@ -100,7 +100,7 @@ const ConciergeWidget: React.FC = () => {
         try {
             let aiResponse: string;
 
-            // If user is signed in and we have their Convex user, use the full AI with memory
+            // If user is signed in and we have their Convex user, use full Billionaireable with memory
             if (isSignedIn && convexUser) {
                 // Create a conversation if we don't have one
                 let convId = conversationId;
@@ -120,13 +120,13 @@ const ConciergeWidget: React.FC = () => {
                     content: userMessage,
                 });
 
-                // Call Billionaireable AI with full context
+                // Call Billionaireable with full context
                 aiResponse = await chat({
                     userId: convexUser._id,
                     message: userMessage,
                 });
 
-                // Save AI response to Convex
+                // Save response to Convex
                 await addMessage({
                     conversationId: convId as any,
                     userId: convexUser._id,

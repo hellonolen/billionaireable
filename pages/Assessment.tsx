@@ -52,7 +52,7 @@ const QUESTIONS: Question[] = [
             { value: 1, label: 'News/headlines' },
             { value: 2, label: 'Newsletters + basic alerts' },
             { value: 3, label: 'Bloomberg/trading platform' },
-            { value: 4, label: 'AI-powered real-time intelligence' },
+            { value: 4, label: 'Real-time intelligence systems' },
         ]
     },
 
@@ -62,7 +62,7 @@ const QUESTIONS: Question[] = [
             { value: 1, label: 'Casual reading' },
             { value: 2, label: 'Curated newsletters' },
             { value: 3, label: 'Private networks/masterminds' },
-            { value: 4, label: 'Personal board of advisors + AI synthesis' },
+            { value: 4, label: 'Personal board of advisors with synthesis' },
         ]
     },
 
@@ -72,7 +72,7 @@ const QUESTIONS: Question[] = [
             { value: 1, label: 'Rarely / when problems arise' },
             { value: 2, label: 'Annually' },
             { value: 3, label: 'Quarterly with advisors' },
-            { value: 4, label: 'Weekly sessions with AI-assisted planning' },
+            { value: 4, label: 'Weekly sessions with strategic planning' },
         ]
     },
 ];

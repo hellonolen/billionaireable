@@ -10,7 +10,7 @@ const VAULT_CARDS: CardData[] = [
         id: 'pre-ipo-1',
         title: 'Series D Allocation',
         type: 'curriculum',
-        description: 'AI Infrastructure',
+        description: 'Infrastructure',
         colorTheme: 'blue',
         previewMetrics: [
             { label: 'Valuation', value: '$8.5B' },
