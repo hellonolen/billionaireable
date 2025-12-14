@@ -2,6 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Menu, Search, Mic, MonitorPlay, LayoutGrid, Activity, Cpu, X, Banknote, ChevronDown, User, Lock, Globe, History, GraduationCap, TrendingUp, Target, Triangle, Sun, Moon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from '@clerk/clerk-react';
 
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -74,7 +81,7 @@ const Navigation: React.FC = () => {
           ))}
         </div>
 
-        {/* Right Side - Profile Dropdown */}
+        {/* Right Side - Auth & Profile */}
         <div className="flex items-center gap-4">
           {/* Dark Mode Toggle */}
           <button
@@ -89,51 +96,71 @@ const Navigation: React.FC = () => {
             )}
           </button>
 
-          {/* Desktop Profile Dropdown */}
-          <div className="hidden md:block relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              className="flex items-center gap-3 group"
-            >
-              <div className="text-right hidden lg:block">
-                <p className="text-sm font-black uppercase text-black leading-none">Alex</p>
-              </div>
-              <div className="h-12 w-12 bg-white p-1 rounded-[18px] shadow-soft-xl cursor-pointer group-hover:scale-105 transition-transform">
-                <div className="w-full h-full bg-gray-200 rounded-[14px] overflow-hidden flex items-center justify-center">
-                  <User className="w-6 h-6 text-gray-600" />
-                </div>
-              </div>
-              <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform hidden lg:block ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+          {/* Clerk Auth - Signed Out State */}
+          <SignedOut>
+            <div className="hidden md:flex items-center gap-2">
+              <SignInButton mode="modal">
+                <button className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase bg-black dark:bg-white text-white dark:text-black rounded-full hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-colors shadow-lg">
+                  Get Started
+                </button>
+              </SignUpButton>
+            </div>
+          </SignedOut>
 
-            {/* Dropdown Menu */}
-            {isProfileDropdownOpen && (
-              <div className="absolute right-0 mt-3 w-56 bg-white rounded-[24px] shadow-2xl border border-gray-100 py-2 animate-fade-in">
-                {profileMenuItems.map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      navigate(item.path);
-                      setIsProfileDropdownOpen(false);
+          {/* Clerk Auth - Signed In State */}
+          <SignedIn>
+            <div className="hidden md:block relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center gap-3 group"
+              >
+                <div className="h-12 w-12 bg-white dark:bg-gray-800 p-1 rounded-[18px] shadow-soft-xl cursor-pointer group-hover:scale-105 transition-transform">
+                  <UserButton 
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-full h-full rounded-[14px]",
+                        userButtonPopoverCard: "rounded-[24px] shadow-2xl",
+                      }
                     }}
-                    className={`w-full flex items-center gap-3 px-6 py-3 transition-colors ${isActive(item.path)
-                      ? 'bg-art-orange/10 text-art-orange'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-black'
-                      }`}
-                  >
-                    {item.icon}
-                    <span className="font-sans text-sm font-bold">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+                  />
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform hidden lg:block ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-[24px] shadow-2xl border border-gray-100 dark:border-gray-700 py-2 animate-fade-in">
+                  {profileMenuItems.map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        navigate(item.path);
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-6 py-3 transition-colors ${isActive(item.path)
+                        ? 'bg-art-orange/10 text-art-orange'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white'
+                        }`}
+                    >
+                      {item.icon}
+                      <span className="font-sans text-sm font-bold">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </SignedIn>
 
           {/* Mobile Menu Toggle */}
           <div className="flex xl:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-3 text-black bg-white rounded-full shadow-soft-xl hover:bg-gray-100 transition-colors"
+              className="p-3 text-black dark:text-white bg-white dark:bg-gray-800 rounded-full shadow-soft-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -143,8 +170,37 @@ const Navigation: React.FC = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="xl:hidden border-t border-gray-100 bg-white/95 backdrop-blur-xl absolute left-0 right-0 z-40 shadow-2xl">
+        <div className="xl:hidden border-t border-gray-100 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl absolute left-0 right-0 z-40 shadow-2xl">
           <div className="flex flex-col p-4 space-y-2">
+            {/* Mobile Auth Buttons */}
+            <SignedOut>
+              <div className="flex gap-2 mb-4">
+                <SignInButton mode="modal">
+                  <button className="flex-1 py-3 text-sm font-bold uppercase text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-2xl">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="flex-1 py-3 text-sm font-bold uppercase text-white bg-black dark:bg-white dark:text-black rounded-2xl">
+                    Get Started
+                  </button>
+                </SignUpButton>
+              </div>
+            </SignedOut>
+
+            <SignedIn>
+              <div className="flex items-center gap-3 p-4 mb-2 bg-gray-50 dark:bg-gray-800 rounded-2xl">
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-10 h-10 rounded-xl",
+                    }
+                  }}
+                />
+                <span className="font-bold text-black dark:text-white">Your Account</span>
+              </div>
+            </SignedIn>
+
             {/* Mobile Menu Items */}
             {navItems.map((item) => (
               <button
@@ -153,7 +209,7 @@ const Navigation: React.FC = () => {
                   navigate(item.path);
                   setIsMenuOpen(false);
                 }}
-                className={`flex items-center gap-3 p-4 rounded-2xl text-lg font-bold uppercase transition-all ${isActive(item.path) ? 'bg-art-orange text-white shadow-lg' : 'text-gray-500 hover:bg-gray-50'
+                className={`flex items-center gap-3 p-4 rounded-2xl text-lg font-bold uppercase transition-all ${isActive(item.path) ? 'bg-art-orange text-white shadow-lg' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
               >
                 {item.icon}
@@ -161,22 +217,22 @@ const Navigation: React.FC = () => {
               </button>
             ))}
 
-            <div className="border-t border-gray-200 my-2"></div>
-
-            <div className="border-t border-gray-200 my-2"></div>
-            {profileMenuItems.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center gap-3 p-4 rounded-2xl text-lg font-bold text-gray-500 hover:bg-gray-50"
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
+            <SignedIn>
+              <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+              {profileMenuItems.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 p-4 rounded-2xl text-lg font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+            </SignedIn>
           </div>
         </div>
       )}
