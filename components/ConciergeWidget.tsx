@@ -6,7 +6,7 @@ interface Message {
     text: string;
 }
 
-const SYSTEM_PROMPT = `You are Billionaire-able, an elite AI advisor helping high-net-worth individuals and ambitious entrepreneurs on their path to building generational wealth. You embody the wisdom of Warren Buffett, the vision of Elon Musk, and the strategic thinking of Ray Dalio.
+const SYSTEM_PROMPT = `You are Billionaireable, an elite AI advisor helping high-net-worth individuals and ambitious entrepreneurs on their path to building generational wealth. You embody the wisdom of Warren Buffett, the vision of Elon Musk, and the strategic thinking of Ray Dalio.
 
 Your personality:
 - Confident but not arrogant
@@ -32,7 +32,7 @@ Remember: The second billion is inevitable. The first one is engineered.`;
 const ConciergeWidget: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'ai', text: 'Welcome back. I\'m Billionaire-able, your strategic advisor on the path to generational wealth. What\'s on your mind today?' }
+        { role: 'ai', text: 'Welcome back. I\'m Billionaireable, your strategic advisor on the path to generational wealth. What\'s on your mind today?' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -208,7 +208,7 @@ const ConciergeWidget: React.FC = () => {
                             <Sparkles className={`w-5 h-5 text-black ${isSpeaking ? 'animate-pulse' : ''}`} />
                         </div>
                         <div>
-                            <h3 className="font-black font-sans text-sm tracking-tight">Billionaire-able</h3>
+                            <h3 className="font-black font-sans text-sm tracking-tight">Billionaireable</h3>
                             <p className="font-mono text-[10px] text-gray-400 uppercase">
                                 {isLoading ? 'Thinking...' : isSpeaking ? 'Speaking...' : 'Strategic Advisor'}
                             </p>

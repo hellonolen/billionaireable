@@ -12,15 +12,11 @@ const Navigation: React.FC = () => {
   const { theme, toggleTheme, isDark } = useTheme();
 
   const navItems = [
-    { path: '/', label: 'DASHBOARD', icon: <LayoutGrid className="w-4 h-4" /> },
-    { path: '/wealth', label: 'WEALTH', icon: <Banknote className="w-4 h-4" /> },
-    { path: '/markets', label: 'MARKETS', icon: <Activity className="w-4 h-4" /> },
-    { path: '/intelligence', label: 'INTELLIGENCE', icon: <MonitorPlay className="w-4 h-4" /> },
+    { path: '/', label: 'HOME', icon: <LayoutGrid className="w-4 h-4" /> },
+    { path: '/dashboard', label: 'DASHBOARD', icon: <LayoutGrid className="w-4 h-4" /> },
     { path: '/strategy', label: 'STRATEGY', icon: <Mic className="w-4 h-4" /> },
-    { path: '/bio-self', label: 'BIO-SELF', icon: <Cpu className="w-4 h-4" /> },
     { path: '/pricing', label: 'PRICING', icon: <Banknote className="w-4 h-4" /> },
     { path: '/waitlist', label: 'WAITLIST', icon: <Lock className="w-4 h-4" /> },
-    { path: '/admin', label: 'ADMIN', icon: <Lock className="w-4 h-4" /> },
   ];
 
   const profileMenuItems = [

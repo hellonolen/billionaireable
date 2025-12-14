@@ -5,6 +5,7 @@ import { ProgressProvider } from './contexts/ProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Navigation from './components/Navigation';
 import PageTransition from './components/PageTransition';
+import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Markets from './pages/Markets';
 import BioSelf from './pages/BioSelf';
@@ -60,7 +61,8 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
+              <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+              <Route path="/home" element={<PageTransition><Home /></PageTransition>} />
               <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
               <Route path="/wealth" element={<PageTransition><Wealth /></PageTransition>} />
               <Route path="/markets" element={<PageTransition><Markets /></PageTransition>} />

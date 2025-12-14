@@ -26,7 +26,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 2010,
     story: 'Two brothers frustrated with online payment complexity built a 7-line integration that changed fintech forever.',
     businessModel: 'API-first platform charging 2.9% + 30¢ per transaction. Focus on developer experience over enterprise sales.',
-    impact: '$95B valuation, processing $640B annually for millions of businesses worldwide.',
+    impact: '$65B+ valuation, processing $1T+ annually for millions of businesses worldwide.',
   },
   {
     id: '2',
@@ -37,8 +37,8 @@ const STRATEGY_CASES: StrategyCase[] = [
     category: 'Scaler',
     year: 2007,
     story: 'From DVD-by-mail to streaming giant. Bet the company on original content when everyone said it was impossible.',
-    businessModel: 'Subscription model ($15.49/month). Own customer relationship, license content, then produce originals.',
-    impact: '$150B market cap, 230M subscribers, revolutionized entertainment industry.',
+    businessModel: 'Tiered subscription model ($6.99-$22.99/month). Own customer relationship, license content, then produce originals. Ad-supported tier for scale.',
+    impact: '$280B+ market cap, 280M+ subscribers, revolutionized entertainment industry.',
   },
   {
     id: '3',
@@ -50,7 +50,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 2003,
     story: 'Told EVs were impossible. Built batteries, motors, software, charging network, and energy products in-house.',
     businessModel: 'Direct-to-consumer sales. No dealerships. Software updates add value post-purchase. Energy credits subsidize growth.',
-    impact: '$800B peak valuation, forced entire auto industry to pivot to electric.',
+    impact: '$1T+ peak valuation, forced entire auto industry to pivot to electric. Most valuable automaker in history.',
   },
   {
     id: '4',
@@ -62,7 +62,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 2008,
     story: 'Rented air mattresses during a conference. Built trust systems that let strangers sleep in each other\'s homes.',
     businessModel: 'Marketplace taking 3% from hosts, 14% from guests. Zero inventory. Community-driven trust.',
-    impact: '$75B valuation, 7M listings, more rooms than all hotel chains combined.',
+    impact: '$85B+ market cap, 8M+ listings, more rooms than all hotel chains combined.',
   },
   {
     id: '5',
@@ -86,7 +86,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 1994,
     story: 'Started selling books from garage. Reinvested every dollar into infrastructure for 20 years before prioritizing profit.',
     businessModel: 'Marketplace + AWS + Prime subscription. Flywheel: lower prices → more customers → more sellers → lower prices.',
-    impact: '$1.7T market cap, 30 years of compounding, redefined retail and cloud computing.',
+    impact: '$2T+ market cap, 30 years of compounding, redefined retail, cloud computing, and logistics.',
   },
   {
     id: '7',
@@ -98,7 +98,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 2004,
     story: 'College dorm project became global communication platform. Prioritized growth over monetization for 5 years.',
     businessModel: 'Free product, advertising revenue. More users = more valuable to advertisers = more revenue to acquire users.',
-    impact: '$800B market cap, 3B daily active users, changed how humans communicate.',
+    impact: '$1.4T+ market cap, 3B+ daily active users across apps, changed how humans communicate.',
   },
   {
     id: '8',
@@ -122,7 +122,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 2014,
     story: 'Inherited declining Windows empire. Pivoted to cloud, open source, and subscriptions. "Mobile-first, cloud-first."',
     businessModel: 'Office 365 subscriptions bundled with Azure cloud. Enterprise lock-in through ecosystem.',
-    impact: '$2.8T market cap, surpassed Apple, transformed from legacy to growth company.',
+    impact: '$3T+ market cap, one of the most valuable companies ever, transformed from legacy to AI leader.',
   },
   {
     id: '10',
@@ -134,7 +134,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 1976,
     story: 'Fired from own company, returned to save it from bankruptcy. Built ecosystem of devices, software, and services.',
     businessModel: 'Premium hardware with 40%+ margins. App Store takes 30%. Services (iCloud, Apple Music) recurring revenue.',
-    impact: '$3T market cap, most valuable company ever, redefined multiple industries.',
+    impact: '$3.5T+ market cap, most valuable company ever, redefined computing, music, phones, and retail.',
   },
   {
     id: '11',
@@ -170,7 +170,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 2006,
     story: 'Wanted to sell snowboards online. Existing platforms sucked. Built own, then sold the platform.',
     businessModel: 'Subscription ($29-$299/month) + payment processing (2.9% + 30¢). Empower merchants, not compete with them.',
-    impact: '$100B market cap, powers 10% of all US e-commerce, enabled millions of entrepreneurs.',
+    impact: '$100B+ market cap, powers 10%+ of all US e-commerce, enabled millions of entrepreneurs.',
   },
   {
     id: '14',
@@ -182,7 +182,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 1993,
     story: 'Bet on GPUs for gaming. Pivoted to AI when everyone thought it was a fad. CUDA software created moat.',
     businessModel: 'Sell chips + software ecosystem. More developers using CUDA = more valuable chips = more developers.',
-    impact: '$1.2T market cap, 80%+ AI chip market share, enabling AI revolution.',
+    impact: '$3T+ market cap, 80%+ AI chip market share, the backbone of the AI revolution.',
   },
   {
     id: '15',
@@ -194,7 +194,7 @@ const STRATEGY_CASES: StrategyCase[] = [
     year: 1965,
     story: 'Bought failing textile mill. Used cash flow to buy insurance companies, then used float to buy businesses.',
     businessModel: 'Acquire undervalued businesses, never sell, reinvest profits. Insurance float provides free capital.',
-    impact: '$780B market cap, 60 years of 20% annual returns, greatest investor of all time.',
+    impact: '$1T+ market cap, 60 years of 20%+ annual returns, greatest investor of all time.',
   },
 ];
 
