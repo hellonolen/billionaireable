@@ -40,7 +40,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.5 }}
                             className="inline-flex items-center bg-black dark:bg-white text-white dark:text-black px-5 py-2 rounded-full mb-8"
                         >
-                            <span className="font-mono text-xs font-bold uppercase tracking-widest">The Framework for Generational Wealth</span>
+                            <span className="font-mono text-xs font-bold uppercase tracking-widest">Your Framework for the Why Not</span>
                         </motion.div>
 
                         {/* Main Headline */}
@@ -62,7 +62,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="font-serif text-xl md:text-2xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
                         >
-                            Billionaireable learns your situation, builds your personalized strategy, and transforms you into someone capable of building generational wealth.
+                            Billionaireable learns your situation, builds your personalized strategy, and shows you exactly why the obstacles in your way don't have to stop you.
                         </motion.p>
 
                         {/* CTA */}
@@ -198,7 +198,7 @@ const Home: React.FC = () => {
                             The 12 Pillars
                         </h2>
                         <p className="font-serif text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                            The complete framework for building and protecting generational wealth.
+                            The complete framework. Your path forward.
                         </p>
                     </div>
 
@@ -250,9 +250,9 @@ const Home: React.FC = () => {
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl mx-auto text-center">
                         <h2 className="font-serif text-4xl md:text-6xl font-black tracking-tighter mb-8">
-                            "The second satisfies.
+                            "You already know what you want.
                             <br />
-                            <span className="text-art-orange">The first transforms."</span>
+                            <span className="text-art-orange">Now remove what's stopping you."</span>
                         </h2>
                         <p className="font-serif text-xl text-gray-400 mb-12">
                             Most people fail not from lack of effort, but from lack of strategy. Billionaireable is the strategy — personalized to you, relentless in execution.
