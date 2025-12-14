@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as billionaireable from "../billionaireable.js";
 import type * as conversations from "../conversations.js";
+import type * as elevenlabs from "../elevenlabs.js";
 import type * as http from "../http.js";
 import type * as payments from "../payments.js";
 import type * as progress from "../progress.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   billionaireable: typeof billionaireable;
   conversations: typeof conversations;
+  elevenlabs: typeof elevenlabs;
   http: typeof http;
   payments: typeof payments;
   progress: typeof progress;

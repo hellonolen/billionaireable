@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { motion, useInView, useSpring, useTransform } from 'framer-motion';
 
-import { ArrowLeft, Play, Lock, Users, FileText, Shield, ArrowUpRight, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Lock, Users, FileText, Shield, ArrowUpRight, CheckCircle, MessageCircle, X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, SkipBack } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DASHBOARD_CARDS, SKILL_DATA } from '../constants';
-
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
+import { useAuth } from '../contexts/AuthContext';
 
 import { useProgress } from '../contexts/ProgressContext';
 
@@ -15,6 +17,57 @@ const SkillDetail: React.FC = () => {
     const { progress, updateNetWorth, updateRevenue, getNextLevelThreshold } = useProgress();
     const [activeModule, setActiveModule] = useState(0);
     const [activeTab, setActiveTab] = useState(0); // New state for progression tabs
+    
+    // "Let's Talk" modal state
+    const [showTalkModal, setShowTalkModal] = useState(false);
+    const [talkMessages, setTalkMessages] = useState<{role: string, content: string}[]>([]);
+    const [talkInput, setTalkInput] = useState('');
+    const [talkLoading, setTalkLoading] = useState(false);
+    const [aiInsights, setAiInsights] = useState<string[]>([]);
+    const talkMessagesEndRef = useRef<HTMLDivElement>(null);
+    const modalRef = useRef<HTMLDivElement>(null);
+    
+    // Voice controls
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMicOn, setIsMicOn] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const hasGreeted = useRef(false);
+    
+    // Close modal on ESC key
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && showTalkModal) {
+                setShowTalkModal(false);
+            }
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, [showTalkModal]);
+    
+    // When modal opens, Billionaireable starts the conversation
+    useEffect(() => {
+        if (showTalkModal && talkMessages.length === 0 && !hasGreeted.current) {
+            hasGreeted.current = true;
+            startConversation();
+        }
+    }, [showTalkModal]);
+    
+    // Reset greeting flag when modal closes
+    useEffect(() => {
+        if (!showTalkModal) {
+            hasGreeted.current = false;
+        }
+    }, [showTalkModal]);
+    
+    // Auth & Convex
+    const { user } = useAuth();
+    const chat = useAction(api.billionaireable.chat);
+    const textToSpeech = useAction(api.elevenlabs.textToSpeech);
+    const createConversation = useMutation(api.conversations.createConversation);
+    const addMessage = useMutation(api.conversations.addMessage);
+    const [conversationId, setConversationId] = useState<string | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const recognitionRef = useRef<any>(null);
 
     // Find the skill data
     const skill = DASHBOARD_CARDS.find(c => c.id === skillId);
@@ -61,6 +114,168 @@ const SkillDetail: React.FC = () => {
 
     const themeBorder = getThemeBorder(skill.colorTheme);
     const themeText = getThemeText(skill.colorTheme);
+
+    // Speak text using Gemini TTS
+    const speakText = async (text: string) => {
+        if (isMuted) return;
+        
+        try {
+            setIsPlaying(true);
+            const result = await textToSpeech({ text });
+            const audioSrc = `data:${result.mimeType};base64,${result.audio}`;
+            const audio = new Audio(audioSrc);
+            audioRef.current = audio;
+            
+            audio.onended = () => setIsPlaying(false);
+            audio.onerror = () => setIsPlaying(false);
+            
+            await audio.play();
+        } catch (error) {
+            console.error('TTS error:', error);
+            setIsPlaying(false);
+        }
+    };
+    
+    // Start the conversation - Billionaireable greets first
+    const startConversation = async () => {
+        const greeting = `Welcome to ${skill?.title}. ${data.insight.split('.')[0]}. What are you working on right now?`;
+        
+        // Show the message immediately
+        setTalkMessages([{ role: 'assistant', content: greeting }]);
+        
+        // Try to speak the greeting (will fail silently if TTS not configured)
+        try {
+            await speakText(greeting);
+        } catch (e) {
+            console.log('Voice not available, text only');
+        }
+    };
+    
+    // Toggle microphone for speech recognition
+    const toggleMic = () => {
+        if (isMicOn) {
+            // Stop listening
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
+            setIsMicOn(false);
+        } else {
+            // Start listening
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Speech recognition not supported in this browser');
+                return;
+            }
+            
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setTalkInput(transcript);
+                setIsMicOn(false);
+            };
+            
+            recognition.onerror = () => {
+                setIsMicOn(false);
+            };
+            
+            recognition.onend = () => {
+                setIsMicOn(false);
+            };
+            
+            recognitionRef.current = recognition;
+            recognition.start();
+            setIsMicOn(true);
+        }
+    };
+    
+    // Stop audio playback
+    const stopPlayback = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+        setIsPlaying(false);
+    };
+
+    // Handle sending a message in the talk modal
+    const handleTalkSend = async () => {
+        if (!talkInput.trim() || talkLoading) return;
+
+        const userMessage = talkInput.trim();
+        setTalkInput('');
+        setTalkMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        setTalkLoading(true);
+
+        try {
+            const systemPrompt = `You are Billionaireable guiding someone through Pillar: ${skill?.title}.
+
+Context: ${data.insight}
+
+You guide. You don't teach. Be direct. 2-3 sentences max.
+
+If they share something meaningful or have a breakthrough, end your response with [INSIGHT: a one-sentence summary of their key realization].`;
+
+            const response = await chat({
+                message: userMessage,
+                history: talkMessages,
+                systemPrompt,
+            });
+
+            // Check for insight marker
+            const insightMatch = response.match(/\[INSIGHT:\s*(.+?)\]/);
+            let cleanResponse = response;
+            if (insightMatch) {
+                cleanResponse = response.replace(/\[INSIGHT:\s*.+?\]/, '').trim();
+                setAiInsights(prev => [...prev, insightMatch[1]]);
+            }
+
+            setTalkMessages(prev => [...prev, { role: 'assistant', content: cleanResponse }]);
+            
+            // Speak the response
+            await speakText(cleanResponse);
+
+            // Save to Convex
+            if (user && skillId) {
+                let convId = conversationId;
+                if (!convId) {
+                    convId = await createConversation({
+                        userId: user._id,
+                        title: `${skill?.title} - Conversation`
+                    });
+                    setConversationId(convId);
+                }
+
+                await addMessage({
+                    conversationId: convId as any,
+                    userId: user._id,
+                    role: 'user',
+                    content: userMessage,
+                    skillId,
+                });
+                await addMessage({
+                    conversationId: convId as any,
+                    userId: user._id,
+                    role: 'assistant',
+                    content: cleanResponse,
+                    skillId,
+                });
+            }
+
+            // Scroll to bottom
+            setTimeout(() => {
+                talkMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        } catch (error) {
+            console.error('Chat error:', error);
+            setTalkMessages(prev => [...prev, { role: 'assistant', content: "Let's refocus. What's on your mind?" }]);
+        } finally {
+            setTalkLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white animate-fade-in">
@@ -219,10 +434,19 @@ const SkillDetail: React.FC = () => {
                             {/* Left Column: Training Modules (The Pathway) */}
                             <div className="lg:col-span-7 space-y-12">
                                 <div>
-                                    <h2 className="font-sans text-4xl font-black uppercase mb-8 flex items-center gap-4">
-                                        <FileText className="w-8 h-8" />
-                                        Training Modules
-                                    </h2>
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h2 className="font-sans text-4xl font-black uppercase flex items-center gap-4">
+                                            <FileText className="w-8 h-8" />
+                                            Training Modules
+                                        </h2>
+                                        <button
+                                            onClick={() => setShowTalkModal(true)}
+                                            className={`${themeBg} text-white px-6 py-3 rounded-full font-mono text-xs font-bold uppercase flex items-center gap-2 hover:opacity-90 transition-all shadow-lg`}
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                            Let's Talk
+                                        </button>
+                                    </div>
                                     <div className="space-y-4">
                                         {data.modules.map((module, index) => (
                                             <div
@@ -267,6 +491,25 @@ const SkillDetail: React.FC = () => {
                                         "{data.insight}"
                                     </p>
                                 </div>
+
+                                {/* AI Insights from Conversation */}
+                                {aiInsights.length > 0 && (
+                                    <div className={`${themeBg} rounded-[32px] p-10`}>
+                                        <h3 className="font-sans text-2xl font-black uppercase mb-4 text-white flex items-center gap-3">
+                                            <MessageCircle className="w-6 h-6" />
+                                            Your Insights
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {aiInsights.map((insight, idx) => (
+                                                <div key={idx} className="bg-white/10 rounded-xl p-4">
+                                                    <p className="font-serif text-base text-white leading-relaxed">
+                                                        {insight}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Right Column: The Network & Tools (The Access) */}
@@ -1745,6 +1988,163 @@ const SkillDetail: React.FC = () => {
                     )
                 }
             </div >
+
+            {/* Let's Talk Modal */}
+            {showTalkModal && (
+                <div 
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    onClick={(e) => {
+                        // Close modal when clicking outside
+                        if (e.target === e.currentTarget) {
+                            setShowTalkModal(false);
+                        }
+                    }}
+                >
+                    <div 
+                        ref={modalRef}
+                        className="bg-white dark:bg-gray-900 rounded-[32px] w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl overflow-hidden"
+                    >
+                        {/* Modal Header */}
+                        <div className={`${themeBg} p-4 flex items-center justify-between`}>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-black">
+                                    B
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-white text-lg">Billionaireable</h3>
+                                    <p className="text-white/70 text-xs font-mono uppercase">{skill?.title}</p>
+                                </div>
+                            </div>
+                            
+                            {/* YouTube-style Controls */}
+                            <div className="flex items-center gap-2">
+                                {/* Restart */}
+                                <button
+                                    onClick={() => {
+                                        setTalkMessages([]);
+                                        stopPlayback();
+                                    }}
+                                    className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+                                    title="Start Over"
+                                >
+                                    <SkipBack className="w-4 h-4" />
+                                </button>
+                                
+                                {/* Play/Pause - stops current playback */}
+                                <button
+                                    onClick={() => {
+                                        if (isPlaying) {
+                                            stopPlayback();
+                                        }
+                                    }}
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center text-white transition-colors ${isPlaying ? 'bg-white/40' : 'bg-white/20 hover:bg-white/30'}`}
+                                    title={isPlaying ? "Stop" : "Playing..."}
+                                >
+                                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                                </button>
+                                
+                                {/* Mic Toggle - actual speech recognition */}
+                                <button
+                                    onClick={toggleMic}
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${isMicOn ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-white/20 hover:bg-white/30'} text-white`}
+                                    title={isMicOn ? "Listening..." : "Speak"}
+                                >
+                                    {isMicOn ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                                </button>
+                                
+                                {/* Volume Toggle */}
+                                <button
+                                    onClick={() => setIsMuted(!isMuted)}
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center text-white transition-colors ${isMuted ? 'bg-white/10' : 'bg-white/20 hover:bg-white/30'}`}
+                                    title={isMuted ? "Unmute" : "Mute"}
+                                >
+                                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                </button>
+                                
+                                {/* Close */}
+                                <button
+                                    onClick={() => setShowTalkModal(false)}
+                                    className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors ml-2"
+                                    title="Close"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Messages */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-[300px]">
+                            {talkMessages.length === 0 && (
+                                <div className="text-center py-12">
+                                    <div className={`w-16 h-16 rounded-full ${themeBg} mx-auto mb-4 flex items-center justify-center`}>
+                                        <MessageCircle className="w-8 h-8 text-white" />
+                                    </div>
+                                    <p className="text-gray-500 dark:text-gray-400 font-serif mb-4">
+                                        Let's talk about {skill?.title}. What's on your mind?
+                                    </p>
+                                    <p className="text-gray-400 dark:text-gray-500 text-xs font-mono uppercase">
+                                        Click outside or press ESC to close
+                                    </p>
+                                </div>
+                            )}
+                            {talkMessages.map((msg, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div
+                                        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                                            msg.role === 'user'
+                                                ? 'bg-black text-white'
+                                                : 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white'
+                                        }`}
+                                    >
+                                        {msg.role !== 'user' && (
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className={`w-5 h-5 rounded-full ${themeBg} flex items-center justify-center text-[10px] font-black text-white`}>
+                                                    B
+                                                </div>
+                                                <span className="font-mono text-[10px] text-gray-400 uppercase">Billionaireable</span>
+                                            </div>
+                                        )}
+                                        <p className="text-sm leading-relaxed">{msg.content}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            {talkLoading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3">
+                                        <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={talkMessagesEndRef} />
+                        </div>
+
+                        {/* Input */}
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="text"
+                                    value={talkInput}
+                                    onChange={(e) => setTalkInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleTalkSend()}
+                                    placeholder="Type your message..."
+                                    className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                                    disabled={talkLoading}
+                                />
+                                <button
+                                    onClick={handleTalkSend}
+                                    disabled={!talkInput.trim() || talkLoading}
+                                    className={`w-12 h-12 ${themeBg} text-white rounded-full flex items-center justify-center hover:opacity-90 disabled:opacity-30 transition-all`}
+                                >
+                                    <Send className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };
