@@ -276,11 +276,11 @@ const Pricing: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Guarantee */}
+                {/* Cancel Anytime */}
                 <div className="mt-20 max-w-3xl mx-auto bg-black dark:bg-white text-white dark:text-black rounded-[32px] p-12 text-center">
-                    <h3 className="font-serif text-3xl font-black mb-4">30-Day Strategic Alignment Guarantee</h3>
+                    <h3 className="font-serif text-3xl font-black mb-4">Cancel Anytime</h3>
                     <p className="font-serif text-lg opacity-80">
-                        If after 30 days you don't feel aligned, we'll refund your investment in full. No questions, no friction.
+                        You're in control. Cancel your subscription at any time. No contracts. No obligations.
                     </p>
                 </div>
             </div>

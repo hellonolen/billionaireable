@@ -88,8 +88,9 @@ export const Terms: React.FC = () => (
         <p>You may be required to purchase or pay a fee to access some of our services. You agree to provide current, complete, and accurate purchase and account information for all purchases made via the Site. You further agree to promptly update account and payment information, including email address, payment method, and payment card expiration date, so that we can complete your transactions and contact you as needed.</p>
         <p>We bill you through an online billing account for purchases made via the Site. Sales tax will be added to the price of purchases as deemed required by us. We may change prices at any time.</p>
 
-        <h3>5. Cancellation</h3>
-        <p>All purchases are non-refundable. You can cancel your subscription at any time by logging into your account. Your cancellation will take effect at the end of the current paid term.</p>
+        <h3>5. Cancellation and Refund Policy</h3>
+        <p><strong>No Refunds.</strong> All purchases are final and non-refundable. There are no refunds under any circumstances.</p>
+        <p><strong>Cancel Anytime.</strong> You can cancel your subscription at any time by logging into your account. Your cancellation will take effect at the end of the current paid term. You will retain access until your current billing period ends.</p>
     </PolicyLayout>
 );
 

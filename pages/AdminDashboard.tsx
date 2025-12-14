@@ -898,8 +898,8 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
               <p className="font-serif text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Handle payments, subscriptions, refunds, and invoicing. All
-                financial operations are managed through Stripe.
+                Handle payments, subscriptions, and invoicing. All
+                financial operations are managed through Stripe. No refunds - cancel anytime policy.
               </p>
               <a
                 href="https://dashboard.stripe.com"
