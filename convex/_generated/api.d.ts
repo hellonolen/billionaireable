@@ -9,8 +9,11 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as auth from "../auth.js";
 import type * as billionaireable from "../billionaireable.js";
 import type * as conversations from "../conversations.js";
+import type * as http from "../http.js";
+import type * as payments from "../payments.js";
 import type * as progress from "../progress.js";
 import type * as speech from "../speech.js";
 import type * as stripe from "../stripe.js";
@@ -25,8 +28,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  auth: typeof auth;
   billionaireable: typeof billionaireable;
   conversations: typeof conversations;
+  http: typeof http;
+  payments: typeof payments;
   progress: typeof progress;
   speech: typeof speech;
   stripe: typeof stripe;

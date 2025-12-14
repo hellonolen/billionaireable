@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
+import { api } from "./_generated/api";
 
 // Create a Stripe checkout session
 export const createCheckoutSession = action({
@@ -102,17 +103,6 @@ export const updateSubscription = mutation({
   },
 });
 
-// Import api for internal queries
-import { api } from "./_generated/api";
-
-// Helper query to get user by ID
-export const getUser = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.userId);
-  },
-});
-
 // Get subscription by Stripe customer ID (for webhooks)
 export const getSubscriptionByCustomerId = query({
   args: { stripeCustomerId: v.string() },
@@ -154,43 +144,9 @@ export const hasActiveSubscription = query({
     
     return {
       hasSubscription: isActive && isNotExpired,
-      plan: subscription.plan,
+      plan: isActive && isNotExpired ? subscription.plan : null,
       status: subscription.status,
       expiresAt: subscription.currentPeriodEnd,
     };
   },
 });
-// Get subscription by Stripe customer ID
-export const getSubscriptionByCustomer = query({
-  args: { stripeCustomerId: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("subscriptions")
-      .withIndex("by_stripe_customer", (q) => q.eq("stripeCustomerId", args.stripeCustomerId))
-      .first();
-  },
-});
-
-// Check if user has active subscription
-export const hasActiveSubscription = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    const subscription = await ctx.db
-      .query("subscriptions")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .first();
-    
-    if (!subscription) return { hasSubscription: false, plan: null };
-    
-    const isActive = subscription.status === "active" || 
-                     subscription.status === "trialing";
-    const isNotExpired = subscription.currentPeriodEnd > Date.now();
-    
-    return {
-      hasSubscription: isActive && isNotExpired,
-      plan: isActive && isNotExpired ? subscription.plan : null,
-      status: subscription.status,
-    };
-  },
-});
-
