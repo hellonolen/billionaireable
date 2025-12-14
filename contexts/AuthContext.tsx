@@ -54,10 +54,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Handle loading state
     useEffect(() => {
+        // If no session token, we're loaded immediately (not signed in)
+        if (!sessionToken) {
+            setIsLoaded(true);
+            return;
+        }
+        // If we have a session and user query completed
         if (user !== undefined) {
             setIsLoaded(true);
         }
-    }, [user]);
+    }, [user, sessionToken]);
 
     // Clear invalid session
     useEffect(() => {
