@@ -62,7 +62,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="font-serif text-xl md:text-2xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
                         >
-                            The system that separates those who talk about it from those who become it.
+                            Most people will satisfice their entire lives. You're not most people.
                         </motion.p>
 
                         {/* CTA */}
@@ -139,10 +139,10 @@ const Home: React.FC = () => {
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="text-center mb-16">
                         <h2 className="font-serif text-4xl md:text-6xl font-black text-black dark:text-white tracking-tighter mb-4">
-                            How It Works
+                            The Path
                         </h2>
                         <p className="font-serif text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                            Not a course. Not a community. A year-long transformation.
+                            You've done enough courses. You've joined enough communities. This is different.
                         </p>
                     </div>
 
@@ -150,20 +150,20 @@ const Home: React.FC = () => {
                         {[
                             {
                                 step: '01',
-                                title: 'Start Here',
-                                desc: 'Your net worth, income, goals. Where you are now.',
+                                title: 'Clarity',
+                                desc: 'You tell me where you are. I tell you what\'s been holding you back.',
                                 color: 'bg-art-orange'
                             },
                             {
                                 step: '02',
-                                title: 'Get Your Path',
-                                desc: 'Your 12-month strategy across all 12 pillars. Updated weekly.',
+                                title: 'Direction',
+                                desc: 'A path built for your situation. Not theory. Not motivation. Moves.',
                                 color: 'bg-art-green'
                             },
                             {
                                 step: '03',
-                                title: 'Execute',
-                                desc: 'Daily guidance. Accountability. No excuses.',
+                                title: 'Momentum',
+                                desc: 'Every day you wake up knowing exactly what to do. And you do it.',
                                 color: 'bg-art-blue'
                             }
                         ].map((item, i) => (
@@ -247,12 +247,10 @@ const Home: React.FC = () => {
                     <div className="max-w-4xl mx-auto">
                         <div className="bg-art-orange rounded-[32px] p-12 md:p-16 text-center">
                             <h2 className="font-serif text-3xl md:text-5xl font-black text-black tracking-tighter mb-6 leading-tight">
-                                "You already know what you want.
-                                <br />
-                                Now remove what's stopping you."
+                                "The reason you haven't done it yet isn't because you can't. It's because no one's shown you how — for your situation."
                             </h2>
                             <p className="font-serif text-lg text-black/70 mb-10 max-w-2xl mx-auto">
-                                Most people fail not from lack of effort, but from lack of strategy. Billionaireable is the strategy — personalized to you, relentless in execution.
+                                That changes now.
                             </p>
                             <button
                                 onClick={() => navigate('/waitlist')}
