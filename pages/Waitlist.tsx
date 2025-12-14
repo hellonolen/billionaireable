@@ -39,8 +39,8 @@ const Waitlist: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-            <div className="max-w-2xl w-full text-center relative z-10">
+        <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex flex-col items-center justify-center p-4 pt-20 relative overflow-hidden">
+            <div className="max-w-2xl w-full text-center relative z-10 -mt-20">
                 <h1 className="font-serif text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none text-black dark:text-white">
                     BILLIONAIREABLE.
                 </h1>
