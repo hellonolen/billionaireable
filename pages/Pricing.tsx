@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ArrowRight, Loader2, Building2 } from 'lucide-react';
+import { Check, ArrowRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useMutation } from 'convex/react';
@@ -137,13 +137,6 @@ const result = await createApplication({
                     </div>
                 </div>
 
-                {/* Wire Transfer Note */}
-                <div className="max-w-2xl mx-auto mb-8 bg-art-blue/10 border border-art-blue/20 rounded-2xl p-4 text-center">
-                    <p className="font-mono text-sm text-art-blue">
-                        <Building2 className="w-4 h-4 inline mr-2" />
-                        All payments via wire transfer — how serious money moves
-                    </p>
-                </div>
 
                 {/* Pricing Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -222,11 +215,6 @@ const result = await createApplication({
                                     )}
                                 </button>
 
-                                {/* Wire Transfer Icon */}
-                                <div className="mt-4 flex items-center justify-center gap-2 text-gray-400">
-                                    <Building2 className="w-4 h-4" />
-                                    <span className="font-mono text-xs">Wire Transfer</span>
-                                </div>
                             </div>
                         </div>
                     ))}
@@ -239,18 +227,6 @@ const result = await createApplication({
                     </h2>
                     <div className="space-y-4">
                         <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
-                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">How does payment work?</h3>
-                            <p className="font-serif text-gray-500 dark:text-gray-400">
-                                Wire transfer only. You'll get bank details immediately. Send the wire with your unique reference code. Once it clears, your access activates automatically.
-                            </p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
-                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">Why wire transfer?</h3>
-                            <p className="font-serif text-gray-500 dark:text-gray-400">
-                                This is how serious money moves. Wire transfer is standard for high-value transactions. It's secure, professional, and what you'll use at this level.
-                            </p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
                             <h3 className="font-sans font-bold text-black dark:text-white mb-2">Can I cancel anytime?</h3>
                             <p className="font-serif text-gray-500 dark:text-gray-400">
                                 Yes. Cancel whenever you want. No contracts, no obligations. You keep access until your current period ends. No refunds.
@@ -259,7 +235,7 @@ const result = await createApplication({
                         <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
                             <h3 className="font-sans font-bold text-black dark:text-white mb-2">How long until I get access?</h3>
                             <p className="font-serif text-gray-500 dark:text-gray-400">
-                                Wire transfers typically clear within 1-3 business days. Your access activates automatically the moment payment clears.
+                                Your access activates automatically the moment payment clears.
                             </p>
                         </div>
                     </div>
