@@ -181,7 +181,7 @@ const Assessment: React.FC = () => {
                             Ready to Close the Gaps?
                         </h2>
                         <p className="font-serif text-xl mb-8 text-white/80">
-                            Your personalized dashboard is waiting.
+                            Your dashboard is ready.
                         </p>
                         <button
                             onClick={() => navigate('/')}

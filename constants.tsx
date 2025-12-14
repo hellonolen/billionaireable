@@ -260,7 +260,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Top CIO Recruiters', type: 'Staffing', access: 'Intro' },
       { name: 'Trust Companies', type: 'Admin', access: 'Direct' },
     ],
-    insight: "A Family Office is not just wealth management; it's the operating system for your life. It handles everything from tax returns to travel logistics, freeing you to focus on high-impact decisions.",
+    insight: "A Family Office is not just wealth management — it's the operating system billionaires use. It handles everything from tax returns to travel logistics, freeing focus for high-impact decisions.",
     tools: ['Investment Policy Statement', 'Staffing Org Chart', 'Concierge Request Form']
   },
   'dynasty-design': {

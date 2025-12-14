@@ -225,7 +225,7 @@ const Onboarding: React.FC = () => {
 
                         <div className="bg-white rounded-[32px] p-12 shadow-soft-xl border border-gray-100 mb-8">
                             <p className="font-serif text-lg text-gray-700 leading-relaxed mb-6 italic">
-                                "Good morning. Based on your goals, I've prepared a personalized assessment.
+                                "Good morning. Here's today's assessment.
                                 Let's discover where you are on the path to becoming <span className="font-bold text-black">Billionaireable</span>."
                             </p>
                             <p className="font-mono text-xs text-gray-400 uppercase">

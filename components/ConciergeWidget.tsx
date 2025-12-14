@@ -135,7 +135,7 @@ const ConciergeWidget: React.FC = () => {
                 });
             } else {
                 // Fallback for non-signed-in users
-                aiResponse = "Sign in to unlock my full capabilities. I can learn your situation, remember our conversations, and provide personalized strategic guidance. What would you like to explore?";
+                aiResponse = "Sign in to continue. This is how billionaires think. This is what they do. Let's go.";
             }
 
             setMessages(prev => [...prev, { role: 'assistant', text: aiResponse }]);

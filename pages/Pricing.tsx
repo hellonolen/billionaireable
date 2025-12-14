@@ -15,7 +15,7 @@ const Pricing: React.FC = () => {
             annualSavings: 967,
             features: [
                 'Unlimited Billionaireable access',
-                'Personalized 12-month roadmap',
+                'The 12-month roadmap',
                 'All 12 pillars curriculum',
                 'Weekly progress tracking',
                 'Mobile app access',
@@ -57,7 +57,7 @@ const Pricing: React.FC = () => {
                 'Everything in Ascendant',
                 'Monthly 1:1 strategy sessions',
                 'Direct founder access',
-                'Custom training on your situation',
+                'Direct training on the 12 pillars',
                 'Private Slack/Discord channel',
                 'In-person annual summit invite',
                 'Family member accounts (up to 3)',
@@ -191,7 +191,7 @@ const Pricing: React.FC = () => {
                 {/* Bottom Note */}
                 <div className="text-center mt-16 max-w-2xl mx-auto">
                     <p className="font-serif text-lg text-gray-500 dark:text-gray-400 mb-4">
-                        Not sure which tier is right for you?
+                        Not sure where to start?
                     </p>
                     <button
                         onClick={() => navigate('/waitlist')}
@@ -205,7 +205,7 @@ const Pricing: React.FC = () => {
                 <div className="mt-20 max-w-3xl mx-auto bg-black dark:bg-white text-white dark:text-black rounded-[32px] p-12 text-center">
                     <h3 className="font-serif text-3xl font-black mb-4">30-Day Strategic Alignment Guarantee</h3>
                     <p className="font-serif text-lg opacity-80">
-                        If after 30 days you don't feel that Billionaireable is the right strategic partner for your billion-dollar journey, we'll refund your investment in full. No questions, no friction.
+                        If after 30 days you don't feel aligned, we'll refund your investment in full. No questions, no friction.
                     </p>
                 </div>
             </div>
