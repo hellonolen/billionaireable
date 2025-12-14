@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, Sparkles, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Pricing: React.FC = () => {
@@ -14,7 +14,7 @@ const Pricing: React.FC = () => {
             annualPrice: 4997,
             annualSavings: 967,
             features: [
-                'Billionaireable AI access (unlimited)',
+                'Unlimited Billionaireable access',
                 'Personalized 12-month roadmap',
                 'All 12 pillars curriculum',
                 'Weekly progress tracking',
@@ -39,13 +39,13 @@ const Pricing: React.FC = () => {
                 'Family office templates',
                 'Tax optimization playbooks',
                 'Network introductions',
-                'Priority AI responses',
+                'Priority responses',
                 'Quarterly 1:1 review sessions',
             ],
             cta: 'Apply for Access',
             popular: true,
             color: 'border-art-orange',
-            barColor: 'bg-gradient-to-r from-art-orange to-art-yellow',
+            barColor: 'bg-art-orange',
         },
         {
             name: 'Principal',
@@ -57,7 +57,7 @@ const Pricing: React.FC = () => {
                 'Everything in Ascendant',
                 'Monthly 1:1 strategy sessions',
                 'Direct founder access',
-                'Custom AI training on your situation',
+                'Custom training on your situation',
                 'Private Slack/Discord channel',
                 'In-person annual summit invite',
                 'Family member accounts (up to 3)',
@@ -76,8 +76,7 @@ const Pricing: React.FC = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-full mb-6">
-                        <Sparkles className="w-4 h-4 text-art-yellow" />
+                    <div className="inline-flex items-center bg-black dark:bg-white text-white dark:text-black px-5 py-2 rounded-full mb-6">
                         <span className="font-mono text-xs font-bold uppercase tracking-widest">Investment in Your Future</span>
                     </div>
                     <h1 className="font-serif text-5xl md:text-7xl font-black text-black dark:text-white tracking-tighter mb-6">
@@ -178,7 +177,7 @@ const Pricing: React.FC = () => {
                                 onClick={() => navigate('/waitlist')}
                                 className={`w-full py-4 rounded-full font-mono text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 group ${
                                     tier.popular
-                                        ? 'bg-gradient-to-r from-art-orange to-art-yellow text-black hover:brightness-110 shadow-lg'
+                                        ? 'bg-art-orange text-black hover:bg-art-green shadow-lg'
                                         : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
                                 }`}
                             >
@@ -198,7 +197,7 @@ const Pricing: React.FC = () => {
                         onClick={() => navigate('/waitlist')}
                         className="font-mono text-sm font-bold uppercase tracking-widest text-art-orange hover:underline"
                     >
-                        Talk to Billionaireable AI first →
+                        Talk to Billionaireable first →
                     </button>
                 </div>
 

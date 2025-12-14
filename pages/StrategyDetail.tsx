@@ -307,7 +307,7 @@ const StrategyDetail: React.FC = () => {
           <div className="bg-black dark:bg-white rounded-[32px] p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-art-yellow" />
+                <Zap className="w-5 h-5 text-art-orange" />
               </div>
               <h2 className="font-sans text-xl font-black uppercase tracking-tight text-white dark:text-black">Key Takeaway</h2>
             </div>

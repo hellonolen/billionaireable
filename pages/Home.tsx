@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Brain, Target, TrendingUp, Shield, Users, Zap, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight } from 'lucide-react';
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -21,13 +21,6 @@ const Home: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const pillars = [
-        { icon: Brain, title: 'Reality Distortion', desc: 'Vision that attracts capital' },
-        { icon: TrendingUp, title: 'Capital Architecture', desc: 'Structure that compounds' },
-        { icon: Target, title: 'Asymmetric Bets', desc: 'Uncapped upside, capped risk' },
-        { icon: Shield, title: 'Dynasty Design', desc: 'Wealth that outlives you' },
-    ];
-
     return (
         <div className="min-h-screen bg-art-offwhite dark:bg-gray-950">
             {/* Hero Section */}
@@ -45,10 +38,9 @@ const Home: React.FC = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-full mb-8"
+                            className="inline-flex items-center bg-black dark:bg-white text-white dark:text-black px-5 py-2 rounded-full mb-8"
                         >
-                            <Sparkles className="w-4 h-4 text-art-yellow" />
-                            <span className="font-mono text-xs font-bold uppercase tracking-widest">AI-Powered Wealth Building</span>
+                            <span className="font-mono text-xs font-bold uppercase tracking-widest">The Framework for Generational Wealth</span>
                         </motion.div>
 
                         {/* Main Headline */}
@@ -58,9 +50,9 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-black dark:text-white tracking-tighter leading-[0.9] mb-8"
                         >
-                            Your AI path to
+                            Become
                             <br />
-                            <span className="text-art-orange">a billion dollars.</span>
+                            <span className="text-art-orange">Billionaireable.</span>
                         </motion.h1>
 
                         {/* Subheadline */}
@@ -70,7 +62,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="font-serif text-xl md:text-2xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
                         >
-                            Billionaireable is an AI that learns your situation, builds your personalized strategy, and guides you to generational wealth over 12 months.
+                            Billionaireable learns your situation, builds your personalized strategy, and transforms you into someone capable of building generational wealth.
                         </motion.p>
 
                         {/* CTA */}
@@ -84,7 +76,7 @@ const Home: React.FC = () => {
                                 onClick={() => navigate('/waitlist')}
                                 className="group flex items-center gap-3 bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-all shadow-2xl"
                             >
-                                Start Your Journey
+                                Start Your Transformation
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
@@ -96,7 +88,7 @@ const Home: React.FC = () => {
                         </motion.div>
                     </div>
 
-                    {/* AI Chat Preview */}
+                    {/* Chat Preview */}
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -106,12 +98,12 @@ const Home: React.FC = () => {
                         <div className="bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                             {/* Chat Header */}
                             <div className="bg-black text-white p-6 flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-art-orange to-art-yellow flex items-center justify-center">
-                                    <Sparkles className="w-6 h-6 text-black" />
+                                <div className="w-12 h-12 rounded-full bg-art-orange flex items-center justify-center">
+                                    <span className="font-serif text-xl font-black text-black">B</span>
                                 </div>
                                 <div>
                                     <h3 className="font-black text-lg">Billionaireable</h3>
-                                    <p className="font-mono text-xs text-gray-400 uppercase">Your Strategic AI Advisor</p>
+                                    <p className="font-mono text-xs text-gray-400 uppercase">Your Strategic Advisor</p>
                                 </div>
                             </div>
 
@@ -124,7 +116,7 @@ const Home: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* AI Response */}
+                                {/* Response */}
                                 <motion.div
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
@@ -136,7 +128,7 @@ const Home: React.FC = () => {
                                             Let's build your path. First, I need to understand where you are now. What's your current net worth and primary income source?
                                         </p>
                                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                                            I'll analyze your situation across all 12 pillars of wealth building and create a personalized 12-month roadmap.
+                                            I'll analyze your situation across all 12 pillars and create a personalized 12-month roadmap.
                                         </p>
                                     </div>
                                 </motion.div>
@@ -151,10 +143,10 @@ const Home: React.FC = () => {
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="text-center mb-16">
                         <h2 className="font-serif text-4xl md:text-6xl font-black tracking-tighter mb-4">
-                            How Billionaireable Works
+                            How It Works
                         </h2>
                         <p className="font-serif text-xl text-gray-400 max-w-2xl mx-auto">
-                            Not a course. Not a community. A year-long AI transformation.
+                            Not a course. Not a community. A year-long transformation.
                         </p>
                     </div>
 
@@ -163,7 +155,7 @@ const Home: React.FC = () => {
                             {
                                 step: '01',
                                 title: 'Tell It Everything',
-                                desc: 'Your net worth, income, goals, fears, constraints. The AI builds a complete picture of where you are.',
+                                desc: 'Your net worth, income, goals, fears, constraints. Billionaireable builds a complete picture of where you are.',
                                 color: 'bg-art-orange'
                             },
                             {
@@ -175,7 +167,7 @@ const Home: React.FC = () => {
                             {
                                 step: '03',
                                 title: 'Execute & Adapt',
-                                desc: 'Daily guidance, accountability, course corrections. The AI learns what works for you and optimizes.',
+                                desc: 'Daily guidance, accountability, course corrections. Billionaireable learns what works for you and optimizes.',
                                 color: 'bg-art-blue'
                             }
                         ].map((item, i) => (
@@ -215,15 +207,15 @@ const Home: React.FC = () => {
                             { title: 'Reality Distortion', color: 'bg-art-orange' },
                             { title: 'Liquidity & Allocation', color: 'bg-art-green' },
                             { title: 'The Holding Co', color: 'bg-art-blue' },
-                            { title: 'Time Arbitrage', color: 'bg-art-yellow' },
-                            { title: 'Bio-Availability', color: 'bg-art-orange' },
+                            { title: 'Time Arbitrage', color: 'bg-art-orange' },
+                            { title: 'Bio-Availability', color: 'bg-art-green' },
                             { title: 'Political Capital', color: 'bg-art-blue' },
-                            { title: 'The Syndicate', color: 'bg-art-green' },
-                            { title: 'Family Office', color: 'bg-art-yellow' },
-                            { title: 'Dynasty Design', color: 'bg-art-orange' },
-                            { title: 'Sovereign Flags', color: 'bg-art-blue' },
+                            { title: 'The Syndicate', color: 'bg-art-orange' },
+                            { title: 'Family Office', color: 'bg-art-green' },
+                            { title: 'Dynasty Design', color: 'bg-art-blue' },
+                            { title: 'Sovereign Flags', color: 'bg-art-orange' },
                             { title: 'Asymmetric Bets', color: 'bg-art-green' },
-                            { title: 'Ascendance', color: 'bg-art-yellow' },
+                            { title: 'Ascendance', color: 'bg-art-blue' },
                         ].map((pillar, i) => (
                             <motion.div
                                 key={i}
@@ -258,33 +250,33 @@ const Home: React.FC = () => {
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl mx-auto text-center">
                         <h2 className="font-serif text-4xl md:text-6xl font-black tracking-tighter mb-8">
-                            "The second billion is inevitable.
+                            "The second satisfies.
                             <br />
-                            <span className="text-art-orange">The first one is engineered."</span>
+                            <span className="text-art-orange">The first transforms."</span>
                         </h2>
                         <p className="font-serif text-xl text-gray-400 mb-12">
-                            Most people fail not from lack of effort, but from lack of strategy. Billionaireable is the strategy — encoded in AI, personalized to you, relentless in execution.
+                            Most people fail not from lack of effort, but from lack of strategy. Billionaireable is the strategy — personalized to you, relentless in execution.
                         </p>
                         <button
                             onClick={() => navigate('/waitlist')}
-                            className="group flex items-center gap-3 mx-auto bg-gradient-to-r from-art-orange to-art-yellow text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-2xl"
+                            className="group flex items-center gap-3 mx-auto bg-art-orange text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-green transition-all shadow-2xl"
                         >
-                            Begin Your Transformation
+                            Become Billionaireable
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>
                 </div>
             </section>
 
-            {/* Social Proof / Stats */}
+            {/* Stats */}
             <section className="py-16 bg-art-offwhite dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         {[
-                            { value: '12', label: 'Wealth Pillars' },
-                            { value: '365', label: 'Days of Guidance' },
-                            { value: '24/7', label: 'AI Availability' },
-                            { value: '$1B', label: 'The Goal' },
+                            { value: '12', label: 'Pillars' },
+                            { value: '365', label: 'Days' },
+                            { value: '24/7', label: 'Access' },
+                            { value: '1', label: 'Goal' },
                         ].map((stat, i) => (
                             <div key={i}>
                                 <p className="font-sans text-4xl md:text-5xl font-black text-black dark:text-white">{stat.value}</p>
@@ -299,4 +291,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-

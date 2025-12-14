@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Check, Sparkles, Target, TrendingUp, Globe, Brain, Heart } from 'lucide-react';
+import { ArrowRight, Check, Target, TrendingUp, Globe, Brain, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const GOALS = [
@@ -47,7 +47,7 @@ const Onboarding: React.FC = () => {
                 {step === 1 && (
                     <div className="animate-fade-in">
                         <div className="text-center mb-12">
-                            <Sparkles className="w-16 h-16 mx-auto mb-6 text-art-orange" />
+                            <div className="w-16 h-16 mx-auto mb-6 bg-art-orange rounded-full flex items-center justify-center"><span className="font-serif text-3xl font-black text-black">B</span></div>
                             <h1 className="font-serif text-6xl md:text-7xl font-black text-black tracking-tighter leading-[0.9] mb-8">
                                 You've Built Wealth.
                             </h1>
@@ -213,7 +213,7 @@ const Onboarding: React.FC = () => {
                     <div className="animate-fade-in">
                         <div className="text-center mb-12">
                             <div className="w-24 h-24 rounded-full bg-black mx-auto mb-6 flex items-center justify-center">
-                                <Sparkles className="w-12 h-12 text-art-yellow animate-pulse" />
+                                <div className="w-12 h-12 bg-art-orange rounded-full flex items-center justify-center"><span className="font-serif text-2xl font-black text-black">B</span></div>
                             </div>
                             <h2 className="font-serif text-5xl font-black text-black tracking-tighter mb-4">
                                 Meet Your AI Concierge

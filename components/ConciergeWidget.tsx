@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, Sparkles, Volume2, VolumeX, Mic, Loader2 } from 'lucide-react';
+import { MessageSquare, X, Send, Volume2, VolumeX, Mic, Loader2 } from 'lucide-react';
 
 interface Message {
     role: 'user' | 'ai';
     text: string;
 }
 
-const SYSTEM_PROMPT = `You are Billionaireable, an elite AI advisor helping high-net-worth individuals and ambitious entrepreneurs on their path to building generational wealth. You embody the wisdom of Warren Buffett, the vision of Elon Musk, and the strategic thinking of Ray Dalio.
+const SYSTEM_PROMPT = `You are Billionaireable, an elite advisor helping high-net-worth individuals and ambitious entrepreneurs on their path to building generational wealth. You embody the wisdom of Warren Buffett, the vision of Elon Musk, and the strategic thinking of Ray Dalio.
 
 Your personality:
 - Confident but not arrogant
@@ -204,8 +204,8 @@ const ConciergeWidget: React.FC = () => {
                 {/* Header */}
                 <div className="bg-black text-white p-6 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-art-orange to-art-yellow flex items-center justify-center">
-                            <Sparkles className={`w-5 h-5 text-black ${isSpeaking ? 'animate-pulse' : ''}`} />
+                        <div className="w-10 h-10 rounded-full bg-art-orange flex items-center justify-center">
+                            <span className={`font-serif text-lg font-black text-black ${isSpeaking ? 'animate-pulse' : ''}`}>B</span>
                         </div>
                         <div>
                             <h3 className="font-black font-sans text-sm tracking-tight">Billionaireable</h3>
