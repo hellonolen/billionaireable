@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProgress } from '../contexts/ProgressContext';
 import { ChevronLeft, CheckCircle, Play, Pause, Volume2, Loader2 } from 'lucide-react';
 import { SKILL_DATA } from '../constants';
 import { LESSON_CONTENT, PILLAR_NAMES } from '../lessonContent';
-import { useAction } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { useUser } from '@clerk/clerk-react';
 import { api } from '../convex/_generated/api';
 
 const Lesson: React.FC = () => {
@@ -16,11 +17,21 @@ const Lesson: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [currentSection, setCurrentSection] = useState(0);
     
+    // User context for persistence
+    const { user: clerkUser, isSignedIn } = useUser();
+    const convexUser = useQuery(
+        api.users.getUserByClerkId,
+        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
+    );
+    
     // Billionaireable chat for interactive guidance
     const chat = useAction(api.billionaireable.chat);
+    const createConversation = useMutation(api.conversations.createConversation);
+    const addMessage = useMutation(api.conversations.addMessage);
     const [chatMessages, setChatMessages] = useState<{role: string, text: string}[]>([]);
     const [chatInput, setChatInput] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
+    const [lessonConversationId, setLessonConversationId] = useState<string | null>(null);
 
     if (!skillId || !moduleId) {
         return <div>Invalid lesson</div>;
@@ -124,11 +135,25 @@ const Lesson: React.FC = () => {
         setChatLoading(true);
 
         try {
-            const systemPrompt = `You are Billionaireable guiding someone through the ${pillarName} pillar, specifically the "${module.title}" module.
+            // Build rich context about this specific module
+            const moduleContext = lessonContent ? `
+MODULE CONTEXT (${pillarName} - ${module.title}):
+${lessonContent.intro.substring(0, 500)}...
 
-Context: ${lessonContent?.intro || skillData?.insight}
+Key concepts: ${lessonContent.sections.map(s => s.heading).join(', ')}
+Framework: ${lessonContent.framework?.name || 'N/A'}
+Directive: ${lessonContent.directive}
+` : skillData?.insight || '';
 
-You guide. You don't teach. You already know. They follow. Keep responses to 2-3 sentences. Direct. No fluff.`;
+            const systemPrompt = `You are Billionaireable guiding someone through Pillar ${PILLAR_ORDER.indexOf(skillId) + 1}: ${pillarName}, specifically Module ${moduleId}: "${module.title}".
+
+${moduleContext}
+
+You guide. You don't teach. You already know. They follow.
+
+REMEMBER: You know everything about this module. Answer questions directly. If they're confused, clarify with authority. If they're resisting, push them. This is the path.
+
+Keep responses to 2-3 sentences. Direct. No fluff.`;
 
             const response = await chat({
                 message: userMessage,
@@ -137,6 +162,35 @@ You guide. You don't teach. You already know. They follow. Keep responses to 2-3
             });
 
             setChatMessages(prev => [...prev, { role: 'model', text: response }]);
+            
+            // Save to Convex
+            if (convexUser) {
+                let convId = lessonConversationId;
+                if (!convId) {
+                    convId = await createConversation({ 
+                        userId: convexUser._id,
+                        title: `${pillarName} - ${module.title}`
+                    });
+                    setLessonConversationId(convId);
+                }
+                
+                await addMessage({
+                    conversationId: convId as any,
+                    userId: convexUser._id,
+                    role: 'user',
+                    content: userMessage,
+                    skillId,
+                    moduleId,
+                });
+                await addMessage({
+                    conversationId: convId as any,
+                    userId: convexUser._id,
+                    role: 'assistant',
+                    content: response,
+                    skillId,
+                    moduleId,
+                });
+            }
         } catch (error) {
             console.error('Chat error:', error);
             setChatMessages(prev => [...prev, { role: 'model', text: "Let's refocus on the lesson. What's unclear?" }]);
@@ -144,6 +198,13 @@ You guide. You don't teach. You already know. They follow. Keep responses to 2-3
             setChatLoading(false);
         }
     };
+    
+    // Pillar order for context
+    const PILLAR_ORDER = [
+        'reality-distortion', 'liquidity-allocation', 'holding-co', 'time-arbitrage',
+        'bio-availability', 'political-capital', 'syndicate', 'family-office',
+        'dynasty-design', 'sovereign-flags', 'asymmetric-bets', 'ascendance'
+    ];
 
     return (
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-20 pb-20 animate-fade-in">

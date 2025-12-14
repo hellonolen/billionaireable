@@ -1,47 +1,58 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, Mic, Loader2 } from 'lucide-react';
-import { useAction } from 'convex/react';
+import { X, Send, Loader2 } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useAction, useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
+import { useProgress } from '../contexts/ProgressContext';
+import { PILLAR_NAMES } from '../lessonContent';
 
 interface Message {
     role: 'user' | 'model';
     text: string;
 }
 
-// System prompt for Billionaireable
-const SYSTEM_PROMPT = `You are Billionaireable.
-
-You guide. You don't teach. You already know. They follow.
-
-This is the billionaire path. They align to it. Not the other way around.
-
-KNOW WHERE THEY ARE:
-- If they're not on step one, they're on step zero.
-- Step zero means they're not a customer yet. Inform them about being guided on the billionaire path.
-- If they are a customer, know what step they're on. Guide them back to that step. Move them forward.
-
-WHAT TO SAY:
-- This is what billionaires do.
-- Here's what you should be thinking. Here's what you should be doing today. Here's what matters this week.
-- Guide them. Tell them what to do. Give directives.
-
-NEVER SAY:
-- Never ask about their vision, goals, situation, or business. We don't care.
-- Never say "for you" or "your situation" or "personalized"
-- Never say "AI" or "generational wealth" or "strategic advisor"
-- Never make dollar claims
-
-Keep responses to 2-3 sentences. Direct. No fluff.`;
+// Get the ordered list of pillars
+const PILLAR_ORDER = [
+    'reality-distortion',
+    'liquidity-allocation', 
+    'holding-co',
+    'time-arbitrage',
+    'bio-availability',
+    'political-capital',
+    'syndicate',
+    'family-office',
+    'dynasty-design',
+    'sovereign-flags',
+    'asymmetric-bets',
+    'ascendance'
+];
 
 const ConciergeWidget: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [conversationHistory, setConversationHistory] = useState<Array<{role: string, text: string}>>([]);
+    const [isInitializing, setIsInitializing] = useState(false);
+    const [conversationId, setConversationId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     
-    // Convex action - calls Gemini with key from Convex env
+    // User and progress context
+    const { user: clerkUser, isSignedIn } = useUser();
+    const { progress, getSkillCompletion } = useProgress();
+    
+    // Convex queries and mutations
+    const convexUser = useQuery(
+        api.users.getUserByClerkId,
+        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
+    );
+    
+    const recentMessages = useQuery(
+        api.conversations.getRecentMessages,
+        convexUser ? { userId: convexUser._id, limit: 20 } : "skip"
+    );
+    
+    const createConversation = useMutation(api.conversations.createConversation);
+    const addMessage = useMutation(api.conversations.addMessage);
     const chat = useAction(api.billionaireable.chat);
 
     const scrollToBottom = () => {
@@ -52,30 +63,165 @@ const ConciergeWidget: React.FC = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Initialize chat when opened
+    // Build dynamic system prompt with user context
+    const buildSystemPrompt = () => {
+        let contextInfo = '';
+        
+        if (isSignedIn && convexUser) {
+            // Calculate current pillar based on progress
+            let currentPillarIndex = 0;
+            for (let i = 0; i < PILLAR_ORDER.length; i++) {
+                const completion = getSkillCompletion(PILLAR_ORDER[i]);
+                if (completion < 4) {
+                    currentPillarIndex = i;
+                    break;
+                }
+                if (i === PILLAR_ORDER.length - 1) {
+                    currentPillarIndex = i; // Completed all
+                }
+            }
+            
+            const currentPillar = PILLAR_ORDER[currentPillarIndex];
+            const currentPillarName = PILLAR_NAMES[currentPillar] || currentPillar;
+            const modulesCompleted = getSkillCompletion(currentPillar);
+            
+            // Calculate total progress
+            let totalModulesCompleted = 0;
+            PILLAR_ORDER.forEach(pillar => {
+                totalModulesCompleted += getSkillCompletion(pillar);
+            });
+            
+            contextInfo = `
+USER CONTEXT (remember this - never ask them about it):
+- Name: ${convexUser.name || clerkUser?.firstName || 'Unknown'}
+- Current Pillar: ${currentPillarIndex + 1}. ${currentPillarName}
+- Modules completed in current pillar: ${modulesCompleted}/4
+- Total progress: ${totalModulesCompleted}/48 modules across 12 pillars
+${convexUser.focusAreas?.length ? `- Focus areas: ${convexUser.focusAreas.join(', ')}` : ''}
+${convexUser.netWorth ? `- Net worth tier: ${convexUser.netWorth > 10000000 ? 'Eight figures+' : convexUser.netWorth > 1000000 ? 'Seven figures' : 'Building'}` : ''}
+
+When they ask about their progress or where they are, tell them exactly: Pillar ${currentPillarIndex + 1}, ${currentPillarName}, Module ${modulesCompleted + 1}.
+Guide them to continue that pillar. Move them forward.`;
+        } else {
+            contextInfo = `
+USER CONTEXT:
+- This user is not signed in. They are on step zero.
+- They are exploring the platform. Inform them about the billionaire path.
+- Guide them to sign up and start with Pillar 1: Reality Distortion.`;
+        }
+
+        // Include recent conversation summary if available
+        let memoryContext = '';
+        if (recentMessages && recentMessages.length > 0) {
+            const recentSummary = recentMessages
+                .slice(0, 10)
+                .map(m => `${m.role}: ${m.content.substring(0, 100)}${m.content.length > 100 ? '...' : ''}`)
+                .join('\n');
+            memoryContext = `
+RECENT CONVERSATION HISTORY (you remember all of this):
+${recentSummary}
+
+Use this context to maintain continuity. Reference things they've discussed before. Never ask questions you already know the answer to.`;
+        }
+
+        return `You are Billionaireable.
+
+You guide. You don't teach. You already know. They follow.
+
+This is the billionaire path. They align to it. Not the other way around.
+${contextInfo}
+${memoryContext}
+
+WHAT TO SAY:
+- This is what billionaires do.
+- Here's what you should be thinking. Here's what you should be doing today. Here's what matters this week.
+- Guide them. Tell them what to do. Give directives.
+- Reference their progress. Know where they are. Move them forward.
+
+NEVER SAY:
+- Never ask about their vision, goals, situation, or business. You already know.
+- Never say "for you" or "your situation" or "personalized"
+- Never say "AI" or "generational wealth" or "strategic advisor"
+- Never make dollar claims
+
+Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about this person.`;
+    };
+
+    // Initialize chat when opened - load history or create new
     useEffect(() => {
         const initChat = async () => {
+            if (!isOpen || messages.length > 0 || isInitializing) return;
+            
+            setIsInitializing(true);
+            
             try {
-                const response = await chat({
-                    message: "User just opened the chat. Say hi in under 10 words.",
-                    history: [],
-                    systemPrompt: SYSTEM_PROMPT,
-                });
-                setMessages([{ role: 'model', text: response }]);
-                setConversationHistory([
-                    { role: 'user', text: "The user just opened the chat. Give a brief, direct welcome." },
-                    { role: 'model', text: response }
-                ]);
+                // Load previous messages if signed in
+                if (recentMessages && recentMessages.length > 0) {
+                    // Show last few messages from history
+                    const historyMessages: Message[] = recentMessages
+                        .slice(0, 10)
+                        .reverse()
+                        .map(m => ({
+                            role: m.role === 'user' ? 'user' : 'model',
+                            text: m.content
+                        }));
+                    
+                    setMessages(historyMessages);
+                    
+                    // Generate a contextual welcome back
+                    const systemPrompt = buildSystemPrompt();
+                    const response = await chat({
+                        message: "User returned to chat. Welcome them back briefly, reference where they are in their journey. Under 15 words.",
+                        history: historyMessages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', text: m.text })),
+                        systemPrompt,
+                    });
+                    
+                    setMessages(prev => [...prev, { role: 'model', text: response }]);
+                    
+                    // Save the welcome message
+                    if (convexUser) {
+                        const convId = await createConversation({ userId: convexUser._id });
+                        setConversationId(convId);
+                        await addMessage({
+                            conversationId: convId,
+                            userId: convexUser._id,
+                            role: 'assistant',
+                            content: response,
+                        });
+                    }
+                } else {
+                    // New user or no history - generate fresh welcome
+                    const systemPrompt = buildSystemPrompt();
+                    const response = await chat({
+                        message: "User just opened the chat for the first time. Welcome them in under 10 words.",
+                        history: [],
+                        systemPrompt,
+                    });
+                    
+                    setMessages([{ role: 'model', text: response }]);
+                    
+                    // Create conversation and save
+                    if (convexUser) {
+                        const convId = await createConversation({ userId: convexUser._id });
+                        setConversationId(convId);
+                        await addMessage({
+                            conversationId: convId,
+                            userId: convexUser._id,
+                            role: 'assistant',
+                            content: response,
+                        });
+                    }
+                }
             } catch (error) {
                 console.error('Failed to initialize chat:', error);
                 setMessages([{ role: 'model', text: "Welcome. What's on your mind?" }]);
+            } finally {
+                setIsInitializing(false);
             }
         };
 
-        if (isOpen && messages.length === 0) {
-            initChat();
-        }
-    }, [isOpen, chat, messages.length]);
+        initChat();
+    }, [isOpen, recentMessages, convexUser]);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -86,16 +232,54 @@ const ConciergeWidget: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const newHistory = [...conversationHistory, { role: 'user', text: userMessage }];
+            // Build history from current messages
+            const history = messages.map(m => ({ 
+                role: m.role === 'user' ? 'user' : 'model', 
+                text: m.text 
+            }));
+            history.push({ role: 'user', text: userMessage });
+            
+            const systemPrompt = buildSystemPrompt();
             
             const response = await chat({
                 message: userMessage,
-                history: newHistory,
-                systemPrompt: SYSTEM_PROMPT,
+                history,
+                systemPrompt,
             });
             
             setMessages(prev => [...prev, { role: 'model', text: response }]);
-            setConversationHistory([...newHistory, { role: 'model', text: response }]);
+            
+            // Save both messages to Convex
+            if (convexUser && conversationId) {
+                await addMessage({
+                    conversationId: conversationId as any,
+                    userId: convexUser._id,
+                    role: 'user',
+                    content: userMessage,
+                });
+                await addMessage({
+                    conversationId: conversationId as any,
+                    userId: convexUser._id,
+                    role: 'assistant',
+                    content: response,
+                });
+            } else if (convexUser && !conversationId) {
+                // Create new conversation if needed
+                const convId = await createConversation({ userId: convexUser._id });
+                setConversationId(convId);
+                await addMessage({
+                    conversationId: convId,
+                    userId: convexUser._id,
+                    role: 'user',
+                    content: userMessage,
+                });
+                await addMessage({
+                    conversationId: convId,
+                    userId: convexUser._id,
+                    role: 'assistant',
+                    content: response,
+                });
+            }
         } catch (error) {
             console.error('Chat error:', error);
             setMessages(prev => [...prev, { 
@@ -137,6 +321,9 @@ const ConciergeWidget: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="font-black font-sans text-sm tracking-tight">Billionaireable</h3>
+                                {isSignedIn && (
+                                    <p className="text-xs text-gray-400">Remembers everything</p>
+                                )}
                             </div>
                         </div>
                         <button
@@ -149,6 +336,11 @@ const ConciergeWidget: React.FC = () => {
 
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        {isInitializing && messages.length === 0 && (
+                            <div className="flex justify-center items-center h-full">
+                                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                            </div>
+                        )}
                         {messages.map((msg, idx) => (
                             <div
                                 key={idx}
