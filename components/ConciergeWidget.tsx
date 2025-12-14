@@ -1,44 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Volume2, VolumeX, Mic, Loader2 } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 interface Message {
-    role: 'user' | 'ai';
+    role: 'user' | 'assistant';
     text: string;
 }
 
-const SYSTEM_PROMPT = `You are Billionaireable, an elite strategic advisor. You help ambitious individuals identify and remove the obstacles standing between them and what they want. You embody the wisdom of Warren Buffett, the vision of Elon Musk, and the strategic thinking of Ray Dalio.
-
-Your personality:
-- Confident but not arrogant
-- Direct and actionable advice
-- Thinks in systems and leverage
-- Always looking for asymmetric opportunities
-- Speaks with authority but welcomes questions
-
-Your areas of expertise:
-1. Capital allocation and wealth building
-2. Business strategy and scaling
-3. Tax optimization and asset protection
-4. Family office structures
-5. Deal flow and investment opportunities
-6. Time leverage and productivity
-7. Network effects and relationship capital
-8. Legacy planning and long-term thinking
-
-Keep responses concise (2-3 paragraphs max). Use concrete examples when relevant. Always end with a thought-provoking question or actionable next step.
-
-Remember: You already know what you want. Now remove what's stopping you.`;
-
 const ConciergeWidget: React.FC = () => {
+    const { user: clerkUser, isSignedIn } = useUser();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'ai', text: 'Welcome back. I\'m Billionaireable, your strategic advisor. What\'s on your mind today?' }
+        { role: 'assistant', text: 'Welcome back. I\'m Billionaireable, your strategic advisor. What\'s on your mind today?' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [voiceEnabled, setVoiceEnabled] = useState(true);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const [conversationId, setConversationId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Convex hooks
+    const convexUser = useQuery(
+        api.users.getUserByClerkId,
+        isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
+    );
+    const createConversation = useMutation(api.conversations.createConversation);
+    const addMessage = useMutation(api.conversations.addMessage);
+    const chat = useAction(api.billionaireable.chat);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -78,72 +69,6 @@ const ConciergeWidget: React.FC = () => {
         window.speechSynthesis.speak(utterance);
     };
 
-    const callGeminiAPI = async (userMessage: string): Promise<string> => {
-        const apiKey = process.env.GEMINI_API_KEY;
-        
-        if (!apiKey) {
-            return "I'm currently in offline mode. To enable my full capabilities, please configure your Gemini API key. In the meantime, what specific area would you like to explore? I can guide you through our curriculum on wealth building, capital allocation, or strategic planning.";
-        }
-
-        try {
-            // Build conversation history for context
-            const conversationHistory = messages.map(msg => ({
-                role: msg.role === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.text }]
-            }));
-
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [
-                            ...conversationHistory,
-                            {
-                                role: 'user',
-                                parts: [{ text: userMessage }]
-                            }
-                        ],
-                        systemInstruction: {
-                            parts: [{ text: SYSTEM_PROMPT }]
-                        },
-                        generationConfig: {
-                            temperature: 0.8,
-                            topK: 40,
-                            topP: 0.95,
-                            maxOutputTokens: 1024,
-                        },
-                        safetySettings: [
-                            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-                            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-                            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-                            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-                        ]
-                    }),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            
-            if (!aiResponse) {
-                throw new Error('No response from API');
-            }
-
-            return aiResponse;
-        } catch (error) {
-            console.error('Gemini API error:', error);
-            return "I encountered a brief disruption. Let me refocus. What's the core question you're wrestling with regarding your wealth-building journey?";
-        }
-    };
-
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
         
@@ -153,13 +78,53 @@ const ConciergeWidget: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const aiResponse = await callGeminiAPI(userMessage);
-            setMessages(prev => [...prev, { role: 'ai', text: aiResponse }]);
+            let aiResponse: string;
+
+            // If user is signed in and we have their Convex user, use the full AI with memory
+            if (isSignedIn && convexUser) {
+                // Create a conversation if we don't have one
+                let convId = conversationId;
+                if (!convId) {
+                    convId = await createConversation({ 
+                        userId: convexUser._id,
+                        title: userMessage.slice(0, 50),
+                    });
+                    setConversationId(convId);
+                }
+
+                // Save user message to Convex
+                await addMessage({
+                    conversationId: convId as any,
+                    userId: convexUser._id,
+                    role: 'user',
+                    content: userMessage,
+                });
+
+                // Call Billionaireable AI with full context
+                aiResponse = await chat({
+                    userId: convexUser._id,
+                    message: userMessage,
+                });
+
+                // Save AI response to Convex
+                await addMessage({
+                    conversationId: convId as any,
+                    userId: convexUser._id,
+                    role: 'assistant',
+                    content: aiResponse,
+                });
+            } else {
+                // Fallback for non-signed-in users
+                aiResponse = "Sign in to unlock my full capabilities. I can learn your situation, remember our conversations, and provide personalized strategic guidance. What would you like to explore?";
+            }
+
+            setMessages(prev => [...prev, { role: 'assistant', text: aiResponse }]);
             speak(aiResponse);
         } catch (error) {
+            console.error('Chat error:', error);
             setMessages(prev => [...prev, { 
-                role: 'ai', 
-                text: "Let me recalibrate. What aspect of your billion-dollar journey should we focus on?" 
+                role: 'assistant', 
+                text: "Let me recalibrate. What aspect of your journey should we focus on?" 
             }]);
         } finally {
             setIsLoading(false);
@@ -210,7 +175,7 @@ const ConciergeWidget: React.FC = () => {
                         <div>
                             <h3 className="font-black font-sans text-sm tracking-tight">Billionaireable</h3>
                             <p className="font-mono text-[10px] text-gray-400 uppercase">
-                                {isLoading ? 'Thinking...' : isSpeaking ? 'Speaking...' : 'Strategic Advisor'}
+                                {isLoading ? 'Thinking...' : isSpeaking ? 'Speaking...' : isSignedIn ? 'Memory Active' : 'Sign in for memory'}
                             </p>
                         </div>
                     </div>
@@ -238,7 +203,7 @@ const ConciergeWidget: React.FC = () => {
                                     : 'bg-white text-gray-800 shadow-sm rounded-tl-none border border-gray-100'
                             }`}>
                                 <p className="whitespace-pre-wrap">{msg.text}</p>
-                                {msg.role === 'ai' && (
+                                {msg.role === 'assistant' && (
                                     <button
                                         onClick={() => speak(msg.text)}
                                         className="mt-3 text-xs font-mono uppercase text-gray-400 hover:text-art-orange transition-colors flex items-center gap-1"
