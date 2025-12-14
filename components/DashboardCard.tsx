@@ -1,8 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus, ChevronRight } from 'lucide-react';
 import { CardData } from '../types';
-import { useProgress } from '../contexts/ProgressContext';
-import { SKILL_DATA } from '../constants';
 
 interface DashboardCardProps {
   data: CardData;
@@ -49,19 +47,6 @@ const ScribbleYellow = () => (
 );
 
 const DashboardCard: React.FC<DashboardCardProps> = ({ data, onClick }) => {
-  const { getSkillCompletion } = useProgress();
-  
-  // Calculate progress percentage based on completed modules
-  const getProgressPercent = (): number => {
-    const skillData = SKILL_DATA[data.id];
-    if (!skillData) return 0;
-    const totalModules = skillData.modules.length;
-    const completedModules = getSkillCompletion(data.id);
-    return totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
-  };
-  
-  const progressPercent = getProgressPercent();
-
   const getBgClass = () => {
     switch (data.colorTheme) {
       case 'orange': return 'bg-art-orange';
@@ -123,12 +108,9 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ data, onClick }) => {
             <div className="space-y-2">
               <div className="flex items-center gap-2 mb-2">
                 <div className="h-1.5 flex-grow bg-black/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-black transition-all duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  ></div>
+                  <div className={`h-full w-[20%] ${getBarColorClass() === 'bg-black' ? 'bg-black' : 'bg-black'}`}></div>
                 </div>
-                <span className="font-mono text-[10px] font-bold">{progressPercent}%</span>
+                <span className="font-mono text-[10px] font-bold">20%</span>
               </div>
               {data.previewMetrics.map((metric, idx) => (
                 <div key={idx}>
