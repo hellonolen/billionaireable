@@ -117,7 +117,7 @@ export const sendVerificationEmail = action({
                 <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;" />
                 
                 <p style="font-size: 12px; color: #999;">
-                    Billionaireable - The Path to a Billion
+                    Billionaireable
                 </p>
             </div>
         `;

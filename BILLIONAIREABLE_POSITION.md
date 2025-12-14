@@ -49,4 +49,14 @@
 ## The Name
 
 - "Billionaireable" - no dash, no "AI", just Billionaireable
+- ONE WORD, not two. Never "Billionaire Able" or "BILLIONAIRE ABLE"
+
+## CRITICAL: Legal Language Protection
+
+- **NEVER** say "path to a billion" or "path to billions" - this makes a specific monetary claim we cannot prove
+- **ONLY** say "Become Billionaireable" or "The Path" 
+- "Billionaireable is a path" - yes
+- "The path to a billion" - NO, lawsuit risk
+- We don't know if this is a path to a billion. If someone challenges it and we don't have proof, that's a lawsuit.
+- Never speak about money like that. Only speak about becoming billionaire-able.
 

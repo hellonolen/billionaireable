@@ -61,7 +61,7 @@ const Auth: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex items-start justify-center p-4 pt-24 md:pt-32">
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="text-center mb-8">
@@ -69,7 +69,7 @@ const Auth: React.FC = () => {
                         Billionaireable
                     </h1>
                     <p className="font-serif text-gray-500 dark:text-gray-400 mt-2">
-                        The path to a billion
+                        The Path
                     </p>
                 </div>
 

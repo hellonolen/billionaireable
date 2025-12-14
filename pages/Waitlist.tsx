@@ -42,7 +42,7 @@ const Waitlist: React.FC = () => {
         <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
             <div className="max-w-2xl w-full text-center relative z-10">
                 <h1 className="font-serif text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none text-black dark:text-white">
-                    BILLIONAIRE<br />ABLE.
+                    BILLIONAIREABLE.
                 </h1>
                 <p className="font-serif text-xl md:text-2xl text-gray-400 mb-12">
                     "The second billion is inevitable. The first one is engineered."
