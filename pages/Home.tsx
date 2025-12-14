@@ -139,13 +139,13 @@ const Home: React.FC = () => {
             </section>
 
             {/* How It Works */}
-            <section className="py-24 bg-black text-white">
+            <section className="py-24 bg-art-offwhite dark:bg-gray-950 border-y border-gray-200 dark:border-gray-800">
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="text-center mb-16">
-                        <h2 className="font-serif text-4xl md:text-6xl font-black tracking-tighter mb-4">
+                        <h2 className="font-serif text-4xl md:text-6xl font-black text-black dark:text-white tracking-tighter mb-4">
                             How It Works
                         </h2>
-                        <p className="font-serif text-xl text-gray-400 max-w-2xl mx-auto">
+                        <p className="font-serif text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                             Not a course. Not a community. A year-long transformation.
                         </p>
                     </div>
@@ -161,7 +161,7 @@ const Home: React.FC = () => {
                             {
                                 step: '02',
                                 title: 'Get Your Path',
-                                desc: 'A personalized 12-month strategy across all pillars of wealth building. Updated weekly as you progress.',
+                                desc: 'A personalized 12-month strategy across all pillars. Updated weekly as you progress.',
                                 color: 'bg-art-green'
                             },
                             {
@@ -177,13 +177,13 @@ const Home: React.FC = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: i * 0.1 }}
                                 viewport={{ once: true }}
-                                className="relative"
+                                className="relative bg-white dark:bg-gray-900 p-8 rounded-[24px] shadow-soft-xl border border-gray-100 dark:border-gray-800"
                             >
-                                <div className={`${item.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
-                                    <span className="font-mono text-2xl font-black text-black">{item.step}</span>
+                                <div className={`${item.color} w-14 h-14 rounded-xl flex items-center justify-center mb-6`}>
+                                    <span className="font-mono text-xl font-black text-black">{item.step}</span>
                                 </div>
-                                <h3 className="font-sans text-2xl font-black mb-3">{item.title}</h3>
-                                <p className="text-gray-400 font-medium">{item.desc}</p>
+                                <h3 className="font-sans text-xl font-black text-black dark:text-white mb-3">{item.title}</h3>
+                                <p className="text-gray-500 dark:text-gray-400 font-medium">{item.desc}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -246,24 +246,26 @@ const Home: React.FC = () => {
             </section>
 
             {/* The Promise */}
-            <section className="py-24 bg-black text-white">
+            <section className="py-24 bg-art-offwhite dark:bg-gray-950">
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
-                    <div className="max-w-3xl mx-auto text-center">
-                        <h2 className="font-serif text-4xl md:text-6xl font-black tracking-tighter mb-8">
-                            "You already know what you want.
-                            <br />
-                            <span className="text-art-orange">Now remove what's stopping you."</span>
-                        </h2>
-                        <p className="font-serif text-xl text-gray-400 mb-12">
-                            Most people fail not from lack of effort, but from lack of strategy. Billionaireable is the strategy — personalized to you, relentless in execution.
-                        </p>
-                        <button
-                            onClick={() => navigate('/waitlist')}
-                            className="group flex items-center gap-3 mx-auto bg-art-orange text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-green transition-all shadow-2xl"
-                        >
-                            Become Billionaireable
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </button>
+                    <div className="max-w-4xl mx-auto">
+                        <div className="bg-art-orange rounded-[32px] p-12 md:p-16 text-center">
+                            <h2 className="font-serif text-3xl md:text-5xl font-black text-black tracking-tighter mb-6 leading-tight">
+                                "You already know what you want.
+                                <br />
+                                Now remove what's stopping you."
+                            </h2>
+                            <p className="font-serif text-lg text-black/70 mb-10 max-w-2xl mx-auto">
+                                Most people fail not from lack of effort, but from lack of strategy. Billionaireable is the strategy — personalized to you, relentless in execution.
+                            </p>
+                            <button
+                                onClick={() => navigate('/waitlist')}
+                                className="group flex items-center gap-3 mx-auto bg-black text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-gray-900 transition-all shadow-2xl"
+                            >
+                                Become Billionaireable
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
