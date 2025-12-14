@@ -42,7 +42,6 @@
 
 ## Copy Style
 
-- "Give me some Frank Kern stuff. I think this Alex Hormozi shit is not what I want."
 - "What I like is copy that speaks of going this way. Let's move forward. Let's go accomplish something. Let's become something."
 - "All of this stuff makes an assumption. I don't want to, I don't like copy like this."
 - Copy should not make assumptions about the user's past
