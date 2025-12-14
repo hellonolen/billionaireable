@@ -1,102 +1,112 @@
 import React from 'react';
-import DashboardCard from '../components/DashboardCard';
-import { CardData } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, Target, TrendingUp, Zap, Brain, Globe } from 'lucide-react';
 
-const COMMUNITY_CARDS: CardData[] = [
+const INTELLIGENCE_FEEDS = [
     {
-        id: 'summit-1',
-        title: 'Sovereign Summit',
-        type: 'curriculum',
-        description: 'Davos, Switzerland',
-        colorTheme: 'blue',
-        previewMetrics: [
-            { label: 'Date', value: 'Dec 12-15' },
-            { label: 'Type', value: 'Global Macro' }
-        ],
+        id: 'feed-1',
+        title: 'Market Intelligence',
+        description: 'Real-time analysis of global markets, trends, and opportunities',
+        icon: <TrendingUp className="w-6 h-6" />,
+        color: 'bg-art-green',
+        updates: 'Updated daily',
     },
     {
-        id: 'retreat-1',
-        title: 'Bio-Age Retreat',
-        type: 'curriculum',
-        description: 'Costa Rica',
-        colorTheme: 'orange',
-        previewMetrics: [
-            { label: 'Date', value: 'Jan 5-10' },
-            { label: 'Type', value: 'Health' }
-        ],
+        id: 'feed-2',
+        title: 'Deal Flow Analysis',
+        description: 'Breakdown of major deals, structures, and strategic moves',
+        icon: <Target className="w-6 h-6" />,
+        color: 'bg-art-orange',
+        updates: 'Updated weekly',
     },
     {
-        id: 'roundtable-1',
-        title: 'PE Roundtable',
-        type: 'curriculum',
-        description: 'New York, NY',
-        colorTheme: 'green',
-        previewMetrics: [
-            { label: 'Date', value: 'Feb 22' },
-            { label: 'Type', value: 'Wealth' }
-        ],
+        id: 'feed-3',
+        title: 'Global Macro Briefing',
+        description: 'Geopolitical shifts and their impact on capital flows',
+        icon: <Globe className="w-6 h-6" />,
+        color: 'bg-art-blue',
+        updates: 'Updated weekly',
     },
     {
-        id: 'member-1',
-        title: 'Alex S.',
-        type: 'curriculum',
-        description: 'Tech Founder',
-        colorTheme: 'yellow',
-        previewMetrics: [
-            { label: 'Location', value: 'SF' },
-            { label: 'Status', value: 'Active' }
-        ],
+        id: 'feed-4',
+        title: 'Strategy Playbooks',
+        description: 'Deep dives into billionaire strategies and frameworks',
+        icon: <BookOpen className="w-6 h-6" />,
+        color: 'bg-black',
+        updates: 'New content monthly',
     },
     {
-        id: 'member-2',
-        title: 'Elena R.',
-        type: 'curriculum',
-        description: 'Family Office',
-        colorTheme: 'blue',
-        previewMetrics: [
-            { label: 'Location', value: 'London' },
-            { label: 'Status', value: 'Active' }
-        ],
+        id: 'feed-5',
+        title: 'Asymmetric Opportunities',
+        description: 'High-upside, limited-downside opportunities analysis',
+        icon: <Zap className="w-6 h-6" />,
+        color: 'bg-art-orange',
+        updates: 'Updated as identified',
     },
     {
-        id: 'member-3',
-        title: 'Marcus T.',
-        type: 'curriculum',
-        description: 'Real Estate',
-        colorTheme: 'orange',
-        previewMetrics: [
-            { label: 'Location', value: 'Dubai' },
-            { label: 'Status', value: 'Active' }
-        ],
+        id: 'feed-6',
+        title: 'Mental Models Library',
+        description: 'Frameworks for better thinking and decision-making',
+        icon: <Brain className="w-6 h-6" />,
+        color: 'bg-art-green',
+        updates: 'Expanding library',
     },
 ];
 
 const Community: React.FC = () => {
-    return (
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 pt-20 pb-20 animate-fade-in">
+    const navigate = useNavigate();
 
+    return (
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 py-12">
             {/* Header */}
-            <div className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
-                <div>
-                    <h1 className="font-serif text-6xl md:text-8xl font-black text-black tracking-tighter leading-[0.9] mb-6">
-                        THE NETWORK
-                    </h1>
-                    <p className="font-serif text-2xl text-gray-400">"Your network is your net worth. Literally."</p>
-                </div>
+            <div className="mb-12">
+                <h1 className="font-serif text-5xl md:text-6xl font-black text-black dark:text-white tracking-tighter mb-4">
+                    Intelligence
+                </h1>
+                <p className="font-serif text-xl text-gray-500 dark:text-gray-400 max-w-2xl">
+                    The information edge. Updated continuously. This is what billionaires know.
+                </p>
             </div>
 
-            {/* The Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {COMMUNITY_CARDS.map((card) => (
-                    <div key={card.id} className="h-full">
-                        <DashboardCard
-                            data={card}
-                            onClick={() => { }}
-                        />
+            {/* Intelligence Feeds Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {INTELLIGENCE_FEEDS.map((feed) => (
+                    <div
+                        key={feed.id}
+                        onClick={() => navigate('/dashboard')}
+                        className="bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-soft-xl border border-gray-100 dark:border-gray-800 cursor-pointer hover:-translate-y-1 transition-all duration-300"
+                    >
+                        <div className={`w-12 h-12 ${feed.color} rounded-2xl flex items-center justify-center text-white mb-6`}>
+                            {feed.icon}
+                        </div>
+                        <h3 className="font-sans text-xl font-bold uppercase tracking-tight mb-2 dark:text-white">
+                            {feed.title}
+                        </h3>
+                        <p className="font-serif text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            {feed.description}
+                        </p>
+                        <p className="font-mono text-xs text-gray-400 uppercase">
+                            {feed.updates}
+                        </p>
                     </div>
                 ))}
             </div>
 
+            {/* Bottom CTA */}
+            <div className="mt-16 bg-black dark:bg-white rounded-[32px] p-12 text-center">
+                <h2 className="font-serif text-3xl font-black text-white dark:text-black mb-4">
+                    All Intelligence. One Source.
+                </h2>
+                <p className="font-serif text-lg text-white/80 dark:text-black/80 max-w-xl mx-auto mb-8">
+                    Billionaireable synthesizes global intelligence and delivers what matters. No noise. Only signal.
+                </p>
+                <button
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-white dark:bg-black text-black dark:text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                >
+                    Access Intelligence →
+                </button>
+            </div>
         </div>
     );
 };

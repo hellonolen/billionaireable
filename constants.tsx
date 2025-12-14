@@ -253,7 +253,7 @@ export const SKILL_DATA: Record<string, {
       { id: 1, title: 'SFO vs MFO', duration: '20 min', status: 'completed' },
       { id: 2, title: 'Hiring the CIO', duration: '30 min', status: 'active' },
       { id: 3, title: 'Investment Policy', duration: '25 min', status: 'locked' },
-      { id: 4, title: 'Lifestyle Concierge', duration: '15 min', status: 'locked' },
+      { id: 4, title: 'Lifestyle Systems', duration: '15 min', status: 'locked' },
     ],
     network: [
       { name: 'Family Office Exchange', type: 'Network', access: 'Direct' },
@@ -261,7 +261,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Trust Companies', type: 'Admin', access: 'Direct' },
     ],
     insight: "A Family Office is not just wealth management — it's the operating system billionaires use. It handles everything from tax returns to travel logistics, freeing focus for high-impact decisions.",
-    tools: ['Investment Policy Statement', 'Staffing Org Chart', 'Concierge Request Form']
+    tools: ['Investment Policy Statement', 'Staffing Org Chart', 'Administrative Systems Checklist']
   },
   'dynasty-design': {
     modules: [

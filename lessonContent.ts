@@ -574,23 +574,23 @@ export const LESSON_CONTENT: Record<string, Record<number, {
       directive: "Calculate current assets under management. Determine which model fits. If SFO makes sense, start planning."
     },
     2: {
-      title: 'Hiring the CIO',
-      intro: "The Chief Investment Officer runs the money. This is the most important hire. Get it right.",
+      title: 'The CIO Role',
+      intro: "The Chief Investment Officer runs the money. Understanding this role is critical. Know the profile.",
       sections: [
         {
           heading: 'The Profile',
-          content: "Track record that's verifiable. Philosophy aligned with yours. Ego in check. Communication skills. This person becomes your partner."
+          content: "Track record that's verifiable. Philosophy aligned with the mission. Ego in check. Communication skills. This role is the operational center."
         },
         {
           heading: 'Compensation Structure',
           content: "Base plus performance. Long vesting. Clawback provisions. Aligned incentives. Structure it so winning together is the only way to win big."
         },
         {
-          heading: 'The Interview',
-          content: "Ask about their worst investment. Ask about disagreements with past employers. How they handle being wrong tells you everything."
+          heading: 'Evaluation Criteria',
+          content: "Ask about worst investments. Ask about disagreements. How someone handles being wrong tells you everything about their character."
         }
       ],
-      directive: "Write the CIO job description. Define the philosophy. Start the search. Or evaluate the current one."
+      directive: "Define the CIO role criteria. What philosophy? What track record? What compensation structure? Document it."
     },
     3: {
       title: 'Investment Policy',
@@ -606,29 +606,29 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         },
         {
           heading: 'Approval Process',
-          content: "Who approves what? Below $1M, CIO decides. Above $5M, family approval. Document the process. Follow it."
+          content: "Define the thresholds. Below a certain amount, auto-approve. Above it, deeper review. Document the process. Follow it."
         }
       ],
       directive: "Draft the Investment Policy Statement. Asset allocation. Risk parameters. Approval thresholds. One document."
     },
     4: {
-      title: 'Lifestyle Concierge',
-      intro: "The family office handles life, not just money. Travel, health, education, security. All of it.",
+      title: 'Lifestyle Systems',
+      intro: "The family office handles life, not just money. Travel, health, logistics. Build the systems.",
       sections: [
         {
-          heading: 'Travel Management',
-          content: "Private aviation. Luxury travel. Security details. Someone handles all of it. Time shouldn't be spent on logistics."
+          heading: 'Travel Systems',
+          content: "Private aviation protocols. Luxury travel preferences documented. Security considerations. Systems handle logistics. Time goes to high-value activities."
         },
         {
-          heading: 'Health Coordination',
-          content: "Executive physicals. Specialist access. Medical records management. Concierge medicine. Health is the ultimate asset."
+          heading: 'Health Systems',
+          content: "Executive physicals scheduled. Specialist relationships established. Medical records organized. Health is the ultimate asset. Systematize it."
         },
         {
-          heading: 'Family Services',
-          content: "Education consulting. Estate planning coordination. Security assessments. The family office protects the family. All of it."
+          heading: 'Administrative Systems',
+          content: "Bill pay automated. Insurance policies consolidated. Legal documents organized. Every administrative function systematized. Nothing falls through cracks."
         }
       ],
-      directive: "List all lifestyle functions currently self-managed. Identify which ones drain time. Outsource them."
+      directive: "List all lifestyle functions currently self-managed. Identify which ones drain time. Build systems for them."
     }
   },
   'dynasty-design': {
