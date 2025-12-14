@@ -78,14 +78,7 @@ const ConciergeWidget: React.FC = () => {
         } catch (error) {
             console.error('TTS error:', error);
             setIsSpeaking(false);
-            
-            // Fallback to Web Speech API if Gemini audio fails
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.95;
-                utterance.onend = () => setIsSpeaking(false);
-                window.speechSynthesis.speak(utterance);
-            }
+            // No fallback - voice disabled until proper TTS is configured
         }
     }, [voiceEnabled, textToSpeech]);
 
