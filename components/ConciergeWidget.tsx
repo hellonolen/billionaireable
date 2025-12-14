@@ -13,7 +13,7 @@ const ConciergeWidget: React.FC = () => {
     const { user: clerkUser, isSignedIn } = useUser();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'assistant', text: 'Welcome back. I\'m Billionaireable, your strategic advisor. What\'s on your mind today?' }
+        { role: 'assistant', text: 'Welcome back. What\'s on your mind today?' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -197,7 +197,7 @@ const ConciergeWidget: React.FC = () => {
                         <div>
                             <h3 className="font-black font-sans text-sm tracking-tight">Billionaireable</h3>
                             <p className="font-mono text-[10px] text-gray-400 uppercase">
-                                {isLoading ? 'Thinking...' : isSpeaking ? 'Speaking...' : isSignedIn ? 'Memory Active' : 'Sign in for memory'}
+                                {isLoading ? 'Thinking...' : isSpeaking ? 'Speaking...' : ''}
                             </p>
                         </div>
                     </div>

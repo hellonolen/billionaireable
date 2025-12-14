@@ -62,7 +62,7 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="font-serif text-xl md:text-2xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
                         >
-                            Billionaireable learns your situation, builds your personalized strategy, and shows you exactly why the obstacles in your way don't have to stop you.
+                            Your guide to a billion dollars. 12 pillars. 12 months. No excuses.
                         </motion.p>
 
                         {/* CTA */}
@@ -103,7 +103,6 @@ const Home: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-black text-lg">Billionaireable</h3>
-                                    <p className="font-mono text-xs text-gray-400 uppercase">Your Strategic Advisor</p>
                                 </div>
                             </div>
 
@@ -125,10 +124,10 @@ const Home: React.FC = () => {
                                 >
                                     <div className="bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 dark:border-gray-700 max-w-md">
                                         <p className="text-gray-800 dark:text-gray-200 font-medium mb-3">
-                                            Let's build your path. First, I need to understand where you are now. What's your current net worth and primary income source?
+                                            Good. Let's get you there. What's your current net worth and primary income source?
                                         </p>
                                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                                            I'll analyze your situation across all 12 pillars and create a personalized 12-month roadmap.
+                                            We'll map out your 12-month path across all 12 pillars.
                                         </p>
                                     </div>
                                 </motion.div>
@@ -154,20 +153,20 @@ const Home: React.FC = () => {
                         {[
                             {
                                 step: '01',
-                                title: 'Tell It Everything',
-                                desc: 'Your net worth, income, goals, fears, constraints. Billionaireable builds a complete picture of where you are.',
+                                title: 'Start Here',
+                                desc: 'Your net worth, income, goals. Where you are now.',
                                 color: 'bg-art-orange'
                             },
                             {
                                 step: '02',
                                 title: 'Get Your Path',
-                                desc: 'A personalized 12-month strategy across all pillars. Updated weekly as you progress.',
+                                desc: 'Your 12-month strategy across all 12 pillars. Updated weekly.',
                                 color: 'bg-art-green'
                             },
                             {
                                 step: '03',
-                                title: 'Execute & Adapt',
-                                desc: 'Daily guidance, accountability, course corrections. Billionaireable learns what works for you and optimizes.',
+                                title: 'Execute',
+                                desc: 'Daily guidance. Accountability. No excuses.',
                                 color: 'bg-art-blue'
                             }
                         ].map((item, i) => (
