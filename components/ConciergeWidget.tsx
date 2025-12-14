@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageSquare, X, Send, Volume2, VolumeX, Mic, Loader2 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useAction, useMutation, useQuery } from 'convex/react';
@@ -30,6 +30,10 @@ const ConciergeWidget: React.FC = () => {
     const createConversation = useMutation(api.conversations.createConversation);
     const addMessage = useMutation(api.conversations.addMessage);
     const chat = useAction(api.billionaireable.chat);
+    const textToSpeech = useAction(api.speech.textToSpeech);
+    
+    // Audio ref for playing TTS
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,35 +43,51 @@ const ConciergeWidget: React.FC = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Text-to-Speech function using Web Speech API
-    const speak = (text: string) => {
-        if (!voiceEnabled || !('speechSynthesis' in window)) return;
+    // Text-to-Speech using Google Cloud TTS via Convex
+    const speak = useCallback(async (text: string) => {
+        if (!voiceEnabled) return;
 
-        // Cancel any ongoing speech
-        window.speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.95;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.8;
-
-        // Try to use a premium voice
-        const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(v => 
-            v.name.includes('Samantha') || 
-            v.name.includes('Karen') || 
-            v.name.includes('Daniel') ||
-            v.lang.includes('en-GB')
-        );
-        if (preferredVoice) {
-            utterance.voice = preferredVoice;
+        // Stop any currently playing audio
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
         }
 
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => setIsSpeaking(false);
+        setIsSpeaking(true);
 
-        window.speechSynthesis.speak(utterance);
-    };
+        try {
+            // Call Convex action to get audio from Google TTS
+            const audioBase64 = await textToSpeech({ text });
+            
+            // Create audio element and play
+            const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
+            audioRef.current = audio;
+            
+            audio.onended = () => {
+                setIsSpeaking(false);
+                audioRef.current = null;
+            };
+            
+            audio.onerror = () => {
+                setIsSpeaking(false);
+                audioRef.current = null;
+                console.error('Audio playback error');
+            };
+
+            await audio.play();
+        } catch (error) {
+            console.error('TTS error:', error);
+            setIsSpeaking(false);
+            
+            // Fallback to Web Speech API if Google TTS fails
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.95;
+                utterance.onend = () => setIsSpeaking(false);
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+    }, [voiceEnabled, textToSpeech]);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -136,13 +156,15 @@ const ConciergeWidget: React.FC = () => {
         if (isOpen && messages.length === 1) {
             speak(messages[0].text);
         }
-    }, [isOpen]);
-
-    // Load voices on component mount
+    }, [isOpen, speak]);
+    
+    // Cleanup audio on unmount
     useEffect(() => {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.getVoices();
-        }
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+        };
     }, []);
 
     const handleVoiceInput = () => {
