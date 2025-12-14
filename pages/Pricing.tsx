@@ -79,14 +79,14 @@ const Pricing: React.FC = () => {
         try {
             if (method === 'wire') {
                 // Create application for wire transfer
-                await createApplication({
+                const result = await createApplication({
                     userId: convexUser._id,
                     tier: tier.name.toLowerCase(),
                     billingCycle: isAnnual ? 'annual' : 'monthly',
                     amount: isAnnual ? tier.annualPrice : tier.monthlyPrice,
                     paymentMethod: 'wire',
                 });
-                navigate('/payment-application-submitted');
+                navigate(`/payment-application-submitted?id=${result.applicationId}`);
             } else if (method === 'whop') {
                 // Redirect to Whop checkout
                 // You'll set these URLs in your Whop dashboard
@@ -111,10 +111,6 @@ const Pricing: React.FC = () => {
             }
         } catch (error) {
             console.error('Payment error:', error);
-            // For wire/whop, still show application submitted
-            if (method !== 'stripe') {
-                navigate('/payment-application-submitted');
-            }
         } finally {
             setLoading(null);
             setShowPaymentOptions(false);

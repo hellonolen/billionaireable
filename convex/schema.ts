@@ -112,12 +112,18 @@ export default defineSchema({
     billingCycle: v.string(), // monthly, annual
     amount: v.number(),
     paymentMethod: v.string(), // wire, whop, stripe
-    status: v.string(), // pending, approved, rejected, paid
+    status: v.string(), // pending, awaiting_payment, approved, rejected, payment_insufficient
+    wireReference: v.optional(v.string()), // Unique reference for wire payments
+    paymentReference: v.optional(v.string()), // Bank/payment processor reference
+    paymentSource: v.optional(v.string()), // Where payment was verified
+    paymentVerifiedAt: v.optional(v.number()),
+    amountReceived: v.optional(v.number()),
     notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_wire_reference", ["wireReference"]),
 });
 
