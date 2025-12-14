@@ -853,13 +853,13 @@ const AdminDashboard: React.FC = () => {
                         <td className="px-6 py-4">
                           <span
                             className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-mono text-xs font-bold uppercase ${
-                              app.status === 'pending'
+                              app.status === 'awaiting_payment'
                                 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
                                 : app.status === 'approved'
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                : app.status === 'rejected'
+                                : app.status === 'payment_insufficient'
                                 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
                             }`}
                           >
                             {app.status}
@@ -870,37 +870,28 @@ const AdminDashboard: React.FC = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            {app.status === 'pending' && (
-                              <>
-                                <button
-                                  onClick={() =>
-                                    updateApplicationStatus({
-                                      applicationId: app._id,
-                                      status: 'approved',
-                                    })
-                                  }
-                                  className="p-2 text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-                                  title="Approve & Activate"
-                                >
-                                  <CheckCircle className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    updateApplicationStatus({
-                                      applicationId: app._id,
-                                      status: 'rejected',
-                                    })
-                                  }
-                                  className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                  title="Reject"
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </button>
-                              </>
+                            {app.status === 'awaiting_payment' && (
+                              <button
+                                onClick={() =>
+                                  updateApplicationStatus({
+                                    applicationId: app._id,
+                                    status: 'approved',
+                                  })
+                                }
+                                className="px-3 py-1.5 bg-green-500 text-white rounded-lg font-mono text-xs font-bold uppercase hover:bg-green-600 transition-colors"
+                                title="Manual Approve (if webhook didn't fire)"
+                              >
+                                Verify Payment
+                              </button>
                             )}
-                            {app.status !== 'pending' && (
-                              <span className="font-mono text-xs text-gray-400">
-                                {app.status === 'approved' ? 'Active' : 'Closed'}
+                            {app.status === 'approved' && (
+                              <span className="font-mono text-xs text-green-500 font-bold">
+                                ✓ Active
+                              </span>
+                            )}
+                            {app.status === 'payment_insufficient' && (
+                              <span className="font-mono text-xs text-red-500">
+                                Underpaid
                               </span>
                             )}
                           </div>
@@ -912,58 +903,25 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Payment Method Summary */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
-              <h3 className="font-sans text-lg font-bold text-black dark:text-white mb-4">
-                Payment Methods Configuration
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <CreditCard className="w-5 h-5 text-[#635BFF]" />
-                    <span className="font-sans font-bold text-black dark:text-white">Stripe</span>
-                  </div>
-                  <p className="font-mono text-xs text-gray-500 mb-2">
-                    Monthly Founder ($497) only
-                  </p>
-                  <a
-                    href="https://dashboard.stripe.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-xs text-[#635BFF] hover:underline"
-                  >
-                    Manage →
-                  </a>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Zap className="w-5 h-5 text-purple-500" />
-                    <span className="font-sans font-bold text-black dark:text-white">Whop</span>
-                  </div>
-                  <p className="font-mono text-xs text-gray-500 mb-2">
-                    Monthly Founder + Scaler
-                  </p>
-                  <a
-                    href="https://whop.com/dashboard"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-xs text-purple-500 hover:underline"
-                  >
-                    Manage →
-                  </a>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Building2 className="w-5 h-5 text-blue-500" />
-                    <span className="font-sans font-bold text-black dark:text-white">Wire Transfer</span>
-                  </div>
-                  <p className="font-mono text-xs text-gray-500 mb-2">
-                    All annual + Monthly Owner
-                  </p>
-                  <span className="font-mono text-xs text-blue-500">
-                    Manual invoice required
-                  </span>
-                </div>
+            {/* Wire Transfer Info */}
+            <div className="bg-gradient-to-br from-art-blue/10 to-art-blue/5 rounded-2xl border border-art-blue/20 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Building2 className="w-6 h-6 text-art-blue" />
+                <h3 className="font-sans text-lg font-bold text-black dark:text-white">
+                  Wire Transfer Only
+                </h3>
+              </div>
+              <p className="font-serif text-sm text-gray-600 dark:text-gray-400 mb-4">
+                All payments are via wire transfer. When a user selects a tier, they receive bank details with a unique reference code. When payment clears and the webhook fires, their subscription activates automatically.
+              </p>
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-4">
+                <p className="font-mono text-xs text-gray-400 mb-2">Webhook endpoint:</p>
+                <code className="font-mono text-sm text-art-blue">
+                  POST /wire-verification
+                </code>
+                <p className="font-mono text-xs text-gray-400 mt-2">
+                  Body: {`{ "reference": "BILL-XXX", "amount": 4997 }`}
+                </p>
               </div>
             </div>
           </div>

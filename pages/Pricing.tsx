@@ -1,120 +1,46 @@
 import React, { useState } from 'react';
-import { Check, ArrowRight, Loader2, CreditCard, Building2, Zap } from 'lucide-react';
+import { Check, ArrowRight, Loader2, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import { useAction, useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
-
-// Payment method types
-type PaymentMethod = 'stripe' | 'whop' | 'wire';
-
-// Payment availability rules
-const getAvailablePaymentMethods = (tier: string, isAnnual: boolean): PaymentMethod[] => {
-    // Annual = Wire only (all tiers)
-    if (isAnnual) {
-        return ['wire'];
-    }
-    
-    // Monthly by tier
-    switch (tier) {
-        case 'founder':
-            return ['stripe', 'whop', 'wire']; // All options
-        case 'scaler':
-            return ['whop', 'wire']; // No Stripe (too high)
-        case 'owner':
-            return ['wire']; // Wire only (way too high)
-        default:
-            return ['wire'];
-    }
-};
-
-const PAYMENT_METHOD_INFO: Record<PaymentMethod, { name: string; icon: React.ReactNode; description: string }> = {
-    stripe: {
-        name: 'Credit Card',
-        icon: <CreditCard className="w-5 h-5" />,
-        description: 'Pay instantly with card'
-    },
-    whop: {
-        name: 'Whop',
-        icon: <Zap className="w-5 h-5" />,
-        description: 'Secure subscription'
-    },
-    wire: {
-        name: 'Wire Transfer',
-        icon: <Building2 className="w-5 h-5" />,
-        description: 'Bank transfer (recommended)'
-    }
-};
 
 const Pricing: React.FC = () => {
     const navigate = useNavigate();
     const { user: clerkUser, isSignedIn } = useUser();
     const [isAnnual, setIsAnnual] = useState(true);
     const [loading, setLoading] = useState<string | null>(null);
-    const [selectedTier, setSelectedTier] = useState<string | null>(null);
-    const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
     // Convex
     const convexUser = useQuery(
         api.users.getUserByClerkId,
         isSignedIn && clerkUser ? { clerkId: clerkUser.id } : "skip"
     );
-    const createCheckout = useAction(api.stripe.createCheckoutSession);
     const createApplication = useMutation(api.payments.createPaymentApplication);
 
-    const handleSelectTier = (tierName: string) => {
+    const handleSelectTier = async (tier: typeof tiers[0]) => {
         if (!isSignedIn) {
             navigate('/waitlist');
             return;
         }
-        setSelectedTier(tierName.toLowerCase());
-        setShowPaymentOptions(true);
-    };
-
-    const handlePaymentMethod = async (method: PaymentMethod, tier: typeof tiers[0]) => {
+        
         if (!convexUser) return;
         
         setLoading(tier.name);
 
         try {
-            if (method === 'wire') {
-                // Create application for wire transfer
-                const result = await createApplication({
-                    userId: convexUser._id,
-                    tier: tier.name.toLowerCase(),
-                    billingCycle: isAnnual ? 'annual' : 'monthly',
-                    amount: isAnnual ? tier.annualPrice : tier.monthlyPrice,
-                    paymentMethod: 'wire',
-                });
-                navigate(`/payment-application-submitted?id=${result.applicationId}`);
-            } else if (method === 'whop') {
-                // Redirect to Whop checkout
-                // You'll set these URLs in your Whop dashboard
-                const whopUrls: Record<string, string> = {
-                    founder_monthly: process.env.VITE_WHOP_FOUNDER_MONTHLY || '/payment-application-submitted',
-                    scaler_monthly: process.env.VITE_WHOP_SCALER_MONTHLY || '/payment-application-submitted',
-                };
-                const key = `${tier.name.toLowerCase()}_monthly`;
-                window.location.href = whopUrls[key] || '/payment-application-submitted';
-            } else if (method === 'stripe') {
-                // Stripe checkout (only for low amounts)
-                const priceId = isAnnual ? tier.annualPriceId : tier.monthlyPriceId;
-                const { url } = await createCheckout({
-                    priceId,
-                    userId: convexUser._id,
-                    successUrl: `${window.location.origin}/payment-success`,
-                    cancelUrl: `${window.location.origin}/pricing?canceled=true`,
-                });
-                if (url) {
-                    window.location.href = url;
-                }
-            }
+            const result = await createApplication({
+                userId: convexUser._id,
+                tier: tier.name.toLowerCase(),
+                billingCycle: isAnnual ? 'annual' : 'monthly',
+                amount: isAnnual ? tier.annualPrice : tier.monthlyPrice,
+                paymentMethod: 'wire',
+            });
+            navigate(`/payment-application-submitted?id=${result.applicationId}`);
         } catch (error) {
-            console.error('Payment error:', error);
+            console.error('Error creating application:', error);
         } finally {
             setLoading(null);
-            setShowPaymentOptions(false);
-            setSelectedTier(null);
         }
     };
 
@@ -125,8 +51,6 @@ const Pricing: React.FC = () => {
             monthlyPrice: 497,
             annualPrice: 4997,
             annualSavings: 967,
-            monthlyPriceId: 'price_founder_monthly',
-            annualPriceId: 'price_founder_annual',
             features: [
                 'Unlimited Billionaireable access',
                 'The 12 Pillars curriculum',
@@ -137,7 +61,6 @@ const Pricing: React.FC = () => {
             ],
             cta: 'Start Now',
             popular: false,
-            color: 'border-gray-200 dark:border-gray-700',
             barColor: 'bg-art-orange',
         },
         {
@@ -146,8 +69,6 @@ const Pricing: React.FC = () => {
             monthlyPrice: 1497,
             annualPrice: 14997,
             annualSavings: 2967,
-            monthlyPriceId: 'price_scaler_monthly',
-            annualPriceId: 'price_scaler_annual',
             features: [
                 'Everything in Founder',
                 'Time Arbitrage mastery',
@@ -160,7 +81,6 @@ const Pricing: React.FC = () => {
             ],
             cta: 'Start Now',
             popular: true,
-            color: 'border-art-orange',
             barColor: 'bg-art-green',
         },
         {
@@ -169,8 +89,6 @@ const Pricing: React.FC = () => {
             monthlyPrice: 4997,
             annualPrice: 49997,
             annualSavings: 9967,
-            monthlyPriceId: 'price_owner_monthly',
-            annualPriceId: 'price_owner_annual',
             features: [
                 'Everything in Scaler',
                 'Family Office frameworks',
@@ -181,15 +99,11 @@ const Pricing: React.FC = () => {
                 'Full pillar access forever',
                 'Dedicated Billionaireable instance',
             ],
-            cta: 'Apply Now',
+            cta: 'Start Now',
             popular: false,
-            color: 'border-gray-200 dark:border-gray-700',
             barColor: 'bg-art-blue',
         },
     ];
-
-    const selectedTierData = tiers.find(t => t.name.toLowerCase() === selectedTier);
-    const availableMethods = selectedTier ? getAvailablePaymentMethods(selectedTier, isAnnual) : [];
 
     return (
         <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 pt-20 pb-20">
@@ -230,22 +144,22 @@ const Pricing: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Annual = Wire Transfer Note */}
-                {isAnnual && (
-                    <div className="max-w-2xl mx-auto mb-8 bg-art-blue/10 border border-art-blue/20 rounded-2xl p-4 text-center">
-                        <p className="font-mono text-sm text-art-blue">
-                            <Building2 className="w-4 h-4 inline mr-2" />
-                            Annual plans are paid via wire transfer
-                        </p>
-                    </div>
-                )}
+                {/* Wire Transfer Note */}
+                <div className="max-w-2xl mx-auto mb-8 bg-art-blue/10 border border-art-blue/20 rounded-2xl p-4 text-center">
+                    <p className="font-mono text-sm text-art-blue">
+                        <Building2 className="w-4 h-4 inline mr-2" />
+                        All payments via wire transfer — how serious money moves
+                    </p>
+                </div>
 
                 {/* Pricing Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     {tiers.map((tier) => (
                         <div
                             key={tier.name}
-                            className={`relative bg-white dark:bg-gray-900 rounded-[32px] shadow-soft-xl border-2 ${tier.color} overflow-hidden flex flex-col`}
+                            className={`relative bg-white dark:bg-gray-900 rounded-[32px] shadow-soft-xl border-2 ${
+                                tier.popular ? 'border-art-orange' : 'border-gray-200 dark:border-gray-700'
+                            } overflow-hidden flex flex-col`}
                         >
                             {/* Popular Badge */}
                             {tier.popular && (
@@ -297,7 +211,7 @@ const Pricing: React.FC = () => {
 
                                 {/* CTA */}
                                 <button
-                                    onClick={() => handleSelectTier(tier.name)}
+                                    onClick={() => handleSelectTier(tier)}
                                     disabled={loading === tier.name}
                                     className={`w-full py-4 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-2 ${
                                         tier.popular
@@ -315,69 +229,15 @@ const Pricing: React.FC = () => {
                                     )}
                                 </button>
 
-                                {/* Payment Methods Available */}
-                                <div className="mt-4 flex items-center justify-center gap-2">
-                                    {getAvailablePaymentMethods(tier.name.toLowerCase(), isAnnual).map(method => (
-                                        <div key={method} className="text-gray-400" title={PAYMENT_METHOD_INFO[method].name}>
-                                            {PAYMENT_METHOD_INFO[method].icon}
-                                        </div>
-                                    ))}
+                                {/* Wire Transfer Icon */}
+                                <div className="mt-4 flex items-center justify-center gap-2 text-gray-400">
+                                    <Building2 className="w-4 h-4" />
+                                    <span className="font-mono text-xs">Wire Transfer</span>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
-
-                {/* Payment Method Modal */}
-                {showPaymentOptions && selectedTierData && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-900 rounded-[32px] p-8 max-w-md w-full shadow-2xl">
-                            <h3 className="font-sans text-2xl font-black text-black dark:text-white mb-2">
-                                Choose Payment Method
-                            </h3>
-                            <p className="font-serif text-gray-500 dark:text-gray-400 mb-6">
-                                {selectedTierData.name} - ${isAnnual ? selectedTierData.annualPrice.toLocaleString() : selectedTierData.monthlyPrice.toLocaleString()}/{isAnnual ? 'year' : 'month'}
-                            </p>
-
-                            <div className="space-y-3">
-                                {availableMethods.map(method => (
-                                    <button
-                                        key={method}
-                                        onClick={() => handlePaymentMethod(method, selectedTierData)}
-                                        className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-art-orange dark:hover:border-art-orange transition-colors flex items-center gap-4"
-                                    >
-                                        <div className="w-12 h-12 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                            {PAYMENT_METHOD_INFO[method].icon}
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-sans font-bold text-black dark:text-white">
-                                                {PAYMENT_METHOD_INFO[method].name}
-                                            </p>
-                                            <p className="font-serif text-sm text-gray-500 dark:text-gray-400">
-                                                {PAYMENT_METHOD_INFO[method].description}
-                                            </p>
-                                        </div>
-                                        {method === 'wire' && (
-                                            <span className="ml-auto px-2 py-1 bg-art-green/10 text-art-green rounded-full font-mono text-xs">
-                                                Recommended
-                                            </span>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <button
-                                onClick={() => {
-                                    setShowPaymentOptions(false);
-                                    setSelectedTier(null);
-                                }}
-                                className="w-full mt-6 py-3 text-gray-500 font-mono text-sm hover:text-black dark:hover:text-white transition-colors"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                )}
 
                 {/* FAQ */}
                 <div className="mt-20 max-w-3xl mx-auto">
@@ -386,9 +246,9 @@ const Pricing: React.FC = () => {
                     </h2>
                     <div className="space-y-4">
                         <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
-                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">Can I cancel anytime?</h3>
+                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">How does payment work?</h3>
                             <p className="font-serif text-gray-500 dark:text-gray-400">
-                                Yes. Cancel whenever you want. No contracts, no obligations. You keep access until your current period ends.
+                                Wire transfer only. You'll get bank details immediately. Send the wire with your unique reference code. Once it clears, your access activates automatically.
                             </p>
                         </div>
                         <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
@@ -398,9 +258,15 @@ const Pricing: React.FC = () => {
                             </p>
                         </div>
                         <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
-                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">What happens after I apply?</h3>
+                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">Can I cancel anytime?</h3>
                             <p className="font-serif text-gray-500 dark:text-gray-400">
-                                You'll receive an invoice with wire instructions within 24 hours. Once payment clears, your access is activated immediately.
+                                Yes. Cancel whenever you want. No contracts, no obligations. You keep access until your current period ends. No refunds.
+                            </p>
+                        </div>
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-soft-xl border border-gray-200 dark:border-gray-800">
+                            <h3 className="font-sans font-bold text-black dark:text-white mb-2">How long until I get access?</h3>
+                            <p className="font-serif text-gray-500 dark:text-gray-400">
+                                Wire transfers typically clear within 1-3 business days. Your access activates automatically the moment payment clears.
                             </p>
                         </div>
                     </div>
@@ -423,7 +289,7 @@ const Pricing: React.FC = () => {
                 <div className="mt-20 max-w-3xl mx-auto bg-black dark:bg-white text-white dark:text-black rounded-[32px] p-12 text-center">
                     <h3 className="font-serif text-3xl font-black mb-4">Cancel Anytime</h3>
                     <p className="font-serif text-lg opacity-80">
-                        You're in control. Cancel your subscription at any time. No contracts. No obligations.
+                        You're in control. Cancel your subscription at any time. No contracts. No obligations. No refunds.
                     </p>
                 </div>
             </div>

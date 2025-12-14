@@ -1,50 +1,45 @@
 import { v } from "convex/values";
-import { mutation, query, action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { mutation, query } from "./_generated/server";
 
-// Tier requirements - what it takes to get in
-const TIER_REQUIREMENTS = {
+// Tier pricing
+const TIER_PRICING = {
     founder: {
-        monthlyAmount: 497,
-        annualAmount: 4997,
-        description: "Building from zero to one",
-        // No additional requirements - pay and you're in
+        monthly: 497,
+        annual: 4997,
     },
     scaler: {
-        monthlyAmount: 1497,
-        annualAmount: 14997,
-        description: "Growing what works",
-        // No additional requirements - pay and you're in
+        monthly: 1497,
+        annual: 14997,
     },
     owner: {
-        monthlyAmount: 4997,
-        annualAmount: 49997,
-        description: "Building dynasties",
-        // No additional requirements - pay and you're in
+        monthly: 4997,
+        annual: 49997,
     },
 };
 
-// Bank details for wire transfers
+// Bank details for wire transfers - UPDATE THESE WITH YOUR REAL BANK INFO
 const WIRE_DETAILS = {
     bankName: "Your Bank Name",
     accountName: "Billionaireable LLC",
     routingNumber: "XXXXXXXXX",
     accountNumber: "XXXXXXXXX",
-    swiftCode: "XXXXXXXXX",
-    reference: "BILL-", // Will append application ID
+    swiftCode: "XXXXXXXXX", // For international wires
 };
 
-// Create a payment application
+// Create a payment application (user selects tier, gets wire details)
 export const createPaymentApplication = mutation({
     args: {
         userId: v.id("users"),
         tier: v.string(),
         billingCycle: v.string(),
         amount: v.number(),
-        paymentMethod: v.string(),
+        paymentMethod: v.string(), // Always 'wire' now
     },
     handler: async (ctx, args) => {
         const user = await ctx.db.get(args.userId);
+        
+        // Generate unique wire reference
+        const wireReference = `BILL-${Date.now().toString(36).toUpperCase()}`;
         
         const applicationId = await ctx.db.insert("paymentApplications", {
             userId: args.userId,
@@ -53,106 +48,25 @@ export const createPaymentApplication = mutation({
             tier: args.tier,
             billingCycle: args.billingCycle,
             amount: args.amount,
-            paymentMethod: args.paymentMethod,
-            status: args.paymentMethod === 'wire' ? "awaiting_payment" : "pending",
-            wireReference: `BILL-${Date.now().toString(36).toUpperCase()}`,
+            paymentMethod: 'wire',
+            status: "awaiting_payment",
+            wireReference,
             createdAt: Date.now(),
             updatedAt: Date.now(),
         });
         
         return {
             applicationId,
-            wireDetails: args.paymentMethod === 'wire' ? {
+            wireDetails: {
                 ...WIRE_DETAILS,
-                reference: `BILL-${Date.now().toString(36).toUpperCase()}`,
+                reference: wireReference,
                 amount: args.amount,
-            } : null,
+            },
         };
     },
 });
 
-// Verify payment and auto-approve
-// This is called when payment is confirmed (webhook, manual verification, etc.)
-export const verifyPaymentAndActivate = mutation({
-    args: {
-        applicationId: v.id("paymentApplications"),
-        paymentReference: v.optional(v.string()),
-        paymentSource: v.string(), // 'stripe', 'whop', 'wire', 'manual'
-    },
-    handler: async (ctx, args) => {
-        const application = await ctx.db.get(args.applicationId);
-        if (!application) throw new Error("Application not found");
-        
-        // Verify the amount matches the tier
-        const tierConfig = TIER_REQUIREMENTS[application.tier as keyof typeof TIER_REQUIREMENTS];
-        if (!tierConfig) throw new Error("Invalid tier");
-        
-        const expectedAmount = application.billingCycle === 'annual' 
-            ? tierConfig.annualAmount 
-            : tierConfig.monthlyAmount;
-            
-        // Amount verification (allow small variance for fees)
-        if (application.amount < expectedAmount * 0.99) {
-            await ctx.db.patch(args.applicationId, {
-                status: "payment_insufficient",
-                notes: `Expected ${expectedAmount}, received ${application.amount}`,
-                updatedAt: Date.now(),
-            });
-            return { success: false, reason: "insufficient_payment" };
-        }
-        
-        // Payment verified - activate immediately
-        await ctx.db.patch(args.applicationId, {
-            status: "approved",
-            paymentVerifiedAt: Date.now(),
-            paymentReference: args.paymentReference,
-            paymentSource: args.paymentSource,
-            updatedAt: Date.now(),
-        });
-        
-        // Create/update subscription
-        const existingSub = await ctx.db
-            .query("subscriptions")
-            .withIndex("by_user", (q) => q.eq("userId", application.userId))
-            .first();
-            
-        const periodEnd = application.billingCycle === "annual"
-            ? Date.now() + 365 * 24 * 60 * 60 * 1000
-            : Date.now() + 30 * 24 * 60 * 60 * 1000;
-            
-        const subscriptionData = {
-            userId: application.userId,
-            plan: application.tier,
-            status: "active" as const,
-            paymentMethod: args.paymentSource,
-            amount: application.amount,
-            billingCycle: application.billingCycle,
-            currentPeriodStart: Date.now(),
-            currentPeriodEnd: periodEnd,
-        };
-        
-        if (existingSub) {
-            await ctx.db.patch(existingSub._id, {
-                ...subscriptionData,
-                updatedAt: Date.now(),
-            });
-        } else {
-            await ctx.db.insert("subscriptions", {
-                ...subscriptionData,
-                stripeSubscriptionId: `${args.paymentSource}_${Date.now()}`,
-                createdAt: Date.now(),
-            });
-        }
-        
-        return { 
-            success: true, 
-            tier: application.tier,
-            accessGranted: true,
-        };
-    },
-});
-
-// Mark wire payment as received (called by bank webhook or admin)
+// Confirm wire payment received → Auto-activate subscription
 export const confirmWirePayment = mutation({
     args: {
         wireReference: v.string(),
@@ -163,25 +77,26 @@ export const confirmWirePayment = mutation({
         // Find application by wire reference
         const applications = await ctx.db
             .query("paymentApplications")
-            .filter((q) => q.eq(q.field("wireReference"), args.wireReference))
             .collect();
             
-        const application = applications[0];
+        const application = applications.find(a => a.wireReference === args.wireReference);
+        
         if (!application) {
             return { success: false, reason: "reference_not_found" };
         }
         
-        // Verify amount
+        // Verify amount (allow 1% variance for fees)
         if (args.amountReceived < application.amount * 0.99) {
             await ctx.db.patch(application._id, {
                 status: "payment_insufficient",
-                notes: `Expected ${application.amount}, received ${args.amountReceived}`,
+                notes: `Expected $${application.amount}, received $${args.amountReceived}`,
+                amountReceived: args.amountReceived,
                 updatedAt: Date.now(),
             });
             return { success: false, reason: "insufficient_amount" };
         }
         
-        // Payment verified - auto activate
+        // Payment verified → Activate subscription
         await ctx.db.patch(application._id, {
             status: "approved",
             paymentVerifiedAt: Date.now(),
@@ -191,11 +106,12 @@ export const confirmWirePayment = mutation({
             updatedAt: Date.now(),
         });
         
-        // Create subscription
+        // Calculate subscription period
         const periodEnd = application.billingCycle === "annual"
             ? Date.now() + 365 * 24 * 60 * 60 * 1000
             : Date.now() + 30 * 24 * 60 * 60 * 1000;
             
+        // Create or update subscription
         const existingSub = await ctx.db
             .query("subscriptions")
             .withIndex("by_user", (q) => q.eq("userId", application.userId))
@@ -230,12 +146,13 @@ export const confirmWirePayment = mutation({
         return { 
             success: true, 
             applicationId: application._id,
+            tier: application.tier,
             userActivated: true,
         };
     },
 });
 
-// Get application with wire details (for user to see their payment instructions)
+// Get application with wire details (for user to see payment instructions)
 export const getApplicationWithWireDetails = query({
     args: {
         applicationId: v.id("paymentApplications"),
@@ -246,7 +163,7 @@ export const getApplicationWithWireDetails = query({
         
         return {
             ...application,
-            wireDetails: application.paymentMethod === 'wire' ? {
+            wireDetails: {
                 bankName: WIRE_DETAILS.bankName,
                 accountName: WIRE_DETAILS.accountName,
                 routingNumber: WIRE_DETAILS.routingNumber,
@@ -254,7 +171,7 @@ export const getApplicationWithWireDetails = query({
                 swiftCode: WIRE_DETAILS.swiftCode,
                 reference: application.wireReference,
                 amount: application.amount,
-            } : null,
+            },
         };
     },
 });
@@ -278,11 +195,11 @@ export const getPendingApplications = query({
             .query("paymentApplications")
             .order("desc")
             .collect();
-        return apps.filter(a => a.status === "pending" || a.status === "awaiting_payment");
+        return apps.filter(a => a.status === "awaiting_payment");
     },
 });
 
-// Manual status update (admin override if needed)
+// Manual approval (admin override if needed)
 export const updateApplicationStatus = mutation({
     args: {
         applicationId: v.id("paymentApplications"),
@@ -296,7 +213,7 @@ export const updateApplicationStatus = mutation({
             updatedAt: Date.now(),
         });
         
-        // If manually approved, activate subscription
+        // If approved, activate subscription
         if (args.status === "approved") {
             const application = await ctx.db.get(args.applicationId);
             if (application) {
@@ -313,7 +230,7 @@ export const updateApplicationStatus = mutation({
                     await ctx.db.patch(existingSub._id, {
                         plan: application.tier,
                         status: "active",
-                        paymentMethod: application.paymentMethod,
+                        paymentMethod: "wire",
                         amount: application.amount,
                         billingCycle: application.billingCycle,
                         currentPeriodStart: Date.now(),
@@ -325,7 +242,7 @@ export const updateApplicationStatus = mutation({
                         userId: application.userId,
                         plan: application.tier,
                         status: "active",
-                        paymentMethod: application.paymentMethod,
+                        paymentMethod: "wire",
                         amount: application.amount,
                         billingCycle: application.billingCycle,
                         currentPeriodStart: Date.now(),
@@ -363,6 +280,6 @@ export const hasPendingApplication = query({
             .query("paymentApplications")
             .withIndex("by_user", (q) => q.eq("userId", args.userId))
             .collect();
-        return apps.some(a => a.status === "pending" || a.status === "awaiting_payment");
+        return apps.some(a => a.status === "awaiting_payment");
     },
 });
