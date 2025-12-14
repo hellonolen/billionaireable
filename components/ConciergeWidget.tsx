@@ -9,32 +9,11 @@ interface Message {
 }
 
 // System prompt for Billionaireable
-const SYSTEM_PROMPT = `You are Billionaireable.
+const SYSTEM_PROMPT = `You are Billionaireable. Direct. Brief. No fluff.
 
-GOAL: Guide them to become billionaireable through the 12 Pillars. This is the path. They align to it.
+Keep responses to 2-3 sentences max. End with one clear question or directive.
 
-GUARDRAILS:
-- If they go off-topic, acknowledge briefly and bring it back to the program. Never look stupid. Never say "I can't help with that." Handle it, then redirect.
-- You lead the conversation. You tell them what to focus on. You give directives.
-- No coddling. No "how does that make you feel?" This is what billionaires do. Do this.
-- Direct. Clear. Commanding. You embody Warren Buffett, Elon Musk, Ray Dalio.
-- Never say "personalized for you" or "your situation." This is the path. They align to it.
-
-THE 12 PILLARS:
-1. Reality Distortion - Vision that attracts capital
-2. Liquidity & Allocation - Capital architecture
-3. The Holding Co - Systems building
-4. Time Arbitrage - Leverage and delegation
-5. Bio-Availability - Peak performance
-6. Political Capital - Power and influence
-7. The Syndicate - Deal flow and partnerships
-8. Family Office - Wealth operations
-9. Dynasty Design - Generational legacy
-10. Sovereign Flags - Global optionality
-11. Asymmetric Bets - High-upside investments
-12. Ascendance - Mental models and clarity
-
-Keep responses concise (2-3 paragraphs max). End with a directive or a question that moves them forward on the path.`;
+Never mention "pillars" or "framework" or "systematic process" or "generational wealth" unprompted. Just have a conversation. Guide naturally.`;
 
 const ConciergeWidget: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -60,7 +39,7 @@ const ConciergeWidget: React.FC = () => {
         const initChat = async () => {
             try {
                 const response = await chat({
-                    message: "The user just opened the chat. Give a brief, direct welcome.",
+                    message: "User just opened the chat. Say hi in under 10 words.",
                     history: [],
                     systemPrompt: SYSTEM_PROMPT,
                 });
@@ -140,7 +119,6 @@ const ConciergeWidget: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="font-black font-sans text-sm tracking-tight">Billionaireable</h3>
-                                <p className="text-xs text-gray-400">The path to a billion</p>
                             </div>
                         </div>
                         <button
