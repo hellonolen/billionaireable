@@ -120,6 +120,9 @@ const SkillDetail: React.FC = () => {
 
     // Speak text using server TTS (Gemini primary; OpenAI fallback if configured)
     const speakText = async (text: string) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:entry',message:'speakText called',data:{muted:isMuted,textLen:(text||'').length,isPlaying},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
         if (isMuted) return;
         lastSpokenTextRef.current = text;
 
@@ -139,7 +142,13 @@ const SkillDetail: React.FC = () => {
         setIsPlaying(true);
 
         try {
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:beforeTTS',message:'calling Convex TTS',data:{convexUrl:(import.meta as any)?.env?.VITE_CONVEX_URL || null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+            // #endregion
             const result = await textToSpeech({ text });
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:afterTTS',message:'TTS returned',data:{mimeType:result?.mimeType||null,audioB64Len:result?.audio?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+            // #endregion
             const audio = new Audio(`data:${result.mimeType};base64,${result.audio}`);
             audioRef.current = audio;
 
@@ -147,20 +156,32 @@ const SkillDetail: React.FC = () => {
             audio.onerror = () => {
                 setIsPlaying(false);
                 setAudioError("Audio failed to load.");
+                // #region agent log
+                fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:audioOnError',message:'audio.onerror fired',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+                // #endregion
             };
 
             // IMPORTANT: await + catch autoplay rejections
             await audio.play();
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:audioPlayOk',message:'audio.play resolved',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            // #endregion
         } catch (err) {
             console.error("TTS/playback error:", err);
             setIsPlaying(false);
             setAudioError("Audio was blocked. Tap Play again to enable sound.");
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:catch',message:'speakText failed',data:{errName:(err as any)?.name||null,errMsg:String((err as any)?.message||'')?.slice(0,180)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            // #endregion
         }
     };
     
     // Start the conversation
     const startConversation = async () => {
         const greeting = `Welcome to ${skill?.title}. What are you working on right now?`;
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:startConversation',message:'startConversation',data:{greetingLen:greeting.length,skillId,skillTitle:skill?.title||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
         setTalkMessages([{ role: 'assistant', content: greeting }]);
         await speakText(greeting);
         startListening();
@@ -169,6 +190,9 @@ const SkillDetail: React.FC = () => {
     // Listen for user speech
     const startListening = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:startListening',message:'startListening',data:{hasSR:!!SpeechRecognition,ua:navigator.userAgent?.slice(0,120)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
         if (!SpeechRecognition) return;
         
         const recognition = new SpeechRecognition();
@@ -176,7 +200,17 @@ const SkillDetail: React.FC = () => {
         
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:recognition:onresult',message:'speech recognized',data:{transcriptLen:(transcript||'').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+            // #endregion
             if (transcript.trim()) sendMessage(transcript.trim());
+        };
+
+        recognition.onerror = (e: any) => {
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:recognition:onerror',message:'speech recognition error',data:{error:e?.error||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+            // #endregion
+            setIsMicOn(false);
         };
         
         recognition.onend = () => {
@@ -215,6 +249,9 @@ const SkillDetail: React.FC = () => {
     // Send a message (used by both text input and voice)
     const sendMessage = async (message: string) => {
         if (!message.trim() || talkLoading) return;
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:sendMessage:entry',message:'sendMessage',data:{msgLen:(message||'').trim().length,historyLen:talkMessages.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+        // #endregion
 
         const userMessage = message.trim();
         setTalkMessages(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -234,6 +271,9 @@ If they share something meaningful or have a breakthrough, end your response wit
                 history: talkMessages.map(m => ({ role: m.role, text: m.content })),
                 systemPrompt,
             });
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:sendMessage:chatOk',message:'chat returned',data:{responseLen:(response||'').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+            // #endregion
 
             // Check for insight marker
             const insightMatch = response.match(/\[INSIGHT:\s*(.+?)\]/);
@@ -278,6 +318,9 @@ If they share something meaningful or have a breakthrough, end your response wit
         } catch (error) {
             console.error('Chat error:', error);
             setTalkMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Try again.' }]);
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:sendMessage:catch',message:'chat failed',data:{errMsg:String((error as any)?.message||'')?.slice(0,180)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+            // #endregion
         } finally {
             setTalkLoading(false);
         }
