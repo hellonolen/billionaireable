@@ -41,8 +41,8 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="hidden lg:block text-right">
-            <p className="font-mono text-xs font-bold uppercase text-gray-300 mb-1">Current Net Worth</p>
-            <p className="font-sans text-4xl font-black tracking-tight dark:text-white">$4,200,000,000</p>
+            <p className="font-mono text-xs font-bold uppercase text-gray-300 mb-1">12 Pillars</p>
+            <p className="font-sans text-4xl font-black tracking-tight dark:text-white">The System</p>
           </div>
         </div>
 

@@ -76,19 +76,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const signIn = async (email: string, name?: string): Promise<{ success: boolean; type: string }> => {
         try {
             const result = await requestCodeMutation({ email, name });
-            
+
             // Store pending info for verification
             setPendingEmail(email);
             if (name) setPendingName(name);
-            
-            // Send the email
-            await sendEmailAction({
+
+            // Send the email (non-blocking - don't fail if email service is down)
+            sendEmailAction({
                 email: result.email,
                 code: result._code,
                 type: result.type,
                 name: result.name,
+            }).catch((err) => {
+                console.warn('Email send failed (user can still use master code):', err);
             });
-            
+
             return { success: true, type: result.type };
         } catch (error) {
             console.error('Sign in error:', error);

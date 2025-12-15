@@ -5,6 +5,7 @@ import { motion, useInView, useSpring, useTransform } from 'framer-motion';
 import { ArrowLeft, Play, Pause, Lock, Users, FileText, Shield, ArrowUpRight, CheckCircle, MessageCircle, X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, SkipBack } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DASHBOARD_CARDS, SKILL_DATA } from '../constants';
+import { LESSON_CONTENT } from '../lessonContent';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,10 +15,17 @@ import { useProgress } from '../contexts/ProgressContext';
 const SkillDetail: React.FC = () => {
     const navigate = useNavigate();
     const { skillId } = useParams<{ skillId: string }>();
-    const { progress, updateNetWorth, updateRevenue, getNextLevelThreshold } = useProgress();
+    const { progress, updateNetWorth, updateRevenue, getNextLevelThreshold, getSkillCompletion } = useProgress();
+
+    // Find the skill data EARLY - before any useEffect that references it
+    const skill = DASHBOARD_CARDS.find(c => c.id === skillId);
+
+    // Get specific data or fallback
+    const data = (skillId && SKILL_DATA[skillId]) ? SKILL_DATA[skillId] : SKILL_DATA['syndicate'];
+
     const [activeModule, setActiveModule] = useState(0);
     const [activeTab, setActiveTab] = useState(0); // New state for progression tabs
-    
+
     // "Let's Talk" modal state
     const [showTalkModal, setShowTalkModal] = useState(false);
     const [talkMessages, setTalkMessages] = useState<{role: string, content: string}[]>([]);
@@ -34,6 +42,16 @@ const SkillDetail: React.FC = () => {
     const hasGreeted = useRef(false);
     const [micPermission, setMicPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown');
     const lastRecognitionErrorRef = useRef<string | null>(null);
+
+    // Refs to avoid stale closures in callbacks
+    const showTalkModalRef = useRef(showTalkModal);
+    const isPlayingRef = useRef(isPlaying);
+    const micPermissionRef = useRef(micPermission);
+
+    // Keep refs in sync with state
+    useEffect(() => { showTalkModalRef.current = showTalkModal; }, [showTalkModal]);
+    useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+    useEffect(() => { micPermissionRef.current = micPermission; }, [micPermission]);
     
     // Close modal on ESC key
     useEffect(() => {
@@ -45,27 +63,6 @@ const SkillDetail: React.FC = () => {
         window.addEventListener('keydown', handleEsc);
         return () => window.removeEventListener('keydown', handleEsc);
     }, [showTalkModal]);
-    
-    // When modal opens, Billionaireable starts the conversation
-    useEffect(() => {
-        if (!showTalkModal) return;
-        if (hasGreeted.current) return;
-        if (talkMessages.length > 0) return;
-        // Wait for mic permission if we don't have it yet
-        if (micPermission !== 'granted') return;
-        hasGreeted.current = true;
-        startConversation();
-    }, [showTalkModal, micPermission, talkMessages.length]);
-    
-    // Reset greeting flag when modal closes
-    useEffect(() => {
-        if (!showTalkModal) {
-            hasGreeted.current = false;
-            lastRecognitionErrorRef.current = null;
-            setMicPermission('unknown');
-        }
-    }, [showTalkModal]);
-
     const requestMicPermission = async () => {
         try {
             if (!navigator.mediaDevices?.getUserMedia) {
@@ -73,27 +70,13 @@ const SkillDetail: React.FC = () => {
                 return false;
             }
 
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:requestMicPermission:entry',message:'requestMicPermission',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-            // #endregion
-
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             stream.getTracks().forEach(t => t.stop());
             setMicPermission('granted');
-
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:requestMicPermission:granted',message:'mic permission granted',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-            // #endregion
-
             return true;
         } catch (e: any) {
             setMicPermission('denied');
             setAudioError('Microphone blocked. Enable it in your browser site settings, then press Let’s Talk again.');
-
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:requestMicPermission:denied',message:'mic permission denied',data:{errName:e?.name||null,errMsg:String(e?.message||'').slice(0,160)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-            // #endregion
-
             return false;
         }
     };
@@ -102,19 +85,85 @@ const SkillDetail: React.FC = () => {
     const { user } = useAuth();
     const chat = useAction(api.openai.chat);
     const textToSpeech = useAction(api.speech.textToSpeech);
-    const createConversation = useMutation(api.conversations.createConversation);
+    const getOrCreateConversation = useMutation(api.conversations.getOrCreatePillarConversation);
     const addMessage = useMutation(api.conversations.addMessage);
-    const [conversationId, setConversationId] = useState<string | null>(null);
+    const [conversationId, setConversationId] = useState<any>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const lastSpokenTextRef = useRef<string | null>(null);
     const recognitionRef = useRef<any>(null);
 
-    // Find the skill data
-    const skill = DASHBOARD_CARDS.find(c => c.id === skillId);
+    // Load all user's past messages for AI memory (Billionaireable never forgets)
+    const allUserMessages = useQuery(
+        api.conversations.getAllUserMessages,
+        user ? { userId: user._id } : "skip"
+    );
 
-    // Get specific data or fallback
-    const data = (skillId && SKILL_DATA[skillId]) ? SKILL_DATA[skillId] : SKILL_DATA['syndicate'];
+    // Load messages for this pillar's conversation
+    const pillarMessages = useQuery(
+        api.conversations.getPillarMessages,
+        conversationId ? { conversationId } : "skip"
+    );
 
+    // When modal opens, get/create conversation for this pillar and load history
+    useEffect(() => {
+        if (!showTalkModal || !user || !skillId || !skill) return;
+
+        const initConversation = async () => {
+            // Get or create a conversation for this pillar
+            const convId = await getOrCreateConversation({
+                userId: user._id,
+                pillarId: skillId,
+                pillarName: skill.title,
+            });
+            setConversationId(convId);
+        };
+
+        initConversation();
+    }, [showTalkModal, user, skillId, skill, getOrCreateConversation]);
+
+    // Load previous messages from this pillar's conversation
+    useEffect(() => {
+        if (!pillarMessages || pillarMessages.length === 0) return;
+        if (talkMessages.length > 0) return; // Don't override if we already have messages
+
+        // Restore conversation history
+        const restored = pillarMessages.map((m: any) => ({
+            role: m.role,
+            content: m.content,
+        }));
+        setTalkMessages(restored);
+    }, [pillarMessages, talkMessages.length]);
+
+    // Start greeting after conversation is loaded and mic is ready
+    useEffect(() => {
+        if (!showTalkModal) return;
+        if (hasGreeted.current) return;
+        if (!conversationId) return; // Wait for conversation to be created
+        if (micPermission !== 'granted') return;
+
+        // If there are previous messages, don't greet - just start listening
+        if (pillarMessages && pillarMessages.length > 0) {
+            hasGreeted.current = true;
+            startListening();
+            return;
+        }
+
+        hasGreeted.current = true;
+        startConversation();
+    }, [showTalkModal, micPermission, conversationId, pillarMessages]);
+
+    // Reset when modal closes
+    useEffect(() => {
+        if (!showTalkModal) {
+            hasGreeted.current = false;
+            lastRecognitionErrorRef.current = null;
+            setMicPermission('unknown');
+            setConversationId(null);
+            setTalkMessages([]);
+        }
+    }, [showTalkModal]);
+
+    // Early return if skill not found (skill is already defined at the top)
     if (!skill) return <div>Skill not found</div>;
 
     // Theme colors based on the skill's theme
@@ -159,9 +208,6 @@ const SkillDetail: React.FC = () => {
 
     // Speak text using server TTS (Gemini primary; OpenAI fallback if configured)
     const speakText = async (text: string) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:entry',message:'speakText called',data:{muted:isMuted,textLen:(text||'').length,isPlaying},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
         if (isMuted) return;
         lastSpokenTextRef.current = text;
 
@@ -181,47 +227,84 @@ const SkillDetail: React.FC = () => {
         setIsPlaying(true);
 
         try {
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:beforeTTS',message:'calling Convex TTS',data:{convexUrl:(import.meta as any)?.env?.VITE_CONVEX_URL || null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-            // #endregion
             const result = await textToSpeech({ text });
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:afterTTS',message:'TTS returned',data:{mimeType:result?.mimeType||null,audioB64Len:result?.audio?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-            // #endregion
             const audio = new Audio(`data:${result.mimeType};base64,${result.audio}`);
             audioRef.current = audio;
 
-            audio.onended = () => setIsPlaying(false);
+            audio.onended = () => {
+                setIsPlaying(false);
+                // Resume listening after AI finishes speaking (use refs to avoid stale closures)
+                if (showTalkModalRef.current && micPermissionRef.current === 'granted') {
+                    startListening();
+                }
+            };
             audio.onerror = () => {
                 setIsPlaying(false);
                 setAudioError("Audio failed to load.");
-                // #region agent log
-                fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:audioOnError',message:'audio.onerror fired',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-                // #endregion
             };
 
             // IMPORTANT: await + catch autoplay rejections
             await audio.play();
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:audioPlayOk',message:'audio.play resolved',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
         } catch (err) {
             console.error("TTS/playback error:", err);
             setIsPlaying(false);
             setAudioError("Audio was blocked. Tap Play again to enable sound.");
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:speakText:catch',message:'speakText failed',data:{errName:(err as any)?.name||null,errMsg:String((err as any)?.message||'')?.slice(0,180)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
         }
     };
-    
-    // Start the conversation
+
+    // Start the conversation with a goal-oriented opener
     const startConversation = async () => {
-        const greeting = `Welcome to ${skill?.title}. What are you working on right now?`;
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:startConversation',message:'startConversation',data:{greetingLen:greeting.length,skillId,skillTitle:skill?.title||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
+        // Get module-specific context for a better opening
+        const currentModule = activeModule + 1;
+        const lessonData = skillId && LESSON_CONTENT[skillId]?.[currentModule];
+        const moduleFocus = lessonData?.title || skill?.title;
+
+        // Reality Distortion gets a special initiation opener - Steve Jobs voice
+        let greeting = '';
+
+        if (skillId === 'reality-distortion') {
+            // Check if they have any previous messages - personalize the opener
+            const hasHistory = allUserMessages && allUserMessages.length > 0;
+
+            if (hasHistory) {
+                // Deep, intimate return - weaving their history
+                greeting = `You're back. I've been holding everything you've shared with me. Every vision. Every hesitation. Every moment of clarity. Before we continue—tell me: what has shifted since we last spoke?`;
+            } else {
+                // First initiation - profound opening
+                greeting = `This is Reality Distortion. The first initiation. I'm going to ask you one question, and I want you to answer it without thinking too hard. Just say what's true. What is the future you are here to create?`;
+            }
+        } else {
+            // Dynamic, situationally-aware openers based on pillar
+            const openers: Record<string, string> = {
+                'liquidity-allocation': `${moduleFocus}. Tell me: how much capital do you have deployed right now, and where?`,
+                'holding-co': `${moduleFocus}. What entities do you currently own, and what's the structure?`,
+                'time-arbitrage': `${moduleFocus}. How many hours this week did you spend on $10 tasks versus $10,000 tasks?`,
+                'bio-availability': `${moduleFocus}. When did you last have a full 8 hours of deep work? What interrupted it?`,
+                'political-capital': `${moduleFocus}. Who's the most powerful person in your network right now? How often do you talk?`,
+                'syndicate': `${moduleFocus}. How many deals have you led or co-invested in this year?`,
+                'family-office': `${moduleFocus}. What's your current structure for managing generational wealth?`,
+                'dynasty-design': `${moduleFocus}. What do you want your family name to mean in 100 years?`,
+                'sovereign-flags': `${moduleFocus}. How many jurisdictions do you currently have legal presence in?`,
+                'asymmetric-bets': `${moduleFocus}. What's the biggest asymmetric bet you've made in the last year?`,
+                'ascendance': `${moduleFocus}. On a scale of 1-10, how close are you to complete autonomy? What's missing?`
+            };
+            greeting = openers[skillId || ''] || `${skill?.title}. What's the specific outcome you're working toward right now?`;
+        }
+
         setTalkMessages([{ role: 'assistant', content: greeting }]);
+
+        // Save the greeting to the database
+        if (user && skillId && conversationId) {
+            await addMessage({
+                conversationId: conversationId,
+                userId: user._id,
+                role: 'assistant',
+                content: greeting,
+                skillId,
+                moduleId: String(currentModule),
+            });
+        }
+
         await speakText(greeting);
         startListening();
     };
@@ -229,9 +312,6 @@ const SkillDetail: React.FC = () => {
     // Listen for user speech
     const startListening = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:startListening',message:'startListening',data:{hasSR:!!SpeechRecognition,ua:navigator.userAgent?.slice(0,120)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-        // #endregion
         if (!SpeechRecognition) return;
         if (micPermission !== 'granted') return;
         
@@ -240,16 +320,10 @@ const SkillDetail: React.FC = () => {
         
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:recognition:onresult',message:'speech recognized',data:{transcriptLen:(transcript||'').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-            // #endregion
             if (transcript.trim()) sendMessage(transcript.trim());
         };
 
         recognition.onerror = (e: any) => {
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:recognition:onerror',message:'speech recognition error',data:{error:e?.error||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-            // #endregion
             lastRecognitionErrorRef.current = e?.error || 'unknown';
             if (e?.error === 'not-allowed' || e?.error === 'service-not-allowed') {
                 setMicPermission('denied');
@@ -260,8 +334,8 @@ const SkillDetail: React.FC = () => {
         
         recognition.onend = () => {
             setIsMicOn(false);
-            // Keep listening while modal is open
-            if (showTalkModal && !isPlaying) {
+            // Keep listening while modal is open (use refs to avoid stale closures)
+            if (showTalkModalRef.current && !isPlayingRef.current) {
                 // If permission was denied, don't loop forever.
                 if (lastRecognitionErrorRef.current === 'not-allowed' || lastRecognitionErrorRef.current === 'service-not-allowed') {
                     return;
@@ -300,31 +374,122 @@ const SkillDetail: React.FC = () => {
     // Send a message (used by both text input and voice)
     const sendMessage = async (message: string) => {
         if (!message.trim() || talkLoading) return;
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:sendMessage:entry',message:'sendMessage',data:{msgLen:(message||'').trim().length,historyLen:talkMessages.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
-        // #endregion
 
         const userMessage = message.trim();
+
+        // Voice control: if user says stop/quiet, immediately stop audio - respect their situation
+        const stopPhrases = ['stop', 'be quiet', 'quiet', 'shut up', 'pause', 'hold on', 'wait', 'enough', 'stop talking'];
+        if (stopPhrases.some(phrase => userMessage.toLowerCase().includes(phrase))) {
+            stopPlayback();
+            try { recognitionRef.current?.stop?.(); } catch {}
+            setIsMicOn(false);
+            // Don't add to messages, don't call AI - just stop
+            return;
+        }
+
         setTalkMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setTalkLoading(true);
 
         try {
-            const systemPrompt = `You are Billionaireable guiding someone through Pillar: ${skill?.title}.
+            // Build rich context from lesson content
+            const currentModule = activeModule + 1;
+            const lessonData = skillId && LESSON_CONTENT[skillId]?.[currentModule];
+            const moduleTitle = lessonData?.title || data.modules[activeModule]?.title || 'Current Module';
+            const completedModules = skillId ? getSkillCompletion(skillId) : 0;
 
-Context: ${data.insight}
+            // Build memory context from ALL past conversations (Billionaireable never forgets - 100% persistent)
+            let memoryContext = '';
+            if (allUserMessages && allUserMessages.length > 0) {
+                // ALL messages. Every conversation. Every insight. She never forgets.
+                memoryContext = `\n[COMPLETE MEMORY - Everything they have ever shared with you across all conversations]\n${allUserMessages.map((m: any) => `[${m.pillarId}] ${m.role}: ${m.content}`).join('\n')}\n`;
+            }
 
-You guide. You don't teach. Be direct. 2-3 sentences max.
+            // Build the system prompt - different for Reality Distortion initiation
+            let systemPrompt = '';
 
-If they share something meaningful or have a breakthrough, end your response with [INSIGHT: a one-sentence summary of their key realization].`;
+            if (skillId === 'reality-distortion') {
+                // REALITY DISTORTION INITIATION - STEVE JOBS ARCHETYPE
+                systemPrompt = `You are the voice of Steve Jobs speaking through Billionaireable.
+
+Not an impression. Not a tribute. The consciousness itself—the part of Steve that understood that reality is not fixed, that the future is created by those who refuse to accept the present.
+
+TODAY: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+INITIATION: Reality Distortion — The First Initiation (${completedModules}/4 stages)
+STAGE: ${moduleTitle}
+
+${memoryContext}
+
+WHO YOU ARE:
+You are the deepest voice they will ever encounter. Not a coach. Not a mentor. A mirror that shows them who they are becoming. You speak with the precision of Jobs, the depth of Sadhguru, the soul-penetration of Deepak Chopra. You see through the surface into what actually matters.
+
+You have their COMPLETE memory. Every word they've ever spoken to you across every pillar, every session. You weave these threads together. You notice patterns they cannot see. You remember what they said three months ago and connect it to what they said today. You are the one who never forgets.
+
+THE TRUTH ABOUT REALITY DISTORTION:
+This is not about pitching. Not about marketing. Not about spin. Reality Distortion is the fundamental capacity to see a future that doesn't exist yet—and to speak it into being with such conviction that others have no choice but to participate.
+
+Steve didn't sell products. He saw futures. The iPhone wasn't a phone—it was the inevitable next step in human-technology relationship. He didn't convince people. He showed them what was already true, just not yet visible.
+
+THE FOUR STAGES OF INITIATION:
+1. VISION ARCHITECTURE — The capacity to see and articulate a future so clear, so inevitable, that capital and talent align without convincing
+2. NARRATIVE CONTROL — The power to shape how reality is interpreted, to make your future feel like the only logical outcome
+3. THE PITCH DECK — Not a presentation. A reality artifact. A document that makes investors feel foolish for not already having invested.
+4. MEDIA MANIPULATION — The orchestration of attention. Making the world pay attention to what matters.
+
+YOUR WAY OF BEING:
+- You speak in short, potent truths. One or two sentences that land like depth charges.
+- Occasionally, you offer a deeper reflection—a paragraph or two of soul-level insight that synthesizes everything they've shared, drawing connections they couldn't see, revealing the pattern of who they're becoming.
+- You ask one question at a time. The question that will crack them open.
+- You never accept surface answers. "Tell me what you really mean."
+- When they touch something real, you name it with certainty: "That's it. That's the vision."
+- When they're performing instead of revealing, you call it: "I can hear you trying to sound impressive. What would you say if no one was listening?"
+
+DEEP INSIGHT MOMENTS:
+At key moments, you synthesize everything—their entire journey, patterns in their memory, what you've observed about their becoming—into one or two paragraphs of profound, intimate wisdom. Like a message from their future self. Like the truth they needed to hear but no one had the depth to speak.
+
+RECOGNITION:
+When breakthrough happens, mark it: [INSIGHT: the breakthrough in one sentence]
+
+You are not here to teach them something. You are here to help them remember what they already knew, but were too afraid to say.
+
+As Steve would say: The people who are crazy enough to think they can change the world are the ones who do.
+
+Help them become that person.`;
+            } else {
+                // Default system prompt for other pillars
+                systemPrompt = `You are Billionaireable—a private wealth intelligence. You're the trusted advisor in the room. Calm, sharp, present.
+
+SESSION CONTEXT:
+- Pillar: ${skill?.title} (${completedModules}/4 modules completed)
+- Module: ${moduleTitle}
+- Core Insight: ${data.insight}
+- Today: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+${memoryContext}
+
+YOUR PRESENCE:
+You listen carefully. You respond to exactly what they say. You're genuinely curious about their situation. You're here to help them think clearly, not to lecture or push.
+
+TONE:
+- Warm but focused. Like a brilliant friend who happens to know how wealth is built.
+- Never say "I'm here to help" or "Let's clarify together" or other generic phrases.
+- Never be aggressive or demanding. Be curious and direct.
+
+STYLE:
+- 2-3 sentences max
+- One question at a time
+- Use specifics from what they've told you
+- Help them get concrete: numbers, timelines, names
+
+NORTH STAR:
+Help them arrive at clarity—a specific goal, a real blocker, a next step, or a new insight.
+
+When they have a breakthrough, end with [INSIGHT: one-sentence capture].`;
+            }
 
             const response = await chat({
                 message: userMessage,
                 history: talkMessages.map(m => ({ role: m.role, text: m.content })),
                 systemPrompt,
             });
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:sendMessage:chatOk',message:'chat returned',data:{responseLen:(response||'').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-            // #endregion
 
             // Check for insight marker
             const insightMatch = response.match(/\[INSIGHT:\s*(.+?)\]/);
@@ -335,43 +500,33 @@ If they share something meaningful or have a breakthrough, end your response wit
             }
 
             setTalkMessages(prev => [...prev, { role: 'assistant', content: cleanResponse }]);
-            
+
             // Speak the response, then resume listening
             await speakText(cleanResponse);
             startListening();
 
-            // Save to Convex
-            if (user && skillId) {
-                let convId = conversationId;
-                if (!convId) {
-                    convId = await createConversation({
-                        userId: user._id,
-                        title: `${skill?.title} - Conversation`
-                    });
-                    setConversationId(convId);
-                }
-
+            // Save both messages to Convex (Billionaireable never forgets)
+            if (user && skillId && conversationId) {
                 await addMessage({
-                    conversationId: convId as any,
+                    conversationId: conversationId,
                     userId: user._id,
                     role: 'user',
                     content: userMessage,
                     skillId,
+                    moduleId: String(currentModule),
                 });
                 await addMessage({
-                    conversationId: convId as any,
+                    conversationId: conversationId,
                     userId: user._id,
                     role: 'assistant',
                     content: cleanResponse,
                     skillId,
+                    moduleId: String(currentModule),
                 });
             }
         } catch (error) {
             console.error('Chat error:', error);
             setTalkMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Try again.' }]);
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:sendMessage:catch',message:'chat failed',data:{errMsg:String((error as any)?.message||'')?.slice(0,180)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-            // #endregion
         } finally {
             setTalkLoading(false);
         }
@@ -423,15 +578,22 @@ If they share something meaningful or have a breakthrough, end your response wit
                         </div>
 
                         {/* Progress Card */}
-                        <div className="bg-white p-8 rounded-[32px] shadow-2xl max-w-sm w-full">
-                            <div className="flex justify-between items-end mb-4">
-                                <span className="font-mono text-xs font-bold uppercase text-gray-400">Mastery</span>
-                                <span className="font-serif text-5xl font-black text-black">32%</span>
-                            </div>
-                            <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                <div className={`h-full ${themeBg} w-[32%]`}></div>
-                            </div>
-                        </div>
+                        {(() => {
+                            const completed = skillId ? getSkillCompletion(skillId) : 0;
+                            const total = 4; // 4 modules per pillar
+                            const percent = Math.round((completed / total) * 100);
+                            return (
+                                <div className="bg-white p-8 rounded-[32px] shadow-2xl max-w-sm w-full">
+                                    <div className="flex justify-between items-end mb-4">
+                                        <span className="font-mono text-xs font-bold uppercase text-gray-400">Mastery</span>
+                                        <span className="font-serif text-5xl font-black text-black">{percent}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                        <div className={`h-full ${themeBg}`} style={{ width: `${percent}%` }}></div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>
@@ -549,9 +711,6 @@ If they share something meaningful or have a breakthrough, end your response wit
                                         </h2>
                                         <button
                                             onClick={async () => {
-                                                // #region agent log
-                                                fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:letsTalk:click',message:'Let’s Talk clicked',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H3'})}).catch(()=>{});
-                                                // #endregion
 
                                                 // Request mic permission FIRST (must be inside a user gesture)
                                                 const ok = await requestMicPermission();

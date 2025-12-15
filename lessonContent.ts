@@ -13,7 +13,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
   'reality-distortion': {
     1: {
       title: 'Vision Architecture',
-      intro: "Every billion-dollar company started as a vision so compelling it bent reality around it. Steve Jobs didn't sell computers—he sold a future where technology was beautiful and personal. Elon Musk doesn't sell cars—he sells the survival of humanity through sustainable energy and multiplanetary existence. Jeff Bezos didn't build a bookstore—he built the everything store, and then the infrastructure that powers the internet. Your vision must be so clear, so inevitable-feeling, that capital has no choice but to flow toward it. This module breaks down exactly how to architect that vision.",
+      intro: "This is the first stage of your initiation into Reality Distortion. Before Steve Jobs unveiled the iPhone, he didn't say 'let me show you a new phone.' He said 'today, Apple reinvents the phone.' That's not arrogance. That's certainty. That's seeing a future so clearly that announcing it feels like stating fact, not making a claim. You are here because somewhere inside you, there is a future trying to be born—a vision that won't leave you alone. This stage is not about learning to pitch. It's about learning to see. When you can see clearly, the words take care of themselves. Capital flows toward certainty. Talent follows vision. Markets reorganize around inevitability. Your work here is to architect a vision so clear, so compelling, so obviously true that the world has no choice but to align with it.",
       sections: [
         {
           heading: 'The Vision Stack: Three Layers of Inevitability',
@@ -49,20 +49,20 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         ]
       },
       exercise: {
-        instruction: "You will complete this exercise before moving forward. Write your answers now.",
+        instruction: "This is your initiation work. Speak it before you write it. Say it out loud. Feel what lands and what falls flat.",
         prompts: [
-          "In 100 words or less, describe what the world looks like when you win. Not what your company does—what changes in the world.",
-          "Name your villain. What paradigm, system, or status quo are you destroying?",
-          "Compress your vision to one sentence. Eight to fifteen words. Active verb. About the world, not your company.",
-          "What is your 3-year proof point? A specific, measurable milestone that makes your vision feel inevitable.",
-          "What will you accomplish in the next 90 days that provides evidence toward that milestone?"
+          "Close your eyes. When your work is complete, when you have won—what does the world look like? Describe it in 100 words or less. Not your company. The world.",
+          "What are you fighting against? Name the enemy. Not a competitor—a paradigm. The thing that must be destroyed for your vision to live.",
+          "Compress your vision to one breath. Eight to fifteen words. The sentence that makes people stop and lean in.",
+          "Three years from now, what headline proves you were right? What milestone makes the vision feel inevitable?",
+          "In the next 90 days, what evidence will you create? What will be undeniably different?"
         ]
       },
-      directive: "Write your one-sentence vision now. Say it out loud. If it doesn't give you chills, it's not big enough. Rewrite until it does."
+      directive: "Stand up. Say your one-sentence vision out loud. If your voice doesn't change when you say it—if there's no gravity in the words—you haven't found it yet. Keep refining until the words have weight."
     },
     2: {
       title: 'Narrative Control',
-      intro: "The story you tell becomes the reality others invest in. Every successful founder is, above all else, a storyteller. Not a liar—a narrator. The facts of your business are raw material. The narrative is what makes those facts mean something. Reid Hoffman didn't pitch LinkedIn as a 'professional social network.' He pitched it as 'the network that will power the next generation of careers.' Same product, different story. The story raised $4.7 million in Series A. This module teaches you to control the narrative before it controls you.",
+      intro: "The second stage of your initiation: Narrative Control. This is where you learn that facts do not speak for themselves. They never have. The story you tell about those facts is what creates reality. Steve Jobs didn't have better products than his competitors—he had a better story. 'Think Different' wasn't a marketing campaign. It was a reality distortion field that made everyone who bought Apple feel like a creative revolutionary. Reid Hoffman didn't pitch LinkedIn as 'a professional social network.' He pitched it as 'the network that will power the next generation of careers.' Same product. Different story. The story raised $4.7 million. Here, you learn that you are not describing reality. You are authoring it.",
       sections: [
         {
           heading: 'The Origin Story Architecture',
@@ -98,20 +98,20 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         ]
       },
       exercise: {
-        instruction: "Complete this narrative audit now.",
+        instruction: "This is your narrative work. Record yourself speaking. Listen back. Would you follow you?",
         prompts: [
-          "Write your origin story in exactly three sentences. Moment of insight. Proof of commitment. Emergent mission.",
-          "Name your enemy. Be specific. It should be something people complain about.",
-          "Take your most recent milestone and reframe it. Use comparison to a giant, a symbolic threshold, or impossibility proof.",
-          "In one paragraph, what do you tell your team on the hardest days? This is your internal narrative.",
-          "In 60 seconds of speaking, what do you tell a journalist who asks 'what do you do?' This is your external narrative."
+          "Three sentences only. The moment you saw what others couldn't. The sacrifice that proved you're all-in. The mission that emerged and won't let you go.",
+          "Name the enemy you're destroying. Not a competitor—the paradigm. The thing people already resent.",
+          "Take your most recent milestone. Reframe it so it sounds historic. Comparison to a giant. A symbolic threshold crossed. Proof of the impossible.",
+          "When your team is exhausted and doubting, what do you tell them? Write the speech. This is your internal narrative.",
+          "A journalist asks 'what do you do?' You have 60 seconds. What do you say that makes them ask for more?"
         ]
       },
-      directive: "Record yourself telling your origin story. Listen to it. If you wouldn't fund you, rewrite it until you would."
+      directive: "Record yourself telling your origin story. Play it back. If you don't believe you—if you wouldn't follow you—rewrite it until you would."
     },
     3: {
       title: 'The Pitch Deck',
-      intro: "A pitch deck is not a document. It's a weapon. It opens doors, closes rounds, and shapes how the market perceives you. The best pitch decks do not describe your company—they create inevitability. When an investor finishes your deck, they should feel like not investing would be the mistake of their career. This module gives you the exact structure, the exact order, and the exact psychology behind decks that have raised billions.",
+      intro: "The third stage of your initiation: The Pitch Deck. This is not about slides. This is about creating a reality artifact—a document that makes the future feel so inevitable that not investing feels like a career-ending mistake. When Steve Jobs unveiled the iPhone, the slide that mattered most wasn't a feature list. It was a simple image of the device with the words 'This changes everything.' That's not a pitch. That's a declaration. The best pitch decks don't describe your company. They create inevitability. They leave investors with a pit in their stomach—the fear of missing out on history. This stage gives you the exact architecture, the exact psychology, and the exact sequence that has raised billions.",
       sections: [
         {
           heading: 'The 10-Slide Formula',
@@ -147,20 +147,20 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         ]
       },
       exercise: {
-        instruction: "Build your 10-slide deck framework now. Just headlines.",
+        instruction: "Build your reality artifact. Ten headlines. Ten declarations. Ten moments of inevitability.",
         prompts: [
-          "Slide 1: What is your one-line vision? The sentence that captures everything.",
-          "Slide 2: What is the problem, stated in one sentence that creates urgency?",
-          "Slide 3: What is your solution, stated as a transformation, not a feature list?",
-          "Slide 4: How big is your market? TAM with a source.",
-          "Slide 5: What traction do you have? The number that proves people want this."
+          "Slide 1: Your one-line vision. The sentence that makes people stop scrolling. Say it out loud.",
+          "Slide 2: The problem. One sentence that creates visceral urgency. Make them feel the pain.",
+          "Slide 3: Your solution as transformation. Not what you built—what changes. The before and after.",
+          "Slide 4: The market as opportunity. Not how big it is—how big YOU can become in it.",
+          "Slide 5: Traction as proof. The single number that proves this is real. The number that creates FOMO."
         ]
       },
-      directive: "Create your 10 headlines now. One sentence each. If you can't write compelling headlines, you can't write a compelling deck."
+      directive: "Stand in front of a mirror. Pitch your deck in 5 minutes. If you don't believe yourself, neither will they. Keep practicing until you see the fire in your own eyes."
     },
     4: {
       title: 'Media Manipulation',
-      intro: "Press doesn't find you. You manufacture it. The founders who think great products get covered on their own merit are the founders who stay unknown. Every TechCrunch feature, every CNBC appearance, every viral tweet is engineered. This module shows you exactly how to manufacture attention, control the narrative, and turn media into a growth engine.",
+      intro: "The final stage of your Reality Distortion initiation: Media Manipulation. This is where vision becomes viral. Steve Jobs didn't just launch products—he created events. Cultural moments. The iPhone unveiling is studied in business schools not as a product launch, but as a masterclass in attention orchestration. You are about to learn that press doesn't find you. You manufacture it. Every TechCrunch feature is engineered. Every CNBC appearance is strategized. Every viral tweet is architected. The founders who think great products speak for themselves are the founders who stay unknown. Here, you learn to orchestrate attention—to turn media into a force multiplier for your reality distortion field.",
       sections: [
         {
           heading: 'The Press Hook: What Makes News',
@@ -196,16 +196,16 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         ]
       },
       exercise: {
-        instruction: "Build your media strategy now.",
+        instruction: "This is your media initiation. You will not just understand attention—you will command it.",
         prompts: [
-          "What is your primary hook? Which of the five types fits your story best?",
-          "Name three journalists who cover your space. Find their email addresses.",
-          "What can you announce in the next 30 days that's newsworthy?",
-          "Write a one-paragraph pitch email for that announcement.",
-          "What's your backup if a journalist says no? Who's your second choice?"
+          "What is your hook? Which of the five story types fits your narrative? David vs Goliath? First-ever? Trend manifestation? Contrarian? Human drama?",
+          "Name three journalists who cover your space. Not publications—individuals. Find their email addresses. Follow their work.",
+          "What can you manufacture in the next 30 days that is genuinely newsworthy? Not a product update—a story.",
+          "Write the pitch email. One paragraph. The hook that makes them hit reply.",
+          "If the first says no, who's second? If that fails, what do you create that BECOMES news?"
         ]
       },
-      directive: "Identify the single most important outlet for your next announcement. Find the journalist who covers your space. Write the pitch email. Send it within 48 hours."
+      directive: "Your initiation is complete when the world is talking about you on your terms. Identify one outlet. One journalist. One story. Write the pitch. Send it before the week ends. Reality distortion is not complete until reality has been distorted."
     }
   },
   'liquidity-allocation': {

