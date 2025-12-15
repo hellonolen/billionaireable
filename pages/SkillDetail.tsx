@@ -116,94 +116,40 @@ const SkillDetail: React.FC = () => {
     const themeText = getThemeText(skill.colorTheme);
 
     // Speak text using ElevenLabs TTS
-    const speakText = async (text: string): Promise<void> => {
-        return new Promise(async (resolve) => {
-            try {
-                setIsPlaying(true);
-                const result = await textToSpeech({ text });
-                const audioSrc = `data:${result.mimeType};base64,${result.audio}`;
-                const audio = new Audio(audioSrc);
-                audioRef.current = audio;
-                
-                audio.onended = () => {
-                    setIsPlaying(false);
-                    resolve();
-                };
-                audio.onerror = () => {
-                    setIsPlaying(false);
-                    resolve();
-                };
-                
-                await audio.play();
-            } catch (error) {
-                console.error('TTS error:', error);
-                setIsPlaying(false);
-                resolve();
-            }
-        });
+    const speakText = async (text: string) => {
+        const result = await textToSpeech({ text });
+        const audio = new Audio(`data:${result.mimeType};base64,${result.audio}`);
+        audioRef.current = audio;
+        setIsPlaying(true);
+        audio.onended = () => setIsPlaying(false);
+        audio.play();
     };
     
-    // Start the conversation - Billionaireable greets first, then listens
-    const startConversation = async () => {
-        const greeting = `Welcome to ${skill?.title}. ${data.insight.split('.')[0]}. What are you working on right now?`;
-        
-        // Show the message immediately
+    // Start the conversation
+    const startConversation = () => {
+        const greeting = `Welcome to ${skill?.title}. What are you working on?`;
         setTalkMessages([{ role: 'assistant', content: greeting }]);
-        
-        // Speak the greeting
-        await speakText(greeting);
-        
-        // Start listening immediately after greeting finishes
+        speakText(greeting);
         startListening();
     };
     
-    // Start listening - continuous until user stops or speaks
+    // Listen for user speech
     const startListening = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            console.log('Speech recognition not supported');
-            return;
-        }
-        
-        // Stop any existing recognition
-        if (recognitionRef.current) {
-            try { recognitionRef.current.stop(); } catch (e) {}
-        }
+        if (!SpeechRecognition) return;
         
         const recognition = new SpeechRecognition();
-        recognition.continuous = true; // Keep listening
-        recognition.interimResults = true; // Show what user is saying in real-time
         recognition.lang = 'en-US';
         
         recognition.onresult = (event: any) => {
-            // Get the latest result
-            const lastResult = event.results[event.results.length - 1];
-            if (lastResult.isFinal) {
-                const transcript = lastResult[0].transcript;
-                // Stop listening, send message
-                recognition.stop();
-                setIsMicOn(false);
-                if (transcript.trim()) {
-                    sendMessage(transcript.trim());
-                }
-            }
-        };
-        
-        recognition.onerror = (e: any) => {
-            console.log('Speech error:', e.error);
-            // Restart on recoverable errors
-            if (e.error === 'no-speech' || e.error === 'aborted') {
-                setTimeout(() => {
-                    if (showTalkModal) startListening();
-                }, 500);
-            } else {
-                setIsMicOn(false);
-            }
+            const transcript = event.results[0][0].transcript;
+            if (transcript.trim()) sendMessage(transcript.trim());
         };
         
         recognition.onend = () => {
-            // Only restart if modal is still open and we haven't sent a message
-            // Don't restart here - let onresult handle it
+            setIsMicOn(false);
+            // Keep listening while modal is open
+            if (showTalkModal && !isPlaying) startListening();
         };
         
         recognitionRef.current = recognition;
@@ -267,10 +213,7 @@ If they share something meaningful or have a breakthrough, end your response wit
             setTalkMessages(prev => [...prev, { role: 'assistant', content: cleanResponse }]);
             
             // Speak the response
-            await speakText(cleanResponse);
-            
-            // Start listening again for the next message
-            startListening();
+            speakText(cleanResponse);
 
             // Save to Convex
             if (user && skillId) {
