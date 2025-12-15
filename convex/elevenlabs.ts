@@ -1,6 +1,7 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 
+// ElevenLabs Text-to-Speech
 export const textToSpeech = action({
     args: {
         text: v.string(),
@@ -42,7 +43,12 @@ export const textToSpeech = action({
         }
         
         const audioBuffer = await response.arrayBuffer();
-        const base64Audio = Buffer.from(audioBuffer).toString("base64");
+        const bytes = new Uint8Array(audioBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        const base64Audio = btoa(binary);
         
         return {
             audio: base64Audio,
