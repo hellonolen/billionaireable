@@ -1,73 +1,65 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
+import { textToSpeech as openaiTextToSpeech } from "./openai";
 
-// Text-to-Speech using Gemini 3 Pro model
+// Text-to-Speech. Primary: Gemini TTS. Fallback: OpenAI TTS if configured.
 export const textToSpeech = action({
   args: {
     text: v.string(),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY;
 
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY not configured");
+    // If Gemini isn't configured, fall back to OpenAI if available.
+    if (!geminiKey) {
+      return await openaiTextToSpeech.handler(ctx, args as any);
     }
 
-    // Use Gemini 3.0 Pro for Audio Generation
+    // Use a known Gemini TTS-capable model. (This previously worked in your app.)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiKey}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `Please say the following text naturally and authoritatively: ${args.text}` }]
-            }
-          ],
+          contents: [{ role: "user", parts: [{ text: args.text }] }],
           generationConfig: {
             responseModalities: ["AUDIO"],
             speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: "Kore" 
-                }
-              }
-            }
-          }
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+            },
+          },
         }),
       }
     );
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Gemini TTS API error:", error);
-      throw new Error(`Gemini TTS API error: ${response.status}`);
+      console.error("Gemini TTS API error:", response.status, error);
+      // Gemini failed: try OpenAI if configured.
+      try {
+        return await openaiTextToSpeech.handler(ctx, args as any);
+      } catch (_e) {
+        throw new Error(`Gemini TTS API error: ${response.status}`);
+      }
     }
 
-    const data = await response.json();
-    
-    // Extract audio from response - Gemini TTS returns inline audio data
-    const audioPart = data.candidates?.[0]?.content?.parts?.find(
-      (part: any) => part.inlineData
-    );
-
-    if (!audioPart?.inlineData) {
+    const data: any = await response.json();
+    const audioPart = data.candidates?.[0]?.content?.parts?.find((part: any) => part.inlineData);
+    if (!audioPart?.inlineData?.data) {
       console.error("No audio in Gemini response:", JSON.stringify(data));
-      throw new Error("No audio in response");
+      // Try OpenAI if Gemini returns a shape we can't parse.
+      try {
+        return await openaiTextToSpeech.handler(ctx, args as any);
+      } catch (_e) {
+        throw new Error("No audio in response");
+      }
     }
 
-    // Gemini TTS returns PCM 16-bit 24kHz audio - we need to add WAV headers
-    const pcmBase64 = audioPart.inlineData.data;
+    // Gemini returns PCM 16-bit 24kHz audio - add WAV headers.
+    const pcmBase64 = audioPart.inlineData.data as string;
     const wavBase64 = addWavHeaders(pcmBase64, 24000, 16, 1);
-
-    return {
-      audio: wavBase64,
-      mimeType: "audio/wav"
-    };
+    return { audio: wavBase64, mimeType: "audio/wav" };
   },
 });
 

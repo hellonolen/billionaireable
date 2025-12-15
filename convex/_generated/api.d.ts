@@ -14,6 +14,7 @@ import type * as billionaireable from "../billionaireable.js";
 import type * as conversations from "../conversations.js";
 import type * as elevenlabs from "../elevenlabs.js";
 import type * as http from "../http.js";
+import type * as openai from "../openai.js";
 import type * as payments from "../payments.js";
 import type * as progress from "../progress.js";
 import type * as speech from "../speech.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
   elevenlabs: typeof elevenlabs;
   http: typeof http;
+  openai: typeof openai;
   payments: typeof payments;
   progress: typeof progress;
   speech: typeof speech;

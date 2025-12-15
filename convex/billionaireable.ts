@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
+import { chat as openaiChat } from "./openai";
 
 // Simple chat action - direct Gemini call with history
 export const chat = action({
@@ -14,8 +15,9 @@ export const chat = action({
   handler: async (ctx, args) => {
     const apiKey = process.env.GEMINI_API_KEY;
     
+    // If Gemini isn't configured, fall back to OpenAI if available.
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY not configured in Convex");
+      return await openaiChat.handler(ctx, args as any);
     }
 
     // Build conversation history for Gemini
@@ -42,7 +44,7 @@ export const chat = action({
     ];
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -62,8 +64,13 @@ export const chat = action({
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Gemini API error:", error);
-      throw new Error(`Gemini API error: ${response.status}`);
+      console.error("Gemini API error:", response.status, error);
+      // Gemini failed: try OpenAI if configured.
+      try {
+        return await openaiChat.handler(ctx, args as any);
+      } catch (_e) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
     }
 
     const data = await response.json();
