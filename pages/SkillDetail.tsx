@@ -67,6 +67,7 @@ const SkillDetail: React.FC = () => {
     const addMessage = useMutation(api.conversations.addMessage);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const lastSpokenTextRef = useRef<string | null>(null);
     const recognitionRef = useRef<any>(null);
 
     // Find the skill data
@@ -115,21 +116,53 @@ const SkillDetail: React.FC = () => {
     const themeBorder = getThemeBorder(skill.colorTheme);
     const themeText = getThemeText(skill.colorTheme);
 
-    // Speak text using ElevenLabs TTS
+    const [audioError, setAudioError] = useState<string | null>(null);
+
+    // Speak text using server TTS (Gemini primary; OpenAI fallback if configured)
     const speakText = async (text: string) => {
-        const result = await textToSpeech({ text });
-        const audio = new Audio(`data:${result.mimeType};base64,${result.audio}`);
-        audioRef.current = audio;
+        if (isMuted) return;
+        lastSpokenTextRef.current = text;
+
+        // Stop any active listening to avoid picking up the AI audio as user speech
+        try {
+            recognitionRef.current?.stop?.();
+        } catch {}
+        setIsMicOn(false);
+
+        // Stop any existing audio
+        try {
+            audioRef.current?.pause?.();
+            if (audioRef.current) audioRef.current.currentTime = 0;
+        } catch {}
+
+        setAudioError(null);
         setIsPlaying(true);
-        audio.onended = () => setIsPlaying(false);
-        audio.play();
+
+        try {
+            const result = await textToSpeech({ text });
+            const audio = new Audio(`data:${result.mimeType};base64,${result.audio}`);
+            audioRef.current = audio;
+
+            audio.onended = () => setIsPlaying(false);
+            audio.onerror = () => {
+                setIsPlaying(false);
+                setAudioError("Audio failed to load.");
+            };
+
+            // IMPORTANT: await + catch autoplay rejections
+            await audio.play();
+        } catch (err) {
+            console.error("TTS/playback error:", err);
+            setIsPlaying(false);
+            setAudioError("Audio was blocked. Tap Play again to enable sound.");
+        }
     };
     
     // Start the conversation
-    const startConversation = () => {
-        const greeting = `Welcome to ${skill?.title}. What are you working on?`;
+    const startConversation = async () => {
+        const greeting = `Welcome to ${skill?.title}. What are you working on right now?`;
         setTalkMessages([{ role: 'assistant', content: greeting }]);
-        speakText(greeting);
+        await speakText(greeting);
         startListening();
     };
     
@@ -212,8 +245,9 @@ If they share something meaningful or have a breakthrough, end your response wit
 
             setTalkMessages(prev => [...prev, { role: 'assistant', content: cleanResponse }]);
             
-            // Speak the response
-            speakText(cleanResponse);
+            // Speak the response, then resume listening
+            await speakText(cleanResponse);
+            startListening();
 
             // Save to Convex
             if (user && skillId) {
@@ -2051,6 +2085,20 @@ If they share something meaningful or have a breakthrough, end your response wit
                                 </button>
                             </div>
                         </div>
+
+                        {audioError && (
+                            <div className="px-4 py-2 bg-red-50 text-red-700 border-b border-red-100 flex items-center justify-between gap-3">
+                                <span className="text-[11px] font-mono uppercase tracking-wide">{audioError}</span>
+                                <button
+                                    onClick={() => {
+                                        if (lastSpokenTextRef.current) speakText(lastSpokenTextRef.current);
+                                    }}
+                                    className="px-3 py-1 rounded-full bg-red-600 text-white text-[10px] font-mono uppercase font-bold hover:bg-red-700 transition-colors"
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        )}
 
                         {/* Messages */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-[300px]">
