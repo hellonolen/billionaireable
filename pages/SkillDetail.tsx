@@ -62,7 +62,7 @@ const SkillDetail: React.FC = () => {
     // Auth & Convex
     const { user } = useAuth();
     const chat = useAction(api.billionaireable.chat);
-    const textToSpeech = useAction(api.elevenlabs.textToSpeech);
+    const textToSpeech = useAction(api.speech.textToSpeech);
     const createConversation = useMutation(api.conversations.createConversation);
     const addMessage = useMutation(api.conversations.addMessage);
     const [conversationId, setConversationId] = useState<string | null>(null);
@@ -2108,7 +2108,7 @@ If they share something meaningful or have a breakthrough, end your response wit
                                     type="text"
                                     value={talkInput}
                                     onChange={(e) => setTalkInput(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleTalkSend()}
+                                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleTalkSend()}
                                     placeholder="Type your message..."
                                     className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                                     disabled={talkLoading}
