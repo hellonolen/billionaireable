@@ -198,7 +198,7 @@ If they share something meaningful or have a breakthrough, end your response wit
 
             const response = await chat({
                 message: userMessage,
-                history: talkMessages,
+                history: talkMessages.map(m => ({ role: m.role, text: m.content })),
                 systemPrompt,
             });
 
