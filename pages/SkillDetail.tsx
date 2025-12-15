@@ -115,51 +115,49 @@ const SkillDetail: React.FC = () => {
     const themeBorder = getThemeBorder(skill.colorTheme);
     const themeText = getThemeText(skill.colorTheme);
 
-    // Speak text using ElevenLabs TTS, then auto-listen
-    const speakText = async (text: string, autoListenAfter = false) => {
-        if (isMuted) return;
-        
-        try {
-            setIsPlaying(true);
-            const result = await textToSpeech({ text });
-            const audioSrc = `data:${result.mimeType};base64,${result.audio}`;
-            const audio = new Audio(audioSrc);
-            audioRef.current = audio;
-            
-            audio.onended = () => {
+    // Speak text using ElevenLabs TTS
+    const speakText = async (text: string): Promise<void> => {
+        return new Promise(async (resolve) => {
+            try {
+                setIsPlaying(true);
+                const result = await textToSpeech({ text });
+                const audioSrc = `data:${result.mimeType};base64,${result.audio}`;
+                const audio = new Audio(audioSrc);
+                audioRef.current = audio;
+                
+                audio.onended = () => {
+                    setIsPlaying(false);
+                    resolve();
+                };
+                audio.onerror = () => {
+                    setIsPlaying(false);
+                    resolve();
+                };
+                
+                await audio.play();
+            } catch (error) {
+                console.error('TTS error:', error);
                 setIsPlaying(false);
-                // Auto-start listening after AI finishes speaking
-                if (autoListenAfter && !isMuted) {
-                    startListening();
-                }
-            };
-            audio.onerror = () => setIsPlaying(false);
-            
-            await audio.play();
-        } catch (error) {
-            console.error('TTS error:', error);
-            setIsPlaying(false);
-        }
+                resolve();
+            }
+        });
     };
     
-    // Start the conversation - Billionaireable greets first
+    // Start the conversation - Billionaireable greets first, then listens
     const startConversation = async () => {
         const greeting = `Welcome to ${skill?.title}. ${data.insight.split('.')[0]}. What are you working on right now?`;
         
         // Show the message immediately
         setTalkMessages([{ role: 'assistant', content: greeting }]);
         
-        // Speak the greeting, then auto-listen for user response
-        try {
-            await speakText(greeting, true);
-        } catch (e) {
-            console.log('Voice not available, text only');
-            // If voice fails, still start listening
-            startListening();
-        }
+        // Speak the greeting
+        await speakText(greeting);
+        
+        // Start listening immediately after greeting finishes
+        startListening();
     };
     
-    // Start listening and auto-send when user finishes speaking
+    // Start listening - continuous until user stops or speaks
     const startListening = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -167,26 +165,45 @@ const SkillDetail: React.FC = () => {
             return;
         }
         
+        // Stop any existing recognition
+        if (recognitionRef.current) {
+            try { recognitionRef.current.stop(); } catch (e) {}
+        }
+        
         const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.continuous = true; // Keep listening
+        recognition.interimResults = true; // Show what user is saying in real-time
         recognition.lang = 'en-US';
         
         recognition.onresult = (event: any) => {
-            const transcript = event.results[0][0].transcript;
-            setIsMicOn(false);
-            // Auto-send the message
-            if (transcript.trim()) {
-                sendMessage(transcript.trim());
+            // Get the latest result
+            const lastResult = event.results[event.results.length - 1];
+            if (lastResult.isFinal) {
+                const transcript = lastResult[0].transcript;
+                // Stop listening, send message
+                recognition.stop();
+                setIsMicOn(false);
+                if (transcript.trim()) {
+                    sendMessage(transcript.trim());
+                }
             }
         };
         
-        recognition.onerror = () => {
-            setIsMicOn(false);
+        recognition.onerror = (e: any) => {
+            console.log('Speech error:', e.error);
+            // Restart on recoverable errors
+            if (e.error === 'no-speech' || e.error === 'aborted') {
+                setTimeout(() => {
+                    if (showTalkModal) startListening();
+                }, 500);
+            } else {
+                setIsMicOn(false);
+            }
         };
         
         recognition.onend = () => {
-            setIsMicOn(false);
+            // Only restart if modal is still open and we haven't sent a message
+            // Don't restart here - let onresult handle it
         };
         
         recognitionRef.current = recognition;
@@ -249,8 +266,11 @@ If they share something meaningful or have a breakthrough, end your response wit
 
             setTalkMessages(prev => [...prev, { role: 'assistant', content: cleanResponse }]);
             
-            // Speak the response, then auto-listen for next message
-            await speakText(cleanResponse, true);
+            // Speak the response
+            await speakText(cleanResponse);
+            
+            // Start listening again for the next message
+            startListening();
 
             // Save to Convex
             if (user && skillId) {
