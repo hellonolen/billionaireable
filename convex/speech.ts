@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { textToSpeech as openaiTextToSpeech } from "./openai";
-import { textToSpeech as elevenLabsTextToSpeech } from "./elevenlabs";
 
 // Text-to-Speech. Primary: Gemini TTS. Fallback: OpenAI TTS if configured.
 export const textToSpeech = action({
@@ -10,119 +9,57 @@ export const textToSpeech = action({
   },
   handler: async (ctx, args) => {
     const geminiKey = process.env.GEMINI_API_KEY;
-    const openAiKey = process.env.OPENAI_API_KEY;
-    const elevenKey = process.env.ELEVENLABS_API_KEY;
 
-    if (!geminiKey && !openAiKey && !elevenKey) {
-      throw new Error("No text-to-speech providers configured");
+    // If Gemini isn't configured, fall back to OpenAI if available.
+    if (!geminiKey) {
+      return await openaiTextToSpeech.handler(ctx, args as any);
     }
 
-    const providers: Array<{ name: string; fn: () => Promise<{ audio: string; mimeType: string }> }> = [];
-
-    if (geminiKey) {
-      providers.push({
-        name: "Gemini",
-        fn: async () => {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiKey}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: args.text }] }],
-                generationConfig: {
-                  responseModalities: ["AUDIO"],
-                  speechConfig: {
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
-                  },
-                },
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`Gemini TTS API error: ${response.status} ${error}`);
-          }
-
-          const data: any = await response.json();
-          const audioPart = data.candidates?.[0]?.content?.parts?.find((part: any) => part.inlineData);
-          if (!audioPart?.inlineData?.data) {
-            throw new Error("Gemini TTS response missing audio");
-          }
-
-          const pcmBase64 = audioPart.inlineData.data as string;
-          const wavBase64 = addWavHeaders(pcmBase64, 24000, 16, 1);
-          return { audio: wavBase64, mimeType: "audio/wav" };
-        },
-      });
-    }
-
-    if (openAiKey) {
-      providers.push({
-        name: "OpenAI",
-        fn: async () => openaiTextToSpeech.handler(ctx, args as any),
-      });
-    }
-
-    if (elevenKey) {
-      providers.push({
-        name: "ElevenLabs",
-        fn: async () => elevenLabsTextToSpeech.handler(ctx, args as any),
-      });
-    }
-
-    for (const provider of providers) {
-      try {
-        return await provider.fn();
-      } catch (err) {
-        console.error(`${provider.name} TTS failed:`, err);
+    // Use a known Gemini TTS-capable model. (This previously worked in your app.)
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: args.text }] }],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+            },
+          },
+        }),
       }
-    }
-
-    throw new Error("All text-to-speech providers failed");
-  },
-});
-
-export const speechToText = action({
-  args: {
-    audio: v.string(),
-    mimeType: v.string(),
-  },
-  handler: async (_ctx, args) => {
-    const openAiKey = process.env.OPENAI_API_KEY;
-    if (!openAiKey) {
-      throw new Error("OPENAI_API_KEY not configured");
-    }
-
-    const bytes = decodeBase64(args.audio);
-    const blob = new Blob([bytes], { type: args.mimeType || "audio/webm" });
-    const form = new FormData();
-    form.append("model", "gpt-4o-mini-transcribe");
-    form.append("response_format", "json");
-    form.append("file", blob, "speech.webm");
-
-    const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${openAiKey}`,
-      },
-      body: form,
-    });
+    );
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("OpenAI speech-to-text error:", response.status, error);
-      throw new Error(`OpenAI speech-to-text error: ${response.status}`);
+      console.error("Gemini TTS API error:", response.status, error);
+      // Gemini failed: try OpenAI if configured.
+      try {
+        return await openaiTextToSpeech.handler(ctx, args as any);
+      } catch (_e) {
+        throw new Error(`Gemini TTS API error: ${response.status}`);
+      }
     }
 
     const data: any = await response.json();
-    const text: string | undefined = (data.text || data.text?.trim?.()) ? data.text : data?.results?.[0]?.text;
-    if (!text || text.trim().length === 0) {
-      throw new Error("No transcription returned");
+    const audioPart = data.candidates?.[0]?.content?.parts?.find((part: any) => part.inlineData);
+    if (!audioPart?.inlineData?.data) {
+      console.error("No audio in Gemini response:", JSON.stringify(data));
+      // Try OpenAI if Gemini returns a shape we can't parse.
+      try {
+        return await openaiTextToSpeech.handler(ctx, args as any);
+      } catch (_e) {
+        throw new Error("No audio in response");
+      }
     }
 
-    return { text: text.trim() };
+    // Gemini returns PCM 16-bit 24kHz audio - add WAV headers.
+    const pcmBase64 = audioPart.inlineData.data as string;
+    const wavBase64 = addWavHeaders(pcmBase64, 24000, 16, 1);
+    return { audio: wavBase64, mimeType: "audio/wav" };
   },
 });
 

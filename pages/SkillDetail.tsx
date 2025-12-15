@@ -100,7 +100,7 @@ const SkillDetail: React.FC = () => {
     
     // Auth & Convex
     const { user } = useAuth();
-    const chat = useAction(api.billionaireable.chat);
+    const chat = useAction(api.openai.chat);
     const textToSpeech = useAction(api.speech.textToSpeech);
     const createConversation = useMutation(api.conversations.createConversation);
     const addMessage = useMutation(api.conversations.addMessage);
