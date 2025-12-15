@@ -32,6 +32,8 @@ const SkillDetail: React.FC = () => {
     const [isMicOn, setIsMicOn] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const hasGreeted = useRef(false);
+    const [micPermission, setMicPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown');
+    const lastRecognitionErrorRef = useRef<string | null>(null);
     
     // Close modal on ESC key
     useEffect(() => {
@@ -47,6 +49,8 @@ const SkillDetail: React.FC = () => {
     // When modal opens, Billionaireable starts the conversation
     useEffect(() => {
         if (showTalkModal && talkMessages.length === 0 && !hasGreeted.current) {
+            // Wait for mic permission if we don't have it yet
+            if (micPermission !== 'granted') return;
             hasGreeted.current = true;
             startConversation();
         }
@@ -56,8 +60,42 @@ const SkillDetail: React.FC = () => {
     useEffect(() => {
         if (!showTalkModal) {
             hasGreeted.current = false;
+            lastRecognitionErrorRef.current = null;
+            setMicPermission('unknown');
         }
     }, [showTalkModal]);
+
+    const requestMicPermission = async () => {
+        try {
+            if (!navigator.mediaDevices?.getUserMedia) {
+                setMicPermission('denied');
+                return false;
+            }
+
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:requestMicPermission:entry',message:'requestMicPermission',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+            // #endregion
+
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(t => t.stop());
+            setMicPermission('granted');
+
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:requestMicPermission:granted',message:'mic permission granted',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+            // #endregion
+
+            return true;
+        } catch (e: any) {
+            setMicPermission('denied');
+            setAudioError('Microphone blocked. Enable it in your browser site settings, then press Let’s Talk again.');
+
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:requestMicPermission:denied',message:'mic permission denied',data:{errName:e?.name||null,errMsg:String(e?.message||'').slice(0,160)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+            // #endregion
+
+            return false;
+        }
+    };
     
     // Auth & Convex
     const { user } = useAuth();
@@ -194,6 +232,7 @@ const SkillDetail: React.FC = () => {
         fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:startListening',message:'startListening',data:{hasSR:!!SpeechRecognition,ua:navigator.userAgent?.slice(0,120)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
         // #endregion
         if (!SpeechRecognition) return;
+        if (micPermission !== 'granted') return;
         
         const recognition = new SpeechRecognition();
         recognition.lang = 'en-US';
@@ -210,13 +249,24 @@ const SkillDetail: React.FC = () => {
             // #region agent log
             fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:recognition:onerror',message:'speech recognition error',data:{error:e?.error||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
             // #endregion
+            lastRecognitionErrorRef.current = e?.error || 'unknown';
+            if (e?.error === 'not-allowed' || e?.error === 'service-not-allowed') {
+                setMicPermission('denied');
+                setAudioError('Microphone blocked. Enable it in your browser site settings, then press Let’s Talk again.');
+            }
             setIsMicOn(false);
         };
         
         recognition.onend = () => {
             setIsMicOn(false);
             // Keep listening while modal is open
-            if (showTalkModal && !isPlaying) startListening();
+            if (showTalkModal && !isPlaying) {
+                // If permission was denied, don't loop forever.
+                if (lastRecognitionErrorRef.current === 'not-allowed' || lastRecognitionErrorRef.current === 'service-not-allowed') {
+                    return;
+                }
+                startListening();
+            }
         };
         
         recognitionRef.current = recognition;
@@ -497,7 +547,10 @@ If they share something meaningful or have a breakthrough, end your response wit
                                             Training Modules
                                         </h2>
                                         <button
-                                            onClick={() => setShowTalkModal(true)}
+                                            onClick={async () => {
+                                                setShowTalkModal(true);
+                                                await requestMicPermission();
+                                            }}
                                             className={`${themeBg} text-white px-6 py-3 rounded-full font-mono text-xs font-bold uppercase flex items-center gap-2 hover:opacity-90 transition-all shadow-lg`}
                                         >
                                             <MessageCircle className="w-4 h-4" />
