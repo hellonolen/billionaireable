@@ -115,8 +115,8 @@ const SkillDetail: React.FC = () => {
     const themeBorder = getThemeBorder(skill.colorTheme);
     const themeText = getThemeText(skill.colorTheme);
 
-    // Speak text using Gemini TTS
-    const speakText = async (text: string) => {
+    // Speak text using ElevenLabs TTS, then auto-listen
+    const speakText = async (text: string, autoListenAfter = false) => {
         if (isMuted) return;
         
         try {
@@ -126,7 +126,13 @@ const SkillDetail: React.FC = () => {
             const audio = new Audio(audioSrc);
             audioRef.current = audio;
             
-            audio.onended = () => setIsPlaying(false);
+            audio.onended = () => {
+                setIsPlaying(false);
+                // Auto-start listening after AI finishes speaking
+                if (autoListenAfter && !isMuted) {
+                    startListening();
+                }
+            };
             audio.onerror = () => setIsPlaying(false);
             
             await audio.play();
@@ -143,12 +149,49 @@ const SkillDetail: React.FC = () => {
         // Show the message immediately
         setTalkMessages([{ role: 'assistant', content: greeting }]);
         
-        // Try to speak the greeting (will fail silently if TTS not configured)
+        // Speak the greeting, then auto-listen for user response
         try {
-            await speakText(greeting);
+            await speakText(greeting, true);
         } catch (e) {
             console.log('Voice not available, text only');
+            // If voice fails, still start listening
+            startListening();
         }
+    };
+    
+    // Start listening and auto-send when user finishes speaking
+    const startListening = () => {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.log('Speech recognition not supported');
+            return;
+        }
+        
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            setIsMicOn(false);
+            // Auto-send the message
+            if (transcript.trim()) {
+                sendMessage(transcript.trim());
+            }
+        };
+        
+        recognition.onerror = () => {
+            setIsMicOn(false);
+        };
+        
+        recognition.onend = () => {
+            setIsMicOn(false);
+        };
+        
+        recognitionRef.current = recognition;
+        recognition.start();
+        setIsMicOn(true);
     };
     
     // Toggle microphone for speech recognition
@@ -160,35 +203,7 @@ const SkillDetail: React.FC = () => {
             }
             setIsMicOn(false);
         } else {
-            // Start listening
-            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert('Speech recognition not supported in this browser');
-                return;
-            }
-            
-            const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-            
-            recognition.onresult = (event: any) => {
-                const transcript = event.results[0][0].transcript;
-                setTalkInput(transcript);
-                setIsMicOn(false);
-            };
-            
-            recognition.onerror = () => {
-                setIsMicOn(false);
-            };
-            
-            recognition.onend = () => {
-                setIsMicOn(false);
-            };
-            
-            recognitionRef.current = recognition;
-            recognition.start();
-            setIsMicOn(true);
+            startListening();
         }
     };
     
@@ -201,12 +216,11 @@ const SkillDetail: React.FC = () => {
         setIsPlaying(false);
     };
 
-    // Handle sending a message in the talk modal
-    const handleTalkSend = async () => {
-        if (!talkInput.trim() || talkLoading) return;
+    // Send a message (used by both text input and voice)
+    const sendMessage = async (message: string) => {
+        if (!message.trim() || talkLoading) return;
 
-        const userMessage = talkInput.trim();
-        setTalkInput('');
+        const userMessage = message.trim();
         setTalkMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setTalkLoading(true);
 
@@ -235,8 +249,8 @@ If they share something meaningful or have a breakthrough, end your response wit
 
             setTalkMessages(prev => [...prev, { role: 'assistant', content: cleanResponse }]);
             
-            // Speak the response
-            await speakText(cleanResponse);
+            // Speak the response, then auto-listen for next message
+            await speakText(cleanResponse, true);
 
             // Save to Convex
             if (user && skillId) {
@@ -264,17 +278,20 @@ If they share something meaningful or have a breakthrough, end your response wit
                     skillId,
                 });
             }
-
-            // Scroll to bottom
-            setTimeout(() => {
-                talkMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
         } catch (error) {
             console.error('Chat error:', error);
-            setTalkMessages(prev => [...prev, { role: 'assistant', content: "Let's refocus. What's on your mind?" }]);
+            setTalkMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Try again.' }]);
         } finally {
             setTalkLoading(false);
         }
+    };
+
+    // Handle sending a message from text input
+    const handleTalkSend = async () => {
+        if (!talkInput.trim() || talkLoading) return;
+        const message = talkInput.trim();
+        setTalkInput('');
+        await sendMessage(message);
     };
 
     return (
