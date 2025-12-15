@@ -548,8 +548,17 @@ If they share something meaningful or have a breakthrough, end your response wit
                                         </h2>
                                         <button
                                             onClick={async () => {
+                                                // #region agent log
+                                                fetch('http://127.0.0.1:7244/ingest/3356c135-9049-462b-9515-17260edd4946',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'pages/SkillDetail.tsx:letsTalk:click',message:'Let’s Talk clicked',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H3'})}).catch(()=>{});
+                                                // #endregion
+
+                                                // Request mic permission FIRST (must be inside a user gesture)
+                                                const ok = await requestMicPermission();
+                                                if (!ok) {
+                                                    setShowTalkModal(true);
+                                                    return;
+                                                }
                                                 setShowTalkModal(true);
-                                                await requestMicPermission();
                                             }}
                                             className={`${themeBg} text-white px-6 py-3 rounded-full font-mono text-xs font-bold uppercase flex items-center gap-2 hover:opacity-90 transition-all shadow-lg`}
                                         >
@@ -2187,6 +2196,11 @@ If they share something meaningful or have a breakthrough, end your response wit
                                 <span className="text-[11px] font-mono uppercase tracking-wide">{audioError}</span>
                                 <button
                                     onClick={() => {
+                                        // Retry mic permission first if this is a mic-block message
+                                        if ((audioError || '').toLowerCase().includes('microphone')) {
+                                            requestMicPermission();
+                                            return;
+                                        }
                                         if (lastSpokenTextRef.current) speakText(lastSpokenTextRef.current);
                                     }}
                                     className="px-3 py-1 rounded-full bg-red-600 text-white text-[10px] font-mono uppercase font-bold hover:bg-red-700 transition-colors"
