@@ -48,13 +48,14 @@ const SkillDetail: React.FC = () => {
     
     // When modal opens, Billionaireable starts the conversation
     useEffect(() => {
-        if (showTalkModal && talkMessages.length === 0 && !hasGreeted.current) {
-            // Wait for mic permission if we don't have it yet
-            if (micPermission !== 'granted') return;
-            hasGreeted.current = true;
-            startConversation();
-        }
-    }, [showTalkModal]);
+        if (!showTalkModal) return;
+        if (hasGreeted.current) return;
+        if (talkMessages.length > 0) return;
+        // Wait for mic permission if we don't have it yet
+        if (micPermission !== 'granted') return;
+        hasGreeted.current = true;
+        startConversation();
+    }, [showTalkModal, micPermission, talkMessages.length]);
     
     // Reset greeting flag when modal closes
     useEffect(() => {
@@ -2287,4 +2288,3 @@ If they share something meaningful or have a breakthrough, end your response wit
     );
 };
 export default SkillDetail;
-
