@@ -16,15 +16,15 @@ const Lesson: React.FC = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [currentSection, setCurrentSection] = useState(0);
-    
+
     // User context for persistence
     const { user, isSignedIn } = useAuth();
-    
+
     // Billionaireable chat for interactive guidance
     const chat = useAction(api.billionaireable.chat);
     const createConversation = useMutation(api.conversations.createConversation);
     const addMessage = useMutation(api.conversations.addMessage);
-    const [chatMessages, setChatMessages] = useState<{role: string, text: string}[]>([]);
+    const [chatMessages, setChatMessages] = useState<{ role: string, text: string }[]>([]);
     const [chatInput, setChatInput] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
     const [lessonConversationId, setLessonConversationId] = useState<string | null>(null);
@@ -93,25 +93,25 @@ const Lesson: React.FC = () => {
 
         setIsLoading(true);
         setIsPlaying(true);
-        
+
         try {
             // Build the full lesson text
             const fullText = `${lessonContent.intro} ${lessonContent.sections.map(s => `${s.heading}. ${s.content}`).join(' ')} Your directive: ${lessonContent.directive}`;
-            
+
             // Call Gemini TTS
             const result = await textToSpeech({ text: fullText });
-            
+
             // Create audio from base64
             const audioSrc = `data:${result.mimeType};base64,${result.audio}`;
             const audio = new Audio(audioSrc);
             audioRef.current = audio;
-            
+
             audio.onended = () => setIsPlaying(false);
             audio.onerror = () => {
                 console.error('Audio playback error');
                 setIsPlaying(false);
             };
-            
+
             await audio.play();
         } catch (error) {
             console.error('TTS error:', error);
@@ -158,18 +158,18 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
             });
 
             setChatMessages(prev => [...prev, { role: 'model', text: response }]);
-            
+
             // Save to Convex
             if (user) {
                 let convId = lessonConversationId;
                 if (!convId) {
-                    convId = await createConversation({ 
+                    convId = await createConversation({
                         userId: user._id,
                         title: `${pillarName} - ${module.title}`
                     });
                     setLessonConversationId(convId);
                 }
-                
+
                 await addMessage({
                     conversationId: convId as any,
                     userId: user._id,
@@ -194,7 +194,7 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
             setChatLoading(false);
         }
     };
-    
+
     // Pillar order for context
     const PILLAR_ORDER = [
         'reality-distortion', 'liquidity-allocation', 'holding-co', 'time-arbitrage',
@@ -342,8 +342,8 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
                         <button
                             onClick={handleComplete}
                             className={`w-full py-6 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-3 shadow-xl ${completed
-                                    ? 'bg-art-green text-white'
-                                    : `bg-art-${color} text-white hover:opacity-90`
+                                ? 'bg-art-green text-white'
+                                : `bg-art-${color} text-white hover:opacity-90`
                                 }`}
                         >
                             {completed ? (
@@ -368,6 +368,41 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
                             </p>
                         </div>
                     )}
+
+                    {/* Lesson Navigation */}
+                    <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
+                        {/* Previous Module */}
+                        {moduleIndex > 0 ? (
+                            <button
+                                onClick={() => navigate(`/skills/${skillId}/${moduleIndex}`)}
+                                className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-full font-mono text-xs font-bold uppercase text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                                Previous Module
+                            </button>
+                        ) : (
+                            <div></div>
+                        )}
+
+                        {/* Next Module */}
+                        {skillData && moduleIndex < skillData.modules.length - 1 ? (
+                            <button
+                                onClick={() => navigate(`/skills/${skillId}/${moduleIndex + 2}`)}
+                                className={`flex items-center gap-2 px-6 py-3 bg-art-${color} rounded-full font-mono text-xs font-bold uppercase text-white hover:opacity-90 transition-colors`}
+                            >
+                                Next Module
+                                <ChevronLeft className="w-4 h-4 rotate-180" />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => navigate(`/skills/${skillId}`)}
+                                className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white rounded-full font-mono text-xs font-bold uppercase text-white dark:text-black hover:opacity-90 transition-colors"
+                            >
+                                Back to {pillarName}
+                                <ChevronLeft className="w-4 h-4 rotate-180" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Sidebar - Billionaireable Chat */}
@@ -399,11 +434,10 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
                                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div
-                                        className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
-                                            msg.role === 'user'
+                                        className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${msg.role === 'user'
                                                 ? 'bg-black text-white'
                                                 : 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white'
-                                        }`}
+                                            }`}
                                     >
                                         {msg.text}
                                     </div>

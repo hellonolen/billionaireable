@@ -10,10 +10,13 @@
 
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
+import type * as automation from "../automation.js";
 import type * as billionaireable from "../billionaireable.js";
 import type * as conversations from "../conversations.js";
+import type * as crons from "../crons.js";
 import type * as exercises from "../exercises.js";
 import type * as http from "../http.js";
+import type * as intelligence from "../intelligence.js";
 import type * as lifeContext from "../lifeContext.js";
 import type * as openai from "../openai.js";
 import type * as payments from "../payments.js";
@@ -33,10 +36,13 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
+  automation: typeof automation;
   billionaireable: typeof billionaireable;
   conversations: typeof conversations;
+  crons: typeof crons;
   exercises: typeof exercises;
   http: typeof http;
+  intelligence: typeof intelligence;
   lifeContext: typeof lifeContext;
   openai: typeof openai;
   payments: typeof payments;
