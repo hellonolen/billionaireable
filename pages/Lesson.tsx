@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProgress } from '../contexts/ProgressContext';
-import { ChevronLeft, CheckCircle, Play, Pause, Volume2, Loader2 } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Play, Pause, Volume2, Loader2, Sparkles } from 'lucide-react';
+import { LessonSkeleton } from '../components/Skeleton';
 import { SKILL_DATA } from '../constants';
 import { LESSON_CONTENT, PILLAR_NAMES } from '../lessonContent';
 import { useAction, useMutation, useQuery } from 'convex/react';
@@ -38,8 +39,8 @@ const Lesson: React.FC = () => {
     const module = skillData?.modules[moduleIndex];
     const lessonContent = LESSON_CONTENT[skillId]?.[parseInt(moduleId)];
 
-    if (!module) {
-        return <div>Module not found</div>;
+    if (!skillData || !module || !lessonContent) {
+        return <LessonSkeleton />;
     }
 
     const completion = getSkillCompletion(skillId);
@@ -435,8 +436,8 @@ Keep responses to 2-3 sentences. Direct. No fluff.`;
                                 >
                                     <div
                                         className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${msg.role === 'user'
-                                                ? 'bg-black text-white'
-                                                : 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white'
+                                            ? 'bg-black text-white'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white'
                                             }`}
                                     >
                                         {msg.text}

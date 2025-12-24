@@ -18,16 +18,17 @@ const TIER_PRICING = {
 };
 
 // Bank details for wire transfers
-// IMPORTANT: Set these values in your Convex environment or replace before production
+// Set these in Convex Environment Variables:
+// WIRE_BANK_NAME, WIRE_ACCOUNT_NAME, WIRE_ROUTING_NUMBER, WIRE_ACCOUNT_NUMBER, WIRE_SWIFT_CODE
 const WIRE_DETAILS = {
     // US Domestic Wire
     bankName: process.env.WIRE_BANK_NAME || "Mercury Bank",
     accountName: process.env.WIRE_ACCOUNT_NAME || "Billionaireable LLC",
-    routingNumber: process.env.WIRE_ROUTING || "084106768", // Mercury routing
-    accountNumber: process.env.WIRE_ACCOUNT || "SET_IN_ENV",
+    routingNumber: process.env.WIRE_ROUTING_NUMBER || "084106768",
+    accountNumber: process.env.WIRE_ACCOUNT_NUMBER || "SET_IN_ENV",
     // International Wire (SWIFT)
-    swiftCode: process.env.WIRE_SWIFT || "MCRYUS33",
-    bankAddress: "Mercury, 548 Market St, San Francisco, CA 94104",
+    swiftCode: process.env.WIRE_SWIFT_CODE || "MCRYUS33",
+    bankAddress: process.env.WIRE_BANK_ADDRESS || "Mercury, 548 Market St, San Francisco, CA 94104",
     // Reference format
     referencePrefix: "BILL",
 };
@@ -286,6 +287,24 @@ export const hasPendingApplication = query({
             .query("paymentApplications")
             .withIndex("by_user", (q) => q.eq("userId", args.userId))
             .collect();
-        return apps.some(a => a.status === "awaiting_payment");
+        return apps.some(a => a.status === "awaiting_payment" || a.status === "wire_sent");
+    },
+});
+
+// Mark wire as sent (User action)
+export const markWireSent = mutation({
+    args: {
+        applicationId: v.id("paymentApplications"),
+    },
+    handler: async (ctx, args) => {
+        const application = await ctx.db.get(args.applicationId);
+        if (!application) throw new Error("Application not found");
+
+        await ctx.db.patch(args.applicationId, {
+            status: "wire_sent",
+            updatedAt: Date.now(),
+        });
+
+        return { success: true };
     },
 });

@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight, Clock } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
+import { useAuth } from '../contexts/AuthContext';
+import { FEATURE_FLAGS } from '../constants';
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const hasPendingApp = useQuery(api.payments.hasPendingApplication, user ? { userId: user._id } : "skip");
     const [typedText, setTypedText] = useState('');
     const fullText = "I'm ready. What's first?";
 
@@ -72,19 +78,32 @@ const Home: React.FC = () => {
                             transition={{ duration: 0.6, delay: 0.3 }}
                             className="flex flex-col sm:flex-row items-center justify-center gap-4"
                         >
-                            <button
-                                onClick={() => navigate('/free-assessment')}
-                                className="group flex items-center gap-3 bg-art-orange text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-all shadow-2xl"
-                            >
-                                Take Free Assessment
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                            <button
-                                onClick={() => navigate('/pricing')}
-                                className="font-mono text-sm font-bold uppercase tracking-widest text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                            >
-                                View Pricing →
-                            </button>
+                            {FEATURE_FLAGS.REMEDIATION_PHASE_2 && hasPendingApp ? (
+                                <button
+                                    onClick={() => navigate('/payment-application-submitted')}
+                                    className="group flex items-center gap-3 bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all shadow-2xl"
+                                >
+                                    <Clock className="w-4 h-4 animate-pulse text-art-orange" />
+                                    Verification in Progress
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => navigate('/free-assessment')}
+                                        className="group flex items-center gap-3 bg-art-orange text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-all shadow-2xl"
+                                    >
+                                        Take Free Assessment
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/pricing')}
+                                        className="font-mono text-sm font-bold uppercase tracking-widest text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                                    >
+                                        View Pricing →
+                                    </button>
+                                </>
+                            )}
                         </motion.div>
                     </div>
 

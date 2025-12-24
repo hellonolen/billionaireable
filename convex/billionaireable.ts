@@ -13,11 +13,19 @@ export const chat = action({
     systemPrompt: v.string(),
   },
   handler: async (ctx, args) => {
+    // 1. Fetch Global Directives
+    const directives = await ctx.runQuery(api.admin.getGlobalDirectives);
+    const directivesPrompt = directives.length > 0
+      ? `\n\n[GLOBAL ARCHITECTURAL DIRECTIVES]:\n${directives.map(d => `- ${d.key}: ${d.value}`).join('\n')}`
+      : "";
+
+    const enrichedSystemPrompt = `${args.systemPrompt}${directivesPrompt}\n\n[USER DATA PROTECTION]: Billionaireable never forgets. Everything shared is encrypted. Access is restricted.`;
+
     const apiKey = process.env.GEMINI_API_KEY;
-    
+
     // If Gemini isn't configured, fall back to OpenAI if available.
     if (!apiKey) {
-      return await openaiChat.handler(ctx, args as any);
+      return await openaiChat.handler(ctx, { ...args, systemPrompt: enrichedSystemPrompt } as any);
     }
 
     // Build conversation history for Gemini
@@ -25,11 +33,11 @@ export const chat = action({
       // System prompt as first exchange
       {
         role: "user",
-        parts: [{ text: args.systemPrompt }],
+        parts: [{ text: enrichedSystemPrompt }],
       },
       {
-        role: "model", 
-        parts: [{ text: "Understood. I am Billionaireable. Ready to guide." }],
+        role: "model",
+        parts: [{ text: "Understood. I am Billionaireable. My directives are locked. I monitor and guide. Privacy is absolute." }],
       },
       // Previous conversation
       ...args.history.map((msg) => ({
@@ -67,14 +75,14 @@ export const chat = action({
       console.error("Gemini API error:", response.status, error);
       // Gemini failed: try OpenAI if configured.
       try {
-        return await openaiChat.handler(ctx, args as any);
+        return await openaiChat.handler(ctx, { ...args, systemPrompt: enrichedSystemPrompt } as any);
       } catch (_e) {
-        throw new Error(`Gemini API error: ${response.status}`);
+        return "I am experiencing a momentary intelligence lag. If this persists, elevate this to an allocation specialist: support@billionaireable.com";
       }
     }
 
     const data = await response.json();
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Let's refocus. What are you working on?";
 
     return aiResponse;

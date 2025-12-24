@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, LayoutGrid, Mic, X, Banknote, ChevronDown, User, Lock, Globe, History, Sun, Moon, LogOut } from 'lucide-react';
+import { Menu, LayoutGrid, Mic, X, Banknote, ChevronDown, User, Lock, Globe, History, Sun, Moon, LogOut, ShieldCheck, Clock } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
+import { FEATURE_FLAGS } from '../constants';
 
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,6 +15,7 @@ const Navigation: React.FC = () => {
   const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
   const { user, isSignedIn, signOut, isLoaded } = useAuth();
+  const hasPendingApp = useQuery(api.payments.hasPendingApplication, user ? { userId: user._id } : "skip");
 
   const navItems = [
     { path: '/', label: 'HOME', icon: <LayoutGrid className="w-4 h-4" /> },
@@ -59,11 +63,17 @@ const Navigation: React.FC = () => {
         {/* Logo */}
         <button
           onClick={() => navigate('/')}
-          className="group flex items-center"
+          className="group flex items-center gap-4"
         >
           <span className="font-serif text-2xl lg:text-3xl font-black text-black dark:text-white tracking-tighter hover:text-art-orange transition-colors whitespace-nowrap">
             billionaireable.
           </span>
+          {FEATURE_FLAGS.REMEDIATION_PHASE_2 && hasPendingApp && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-art-orange/10 border border-art-orange/20 rounded-full animate-pulse cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate('/payment-application-submitted'); }}>
+              <Clock className="w-3 h-3 text-art-orange" />
+              <span className="font-mono text-[10px] font-bold text-art-orange uppercase tracking-widest">Awaiting Activation</span>
+            </div>
+          )}
         </button>
 
         {/* Desktop Nav - Floating Pill Style */}
@@ -100,13 +110,13 @@ const Navigation: React.FC = () => {
           {/* Auth - Signed Out State */}
           {isLoaded && !isSignedIn && (
             <div className="hidden md:flex items-center gap-2">
-              <button 
+              <button
                 onClick={() => navigate('/login')}
                 className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
               >
                 Sign In
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/signup')}
                 className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase bg-art-orange text-white rounded-full hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-colors shadow-lg"
               >
@@ -193,13 +203,13 @@ const Navigation: React.FC = () => {
             {/* Mobile Auth Buttons */}
             {isLoaded && !isSignedIn && (
               <div className="flex gap-2 mb-4">
-                <button 
+                <button
                   onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
                   className="flex-1 py-3 text-sm font-bold uppercase text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-2xl"
                 >
                   Sign In
                 </button>
-                <button 
+                <button
                   onClick={() => { navigate('/signup'); setIsMenuOpen(false); }}
                   className="flex-1 py-3 text-sm font-bold uppercase text-white bg-black dark:bg-white dark:text-black rounded-2xl"
                 >

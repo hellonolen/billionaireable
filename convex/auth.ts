@@ -19,34 +19,34 @@ function generateSessionToken(): string {
 
 // Request a login/signup code
 export const requestCode = mutation({
-    args: { 
+    args: {
         email: v.string(),
         name: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const email = args.email.toLowerCase().trim();
-        
+
         // Check if user exists
         const existingUser = await ctx.db
             .query("users")
             .withIndex("by_email", (q) => q.eq("email", email))
             .first();
-        
+
         const type = existingUser ? 'login' : 'signup';
-        
+
         // Delete any existing codes for this email
         const existingCodes = await ctx.db
             .query("verificationCodes")
             .withIndex("by_email", (q) => q.eq("email", email))
             .collect();
-        
+
         for (const code of existingCodes) {
             await ctx.db.delete(code._id);
         }
-        
+
         // Generate new code
         const code = generateCode();
-        
+
         // Save to DB (expires in 15 minutes)
         await ctx.db.insert("verificationCodes", {
             email,
@@ -54,10 +54,10 @@ export const requestCode = mutation({
             type,
             expiresAt: Date.now() + 15 * 60 * 1000,
         });
-        
+
         // Store name for signup if provided
-        return { 
-            success: true, 
+        return {
+            success: true,
             type,
             email,
             name: args.name,
@@ -96,8 +96,8 @@ export const sendVerificationEmail = action({
 
                 <p style="font-size: 16px; color: #333; margin-bottom: 24px;">
                     ${args.type === 'signup'
-                        ? `Welcome${args.name ? `, ${args.name}` : ''}. Here's your access code:`
-                        : 'Here\'s your login code:'}
+                ? `Welcome${args.name ? `, ${args.name}` : ''}. Here's your access code:`
+                : 'Here\'s your login code:'}
                 </p>
 
                 <div style="background: #000; color: #fff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
@@ -123,7 +123,7 @@ export const sendVerificationEmail = action({
         `;
 
         // Email It API endpoint
-        const response = await fetch('https://api.emailit.com/v2/send', {
+        const response = await fetch('https://api.emailit.com/v1/emails', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -134,6 +134,7 @@ export const sendVerificationEmail = action({
                 to: args.email,
                 subject,
                 html,
+                text: subject, // Optional but good practice
             }),
         });
 
@@ -183,17 +184,17 @@ export const verifyCode = mutation({
             // Delete the used code
             await ctx.db.delete(verification._id);
         }
-        
+
         // Generate session token
         const sessionToken = generateSessionToken();
         const sessionExpiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
-        
+
         // Get or create user
         let user = await ctx.db
             .query("users")
             .withIndex("by_email", (q) => q.eq("email", email))
             .first();
-        
+
         if (user) {
             // Update existing user with new session
             await ctx.db.patch(user._id, {
@@ -215,7 +216,7 @@ export const verifyCode = mutation({
             });
             user = await ctx.db.get(userId);
         }
-        
+
         return {
             success: true,
             sessionToken,
@@ -235,19 +236,19 @@ export const getCurrentUser = query({
     args: { sessionToken: v.optional(v.string()) },
     handler: async (ctx, args) => {
         if (!args.sessionToken) return null;
-        
+
         const user = await ctx.db
             .query("users")
             .withIndex("by_session", (q) => q.eq("sessionToken", args.sessionToken))
             .first();
-        
+
         if (!user) return null;
-        
+
         // Check if session expired
         if (user.sessionExpiresAt && user.sessionExpiresAt < Date.now()) {
             return null;
         }
-        
+
         return {
             _id: user._id,
             email: user.email,
@@ -270,7 +271,7 @@ export const signOut = mutation({
             .query("users")
             .withIndex("by_session", (q) => q.eq("sessionToken", args.sessionToken))
             .first();
-        
+
         if (user) {
             await ctx.db.patch(user._id, {
                 sessionToken: undefined,
@@ -278,7 +279,7 @@ export const signOut = mutation({
                 updatedAt: Date.now(),
             });
         }
-        
+
         return { success: true };
     },
 });
@@ -295,15 +296,15 @@ export const updateProfile = mutation({
             .query("users")
             .withIndex("by_session", (q) => q.eq("sessionToken", args.sessionToken))
             .first();
-        
+
         if (!user) throw new Error("Not authenticated");
-        
+
         await ctx.db.patch(user._id, {
             ...(args.name && { name: args.name }),
             ...(args.imageUrl && { imageUrl: args.imageUrl }),
             updatedAt: Date.now(),
         });
-        
+
         return { success: true };
     },
 });
@@ -313,12 +314,12 @@ export const isAdmin = query({
     args: { sessionToken: v.optional(v.string()) },
     handler: async (ctx, args) => {
         if (!args.sessionToken) return false;
-        
+
         const user = await ctx.db
             .query("users")
             .withIndex("by_session", (q) => q.eq("sessionToken", args.sessionToken))
             .first();
-        
+
         return user?.isAdmin === true;
     },
 });
@@ -334,14 +335,14 @@ export const setAdmin = mutation({
             .query("users")
             .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
             .first();
-        
+
         if (!user) throw new Error("User not found");
-        
+
         await ctx.db.patch(user._id, {
             isAdmin: args.isAdmin,
             updatedAt: Date.now(),
         });
-        
+
         return { success: true };
     },
 });

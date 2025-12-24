@@ -23,6 +23,8 @@ export default defineSchema({
     sessionToken: v.optional(v.string()),
     sessionExpiresAt: v.optional(v.number()),
     lastLoginAt: v.optional(v.number()),
+    // Persistence for onboarding and assessment
+    onboardingProgress: v.optional(v.string()), // JSON string of progress state
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -118,6 +120,8 @@ export default defineSchema({
   // Subscriptions - all payment sources
   subscriptions: defineTable({
     userId: v.id("users"),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
     status: v.string(), // active, canceled, past_due, etc.
     plan: v.string(), // founder, scaler, owner
     paymentMethod: v.optional(v.string()), // wire
@@ -205,4 +209,28 @@ export default defineSchema({
   })
     .index("by_sent_at", ["sentAt"])
     .index("by_type", ["type"]),
+
+  // Audit Logs - track critical system mutations
+  auditLogs: defineTable({
+    userId: v.optional(v.id("users")),
+    userEmail: v.optional(v.string()),
+    action: v.string(), // e.g., 'subscription_update', 'admin_access_granted'
+    targetId: v.optional(v.string()),
+    metadata: v.optional(v.string()), // JSON string for details
+    level: v.string(), // 'info', 'warning', 'critical'
+    timestamp: v.number(),
+  })
+    .index("by_action", ["action"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_user", ["userId"]),
+
+  // Global Directives - centralized AI behavioral standards
+  globalDirectives: defineTable({
+    key: v.string(), // e.g., 'tone', 'voice', 'safety'
+    value: v.string(),
+    description: v.optional(v.string()),
+    updatedBy: v.id("users"),
+    timestamp: v.number(),
+  })
+    .index("by_key", ["key"]),
 });

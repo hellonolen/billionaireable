@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Loader2, Mail, CheckCircle } from 'lucide-react';
+import { ArrowRight, Loader2, Mail, CheckCircle, ShieldCheck, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 type AuthStep = 'email' | 'code';
@@ -8,7 +8,7 @@ type AuthStep = 'email' | 'code';
 const Auth: React.FC = () => {
     const navigate = useNavigate();
     const { signIn, verifyCode } = useAuth();
-    
+
     const [step, setStep] = useState<AuthStep>('email');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
@@ -203,6 +203,18 @@ const Auth: React.FC = () => {
                         </>
                     )}
                 </div>
+
+                {/* Secure Environment Badge */}
+                <div className="mt-8 flex items-center justify-center gap-2 opacity-50">
+                    <ShieldCheck className="w-4 h-4 text-art-green" />
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500">Secure Encrypted Environment</span>
+                </div>
+
+                <p className="mt-6 text-center font-serif text-xs text-gray-400 leading-relaxed px-4">
+                    Your identifiers are used solely for authentication. <br />
+                    Billionaireable does not sell, lease, or share your data. <br />
+                    <span className="font-bold">Privacy is the first pillar.</span>
+                </p>
 
                 {/* Footer */}
                 <p className="text-center mt-6 font-serif text-sm text-gray-400">

@@ -413,3 +413,11 @@ export const INTELLIGENCE_CONTENT: ContentItem[] = [
 ];
 
 export const STUDIO_CONTENT = INTELLIGENCE_CONTENT;
+
+export const FEATURE_FLAGS = {
+  REMEDIATION_PHASE_1: true, // Onboarding Persistence & Privacy
+  REMEDIATION_PHASE_2: true, // User Confirmations
+  REMEDIATION_PHASE_3: true, // Billing Transparency
+  REMEDIATION_PHASE_4: true, // AI Continuity
+  REMEDIATION_PHASE_5: true, // Premium UX
+};

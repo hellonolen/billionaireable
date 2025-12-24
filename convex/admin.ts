@@ -371,7 +371,7 @@ export const sendAdminEmail = action({
       throw new Error("Email service not configured");
     }
 
-    const response = await fetch('https://api.emailit.com/v2/send', {
+    const response = await fetch('https://api.emailit.com/v1/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -379,10 +379,10 @@ export const sendAdminEmail = action({
       },
       body: JSON.stringify({
         from: 'Billionaireable <noreply@billionaireable.com>',
-        to: args.to.join(', '), // Email It typically accepts comma-separated strings or handles arrays if configured, but joining is safer for 'to' field in some v2 implementations. Adding multiple recipients.
+        to: args.to.join(', '),
         subject: args.subject,
         html: args.htmlBody,
-        text: args.textBody || '',
+        text: args.textBody || args.subject,
       }),
     });
 
@@ -429,5 +429,89 @@ export const getEmailLogs = query({
       .order("desc")
       .take(limit);
     return logs;
+  },
+});
+
+// Audit Logging
+export const logAction = mutation({
+  args: {
+    userId: v.optional(v.id("users")),
+    userEmail: v.optional(v.string()),
+    action: v.string(),
+    targetId: v.optional(v.string()),
+    metadata: v.optional(v.string()),
+    level: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("auditLogs", {
+      userId: args.userId,
+      userEmail: args.userEmail,
+      action: args.action,
+      targetId: args.targetId,
+      metadata: args.metadata,
+      level: args.level,
+      timestamp: Date.now(),
+    });
+  },
+});
+
+export const getAuditLogs = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 50;
+    return await ctx.db
+      .query("auditLogs")
+      .order("desc")
+      .take(limit);
+  },
+});
+
+// Global Directives Management
+export const updateGlobalDirective = mutation({
+  args: {
+    key: v.string(),
+    value: v.string(),
+    description: v.optional(v.string()),
+    adminId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("globalDirectives")
+      .withIndex("by_key", (q) => q.eq("key", args.key))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        value: args.value,
+        description: args.description,
+        updatedBy: args.adminId,
+        timestamp: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("globalDirectives", {
+        key: args.key,
+        value: args.value,
+        description: args.description,
+        updatedBy: args.adminId,
+        timestamp: Date.now(),
+      });
+    }
+
+    // Log the change
+    await ctx.db.insert("auditLogs", {
+      userId: args.adminId,
+      action: "update_global_directive",
+      targetId: args.key,
+      metadata: JSON.stringify({ key: args.key, value: args.value }),
+      level: "info",
+      timestamp: Date.now(),
+    });
+  },
+});
+
+export const getGlobalDirectives = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("globalDirectives").collect();
   },
 });

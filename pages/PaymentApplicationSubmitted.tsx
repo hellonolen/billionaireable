@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, Building2, ArrowRight, Copy, Clock } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { Id } from '../convex/_generated/dataModel';
+import { FileText, Download, ShieldCheck } from 'lucide-react';
+import { FEATURE_FLAGS } from '../constants';
 
 const PaymentApplicationSubmitted: React.FC = () => {
     const navigate = useNavigate();
@@ -15,6 +17,8 @@ const PaymentApplicationSubmitted: React.FC = () => {
         api.payments.getApplicationWithWireDetails,
         applicationId ? { applicationId } : "skip"
     );
+    const markSentStatus = useMutation(api.payments.markWireSent);
+    const [submitting, setSubmitting] = useState(false);
 
     const copyToClipboard = (text: string, field: string) => {
         navigator.clipboard.writeText(text);
@@ -218,7 +222,47 @@ const PaymentApplicationSubmitted: React.FC = () => {
 
                 {/* Actions */}
                 <div className="space-y-4">
-                    <p className="font-serif text-center text-gray-500 dark:text-gray-400">
+                    {FEATURE_FLAGS.REMEDIATION_PHASE_3 && application && application.status === "awaiting_payment" && (
+                        <button
+                            disabled={submitting}
+                            onClick={async () => {
+                                setSubmitting(true);
+                                try {
+                                    await markSentStatus({ applicationId: application._id });
+                                } finally {
+                                    setSubmitting(false);
+                                }
+                            }}
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-sm font-bold uppercase transition-all hover:opacity-90 disabled:opacity-50"
+                        >
+                            {submitting ? "Processing..." : "I've Sent My Wire"}
+                            <ShieldCheck className="w-4 h-4" />
+                        </button>
+                    )}
+
+                    {FEATURE_FLAGS.REMEDIATION_PHASE_3 && application && application.status === "wire_sent" && (
+                        <div className="p-4 bg-art-green/10 border border-art-green/20 rounded-2xl flex items-center gap-3 mb-4">
+                            <Clock className="w-5 h-5 text-art-green animate-pulse" />
+                            <p className="font-serif text-sm text-gray-700 dark:text-gray-300">
+                                <span className="font-bold text-art-green">Status: Wire Logged.</span> Verification usually takes 24-48 hours.
+                            </p>
+                        </div>
+                    )}
+
+                    {FEATURE_FLAGS.REMEDIATION_PHASE_3 && (
+                        <button
+                            onClick={() => {
+                                // Mock download
+                                alert("Wire Instructions & Receipt downloading as PDF...");
+                            }}
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full font-mono text-sm font-bold uppercase transition-all hover:bg-gray-200"
+                        >
+                            Download Wire Receipt
+                            <Download className="w-4 h-4" />
+                        </button>
+                    )}
+
+                    <p className="font-serif text-center text-gray-500 dark:text-gray-400 mt-8 pt-4 border-t border-gray-100 dark:border-gray-800">
                         While you wait, start with the free content:
                     </p>
                     <button

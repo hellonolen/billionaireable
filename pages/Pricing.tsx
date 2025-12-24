@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, ArrowRight, Loader2, ShieldCheck, Lock, Headset, Globe, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useMutation } from 'convex/react';
@@ -117,8 +117,8 @@ const Pricing: React.FC = () => {
                         <button
                             onClick={() => setIsAnnual(false)}
                             className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${!isAnnual
-                                    ? 'bg-art-orange text-white'
-                                    : 'text-gray-500 hover:text-black dark:hover:text-white'
+                                ? 'bg-art-orange text-white'
+                                : 'text-gray-500 hover:text-black dark:hover:text-white'
                                 }`}
                         >
                             Monthly
@@ -126,8 +126,8 @@ const Pricing: React.FC = () => {
                         <button
                             onClick={() => setIsAnnual(true)}
                             className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${isAnnual
-                                    ? 'bg-art-orange text-white'
-                                    : 'text-gray-500 hover:text-black dark:hover:text-white'
+                                ? 'bg-art-orange text-white'
+                                : 'text-gray-500 hover:text-black dark:hover:text-white'
                                 }`}
                         >
                             Annual <span className="text-art-green ml-1">Save 2 months</span>
@@ -197,8 +197,8 @@ const Pricing: React.FC = () => {
                                     onClick={() => handleSelectTier(tier)}
                                     disabled={loading === tier.name}
                                     className={`w-full py-4 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-2 ${tier.popular
-                                            ? 'bg-art-orange text-black hover:bg-art-orange/90'
-                                            : 'bg-art-orange text-white hover:bg-art-orange/80'
+                                        ? 'bg-art-orange text-black hover:bg-art-orange/90'
+                                        : 'bg-art-orange text-white hover:bg-art-orange/80'
                                         }`}
                                 >
                                     {loading === tier.name ? (
@@ -301,6 +301,60 @@ const Pricing: React.FC = () => {
                     <p className="font-serif text-lg opacity-80">
                         You're in control. Cancel your subscription at any time. No contracts. No obligations. No refunds.
                     </p>
+                </div>
+            </div>
+
+            {/* Trust & Transparency Section */}
+            <div className="max-w-7xl mx-auto px-4 py-24 border-t border-gray-200 dark:border-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                    <div className="space-y-4">
+                        <div className="w-12 h-12 bg-art-green/10 rounded-full flex items-center justify-center text-art-green mx-auto">
+                            <ShieldCheck className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-sans text-lg font-bold dark:text-white uppercase tracking-tighter">Bank-Grade Privacy</h3>
+                        <p className="font-serif text-sm text-gray-500 dark:text-gray-400">
+                            Your financial situation is encrypted and never shared. We follow sovereign-grade security protocols for all user data.
+                        </p>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="w-12 h-12 bg-art-blue/10 rounded-full flex items-center justify-center text-art-blue mx-auto">
+                            <Lock className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-sans text-lg font-bold dark:text-white uppercase tracking-tighter">Encrypted Payments</h3>
+                        <p className="font-serif text-sm text-gray-500 dark:text-gray-400">
+                            Wire transfer applications are processed through an isolated, secure channel. No sensitive bank data is ever stored on our servers.
+                        </p>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="w-12 h-12 bg-art-orange/10 rounded-full flex items-center justify-center text-art-orange mx-auto">
+                            <Headset className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-sans text-lg font-bold dark:text-white uppercase tracking-tighter">Elite Human Support</h3>
+                        <p className="font-serif text-sm text-gray-500 dark:text-gray-400">
+                            Need guidance choosing the right path? Speak with an allocation specialist.
+                        </p>
+                        <button
+                            onClick={() => window.location.href = 'mailto:support@billionaireable.com'}
+                            className="font-mono text-[10px] font-bold uppercase text-art-orange hover:underline"
+                        >
+                            Speak with a specialist →
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-20 flex flex-wrap justify-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+                    <div className="flex items-center gap-2">
+                        <Globe className="w-5 h-5" />
+                        <span className="font-mono text-[10px] font-bold uppercase">Sovereign Compliant</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5" />
+                        <span className="font-mono text-[10px] font-bold uppercase">SSL Secured</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Zap className="w-5 h-5" />
+                        <span className="font-mono text-[10px] font-bold uppercase">AES-256 Encryption</span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -14,11 +14,19 @@ export const chat = action({
     history: v.array(v.object({ role: v.string(), text: v.string() })),
     systemPrompt: v.string(),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
+    // 1. Fetch Global Directives (additive)
+    const directives = await ctx.runQuery(api.admin.getGlobalDirectives);
+    const directivesPrompt = directives.length > 0
+      ? `\n\n[GLOBAL ARCHITECTURAL DIRECTIVES]:\n${directives.map(d => `- ${d.key}: ${d.value}`).join('\n')}`
+      : "";
+
+    const enrichedSystemPrompt = `${args.systemPrompt}${directivesPrompt}`;
+
     const apiKey = getOpenAiKey();
 
     const messages = [
-      { role: "system", content: args.systemPrompt },
+      { role: "system", content: enrichedSystemPrompt },
       ...args.history.map((m) => ({
         role: m.role === "assistant" ? "assistant" : "user",
         content: m.text,
@@ -43,7 +51,7 @@ export const chat = action({
     if (!response.ok) {
       const error = await response.text();
       console.error("OpenAI chat error:", response.status, error);
-      throw new Error(`OpenAI chat error: ${response.status}`);
+      return "Intelligence systems are currently under maintenance. Please contact elite support for immediate assistance: support@billionaireable.com";
     }
 
     const data: any = await response.json();

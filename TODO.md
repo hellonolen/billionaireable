@@ -3,16 +3,14 @@
 ## Circle Back Items
 
 ### Wire Transfer Configuration
-- [ ] Update bank details in `convex/payments.ts`:
-  ```javascript
-  const WIRE_DETAILS = {
-      bankName: "Your Bank Name",
-      accountName: "Billionaireable LLC",
-      routingNumber: "XXXXXXXXX",
-      accountNumber: "XXXXXXXXX",
-      swiftCode: "XXXXXXXXX",
-  };
-  ```
+- [x] Refactor bank details to use Environment Variables
+- [ ] Set these in Convex Dashboard:
+  - `WIRE_BANK_NAME`: Your Bank Name
+  - `WIRE_ACCOUNT_NAME`: Billionaireable LLC
+  - `WIRE_ROUTING_NUMBER`: XXXXXXXXX
+  - `WIRE_ACCOUNT_NUMBER`: XXXXXXXXX
+  - `WIRE_SWIFT_CODE`: XXXXXXXXX
+  - `WIRE_BANK_ADDRESS`: Your Bank Address
 
 ### Wire Payment Webhook Setup
 - [ ] Set up automated wire verification (choose one):

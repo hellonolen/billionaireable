@@ -16,21 +16,54 @@ const FOCUS_AREAS = [
 const Onboarding: React.FC = () => {
     const navigate = useNavigate();
     const { user, isSignedIn } = useAuth();
-    const [step, setStep] = useState(1);
     const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
+    const [lastSaved, setLastSaved] = useState<number | null>(null);
 
     const updateUser = useMutation(api.users.updateUserGoals);
+    const saveProgressMutation = useMutation(api.users.saveOnboardingProgress);
+    const savedProgress = useQuery(api.users.getOnboardingProgress, user ? { userId: user._id } : "skip");
+
+    // Load progress from Convex
+    useEffect(() => {
+        if (savedProgress) {
+            try {
+                const parsed = JSON.parse(savedProgress);
+                if (parsed.step) setStep(parsed.step);
+                if (parsed.selectedAreas) setSelectedAreas(parsed.selectedAreas);
+            } catch (e) {
+                console.error("Failed to parse onboarding progress", e);
+            }
+        }
+    }, [savedProgress]);
+
+    const saveProgress = async (newStep: number, newAreas: string[]) => {
+        if (!user) return;
+        setSaving(true);
+        try {
+            await saveProgressMutation({
+                userId: user._id,
+                progress: JSON.stringify({ step: newStep, selectedAreas: newAreas })
+            });
+            setLastSaved(Date.now());
+        } catch (e) {
+            console.error("Failed to save progress", e);
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const handleAreaToggle = (areaId: string) => {
-        setSelectedAreas(prev =>
-            prev.includes(areaId) ? prev.filter(g => g !== areaId) : [...prev, areaId]
-        );
+        const newAreas = selectedAreas.includes(areaId)
+            ? selectedAreas.filter(g => g !== areaId)
+            : [...selectedAreas, areaId];
+        setSelectedAreas(newAreas);
+        saveProgress(step, newAreas);
     };
 
     const handleComplete = async () => {
         setSaving(true);
-        
+
         try {
             // Save to Convex if signed in
             if (user) {
@@ -39,7 +72,7 @@ const Onboarding: React.FC = () => {
                     goals: selectedAreas,
                 });
             }
-            
+
             // Also save to localStorage as backup
             localStorage.setItem('onboarding_complete', 'true');
             localStorage.setItem('focus_areas', JSON.stringify(selectedAreas));
@@ -63,6 +96,21 @@ const Onboarding: React.FC = () => {
                     className="h-full bg-black dark:bg-white transition-all duration-500"
                     style={{ width: `${(step / 3) * 100}%` }}
                 ></div>
+            </div>
+
+            {/* Saved Indicator */}
+            <div className="fixed top-4 right-4 z-50">
+                {saving ? (
+                    <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-800 shadow-sm">
+                        <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                        <span className="font-mono text-[10px] uppercase text-gray-400">Saving...</span>
+                    </div>
+                ) : lastSaved ? (
+                    <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-800 shadow-sm">
+                        <Check className="w-3 h-3 text-art-green" />
+                        <span className="font-mono text-[10px] uppercase text-gray-400">Progress Saved</span>
+                    </div>
+                ) : null}
             </div>
 
             <div className="max-w-4xl mx-auto px-4 py-20">
@@ -91,7 +139,10 @@ const Onboarding: React.FC = () => {
                         </div>
 
                         <button
-                            onClick={() => setStep(2)}
+                            onClick={() => {
+                                setStep(2);
+                                saveProgress(2, selectedAreas);
+                            }}
                             className="w-full bg-art-orange text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-art-orange/80 transition-colors flex items-center justify-center gap-3"
                         >
                             Let's Go
@@ -139,7 +190,10 @@ const Onboarding: React.FC = () => {
                         </div>
 
                         <button
-                            onClick={() => setStep(3)}
+                            onClick={() => {
+                                setStep(3);
+                                saveProgress(3, selectedAreas);
+                            }}
                             disabled={selectedAreas.length === 0}
                             className="w-full bg-art-orange text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-art-orange/80 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                         >

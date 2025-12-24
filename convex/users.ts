@@ -76,7 +76,7 @@ export const updateProfile = mutation({
 
 // Set user as admin (for initial setup - run from Convex dashboard)
 export const setUserAsAdmin = mutation({
-  args: { 
+  args: {
     email: v.string(),
     isAdmin: v.boolean(),
   },
@@ -85,16 +85,55 @@ export const setUserAsAdmin = mutation({
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
       .first();
-    
+
     if (!user) {
       throw new Error("User not found with that email");
     }
-    
+
     await ctx.db.patch(user._id, {
       isAdmin: args.isAdmin,
       updatedAt: Date.now(),
     });
-    
+
     return { success: true, userId: user._id };
+  },
+});
+
+// Save onboarding/assessment progress
+export const saveOnboardingProgress = mutation({
+  args: {
+    userId: v.id("users"),
+    progress: v.string(), // JSON string
+  },
+  handler: async (ctx, args) => {
+    // Remediation Phase 1: Server-side validation
+    try {
+      const parsed = JSON.parse(args.progress);
+      if (typeof parsed !== 'object' || parsed === null) {
+        throw new Error("Invalid progress data structure");
+      }
+      // Basic check for required keys to prevent corruption
+      const hasAnswers = 'assessmentAnswers' in parsed;
+      const hasIndex = 'assessmentQuestionIndex' in parsed;
+      if (!hasAnswers && !hasIndex) {
+        console.warn("Saving progress with missing standard keys, but proceeding as additive update.");
+      }
+    } catch (e) {
+      throw new Error("Data Integrity Violation: Onboarding progress must be valid JSON");
+    }
+
+    await ctx.db.patch(args.userId, {
+      onboardingProgress: args.progress,
+      updatedAt: Date.now(),
+    });
+    return args.userId;
+  },
+});
+
+export const getOnboardingProgress = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    return user?.onboardingProgress || null;
   },
 });

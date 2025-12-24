@@ -3,7 +3,8 @@ import DashboardCard from '../components/DashboardCard';
 import CardModal from '../components/CardModal';
 import { CardData } from '../types';
 import { INTELLIGENCE_CONTENT } from '../constants';
-import { Radio, Play } from 'lucide-react';
+import { Radio, Play, ShieldCheck, Database } from 'lucide-react';
+import { FEATURE_FLAGS } from '../constants';
 
 const Intelligence: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
@@ -33,6 +34,22 @@ const Intelligence: React.FC = () => {
           <p className="font-serif text-2xl text-gray-400">
             "Knowledge is power. Intelligence is leverage."
           </p>
+          {FEATURE_FLAGS.REMEDIATION_PHASE_4 && (
+            <div className="mt-6 flex items-center gap-4 p-3 bg-art-blue/5 border border-art-blue/20 rounded-2xl w-fit">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 rounded-full bg-art-blue flex items-center justify-center text-white border-2 border-white dark:border-gray-950">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white border-2 border-white dark:border-gray-950">
+                  <Database className="w-4 h-4" />
+                </div>
+              </div>
+              <div>
+                <p className="font-mono text-[10px] uppercase text-art-blue font-bold">Directive Status: Grounded</p>
+                <p className="font-serif text-xs text-gray-500">AI is synchronized with your latest Life Context & Sovereign Directives.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-4">

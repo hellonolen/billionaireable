@@ -13,13 +13,13 @@ interface ProtectedSubscriberRouteProps {
 // Skills that are free (Pillar 1)
 const FREE_SKILLS = ['reality-distortion'];
 
-const ProtectedSubscriberRoute: React.FC<ProtectedSubscriberRouteProps> = ({ 
-  children, 
-  allowFreePreview = false 
+const ProtectedSubscriberRoute: React.FC<ProtectedSubscriberRouteProps> = ({
+  children,
+  allowFreePreview = false
 }) => {
   const { user, isLoaded, isSignedIn, sessionToken } = useAuth();
   const { skillId } = useParams<{ skillId: string }>();
-  
+
   // Check subscription status
   const subscription = useQuery(
     api.stripe.getSubscription,
@@ -37,7 +37,7 @@ const ProtectedSubscriberRoute: React.FC<ProtectedSubscriberRouteProps> = ({
 
   // Check if this is free content
   const isFreeContent = allowFreePreview && skillId && FREE_SKILLS.includes(skillId);
-  
+
   // If free content, allow access even without sign-in
   if (isFreeContent) {
     return <>{children}</>;
@@ -57,11 +57,13 @@ const ProtectedSubscriberRoute: React.FC<ProtectedSubscriberRouteProps> = ({
     );
   }
 
-  // Check if user has active subscription
-  const hasActiveSubscription = subscription?.status === 'active';
+  // Check if user has active subscription or is in grace period
+  const hasActiveSubscription = subscription?.status === 'active' || subscription?.status === 'trialing';
+  const hasPendingWireTransfer = subscription?.paymentMethod === 'wire' && subscription?.status === 'pending';
+  const isAdmin = user?.isAdmin || false;
 
-  // No subscription and not free content - show upgrade prompt
-  if (!hasActiveSubscription && !isFreeContent) {
+  // No subscription, not admin, and not free content - show upgrade prompt
+  if (!hasActiveSubscription && !hasPendingWireTransfer && !isAdmin && !isFreeContent) {
     return (
       <div className="min-h-screen bg-art-offwhite dark:bg-gray-950 flex flex-col items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-900 rounded-[32px] p-12 text-center max-w-md shadow-soft-xl border border-gray-200 dark:border-gray-800">
@@ -72,7 +74,9 @@ const ProtectedSubscriberRoute: React.FC<ProtectedSubscriberRouteProps> = ({
             Premium Content
           </h1>
           <p className="font-serif text-gray-500 dark:text-gray-400 mb-6">
-            This content is available to subscribers. Choose your tier to continue.
+            {subscription?.status === 'past_due'
+              ? 'Your subscription is past due. Please update payment to maintain access.'
+              : 'This content is available to subscribers. Choose your tier to continue.'}
           </p>
           <div className="space-y-3">
             <a
