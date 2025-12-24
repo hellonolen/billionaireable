@@ -12,7 +12,7 @@ export const createCheckoutSession = action({
   },
   handler: async (ctx, args) => {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    
+
     if (!stripeSecretKey) {
       throw new Error("STRIPE_SECRET_KEY not configured in Convex");
     }
@@ -136,17 +136,47 @@ export const hasActiveSubscription = query({
       .query("subscriptions")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .first();
-    
+
     if (!subscription) return { hasSubscription: false, plan: null };
-    
+
     const isActive = subscription.status === "active" || subscription.status === "trialing";
     const isNotExpired = subscription.currentPeriodEnd > Date.now();
-    
+
     return {
       hasSubscription: isActive && isNotExpired,
       plan: isActive && isNotExpired ? subscription.plan : null,
       status: subscription.status,
       expiresAt: subscription.currentPeriodEnd,
     };
+  },
+});
+// Utility to create a test subscription (for development verification)
+export const createTestSubscription = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        status: "active",
+        currentPeriodEnd: Date.now() + 30 * 24 * 60 * 60 * 1000,
+        updatedAt: Date.now(),
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert("subscriptions", {
+      userId: args.userId,
+      stripeCustomerId: "test_cus_" + Math.random().toString(36).substring(7),
+      stripeSubscriptionId: "test_sub_" + Math.random().toString(36).substring(7),
+      status: "active",
+      plan: "founder",
+      currentPeriodEnd: Date.now() + 30 * 24 * 60 * 60 * 1000,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
   },
 });

@@ -9,7 +9,7 @@ const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
     const { user, isSignedIn } = useAuth();
     const [countdown, setCountdown] = useState(10);
-    
+
     const subscription = useQuery(
         api.stripe.hasActiveSubscription,
         user?._id ? { userId: user._id } : "skip"
@@ -20,7 +20,7 @@ const PaymentSuccess: React.FC = () => {
             setCountdown(prev => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    navigate('/dashboard');
+                    navigate('/onboarding');
                     return 0;
                 }
                 return prev - 1;
@@ -53,11 +53,11 @@ const PaymentSuccess: React.FC = () => {
                 <h1 className="font-sans text-5xl md:text-6xl font-black text-black dark:text-white mb-6">
                     Welcome to The Path.
                 </h1>
-                
+
                 <p className="font-serif text-2xl text-gray-600 dark:text-gray-400 mb-4">
                     You are now {getPlanName()}.
                 </p>
-                
+
                 <p className="font-serif text-xl text-gray-500 dark:text-gray-500 mb-12">
                     The 12 Pillars await. This is what billionaires do.
                 </p>
@@ -92,13 +92,13 @@ const PaymentSuccess: React.FC = () => {
 
                 {/* CTA */}
                 <button
-                    onClick={() => navigate('/dashboard')}
-                    className="inline-flex items-center gap-3 px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+                    onClick={() => navigate('/onboarding')}
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-art-orange text-white rounded-full font-mono text-sm font-bold uppercase hover:bg-art-orange/80 transition-colors"
                 >
                     Enter The Path
                     <ArrowRight className="w-5 h-5" />
                 </button>
-                
+
                 <p className="font-mono text-xs text-gray-400 mt-6">
                     Redirecting in {countdown} seconds...
                 </p>

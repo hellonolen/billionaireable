@@ -508,7 +508,7 @@ For each user, Billionaireable tracks:
 - Assessment data structured and queryable
 
 ### Notifications
-- Email via Resend for accountability check-ins
+- Email via Email It for accountability check-ins
 - Based on: Days since last session, outstanding commitments
 
 ---

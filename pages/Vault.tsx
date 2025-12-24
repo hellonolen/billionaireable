@@ -94,7 +94,7 @@ const Vault: React.FC = () => {
                     </h1>
                     <p className="font-serif text-2xl text-gray-400">"Access is the ultimate advantage."</p>
                 </div>
-                <div className="flex items-center gap-4 bg-black text-white px-6 py-3 rounded-full shadow-soft-xl">
+                <div className="flex items-center gap-4 bg-art-orange text-white px-6 py-3 rounded-full shadow-soft-xl">
                     <Lock className="w-4 h-4" />
                     <span className="font-mono text-sm font-bold uppercase tracking-widest">Invitation Only</span>
                 </div>

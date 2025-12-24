@@ -28,7 +28,7 @@ const Studio: React.FC = () => {
             <h2 className="font-sans text-5xl font-black text-black uppercase leading-[0.9] mb-4">Psychology of Scale</h2>
             <p className="font-serif text-2xl text-gray-500 mb-8">"We didn't build for next year. We built for the next century."</p>
             <div className="flex items-center gap-4">
-                <button className="bg-black text-white px-8 py-4 rounded-full font-mono font-bold uppercase hover:bg-art-blue transition-colors flex items-center gap-3">
+                <button className="bg-art-orange text-white px-8 py-4 rounded-full font-mono font-bold uppercase hover:bg-art-blue transition-colors flex items-center gap-3">
                     <Play className="w-4 h-4 fill-current" /> Watch Now
                 </button>
             </div>

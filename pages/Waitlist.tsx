@@ -75,7 +75,7 @@ const Waitlist: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-black dark:bg-white text-white dark:text-black rounded-full px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange hover:text-white transition-all flex items-center justify-center gap-2 group shadow-lg disabled:opacity-50"
+                                className="w-full bg-art-orange text-white rounded-full px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange hover:text-white transition-all flex items-center justify-center gap-2 group shadow-lg disabled:opacity-50"
                             >
                                 {loading ? (
                                     <span className="animate-pulse">Processing...</span>

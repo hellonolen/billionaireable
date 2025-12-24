@@ -84,6 +84,37 @@ export default defineSchema({
   })
     .index("by_user", ["userId"]),
 
+  // Life Context - deep knowledge about the user's life for intelligence
+  lifeContext: defineTable({
+    userId: v.id("users"),
+    spouseName: v.optional(v.string()),
+    childrenNames: v.optional(v.array(v.string())),
+    keyRelationships: v.optional(v.array(v.object({
+      name: v.string(),
+      relationship: v.string(),
+      notes: v.optional(v.string()),
+    }))),
+    companyName: v.optional(v.string()),
+    industry: v.optional(v.string()),
+    teamSize: v.optional(v.string()),
+    currentChallenges: v.optional(v.array(v.string())),
+    biggestWin: v.optional(v.string()),
+    biggestFear: v.optional(v.string()),
+    oneYearGoal: v.optional(v.string()),
+    fiveYearVision: v.optional(v.string()),
+    legacyStatement: v.optional(v.string()),
+    communicationPatterns: v.optional(v.array(v.string())),
+    learnedInsights: v.optional(v.array(v.object({
+      insight: v.string(),
+      learnedAt: v.number(),
+      source: v.string(),
+    }))),
+    preferVoice: v.optional(v.boolean()),
+    voiceActivationPhrase: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"]),
+
   // Subscriptions - all payment sources
   subscriptions: defineTable({
     userId: v.id("users"),
@@ -135,4 +166,43 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_status", ["status"])
     .index("by_wire_reference", ["wireReference"]),
+
+  // Exercise Responses - user's answers to module exercises (permanent memory)
+  exerciseResponses: defineTable({
+    userId: v.id("users"),
+    skillId: v.string(), // e.g., 'reality-distortion'
+    moduleId: v.number(), // 1, 2, 3, 4
+    promptIndex: v.number(), // which prompt they responded to
+    prompt: v.string(), // the prompt text
+    response: v.string(), // their answer
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_skill_module", ["userId", "skillId", "moduleId"]),
+
+  // Module Progress - granular progress within a module
+  moduleProgress: defineTable({
+    userId: v.id("users"),
+    skillId: v.string(),
+    moduleId: v.number(),
+    sectionsViewed: v.array(v.number()), // which sections they've read
+    exercisesCompleted: v.array(v.number()), // which exercise prompts they've answered
+    percentComplete: v.number(), // calculated percentage
+    lastAccessedAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_skill_module", ["userId", "skillId", "moduleId"]),
+
+  // Email logs - track emails sent from admin dashboard
+  emailLogs: defineTable({
+    recipients: v.array(v.string()),
+    subject: v.string(),
+    type: v.string(), // 'individual', 'broadcast', 'waitlist_invite', etc.
+    sentBy: v.string(), // admin email
+    sentAt: v.number(),
+  })
+    .index("by_sent_at", ["sentAt"])
+    .index("by_type", ["type"]),
 });

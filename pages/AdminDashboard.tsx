@@ -136,7 +136,7 @@ const AdminDashboard: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-xs font-bold uppercase transition-all ${
                   activeTab === tab.id
-                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                    ? 'bg-art-orange text-white'
                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >

@@ -207,7 +207,7 @@ const Assessment: React.FC = () => {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <button
                                 onClick={() => navigate('/skills/reality-distortion')}
-                                className="px-8 py-4 bg-white dark:bg-black text-black dark:text-white rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                                className="px-8 py-4 bg-art-orange text-white rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                             >
                                 Start Free: Pillar 1
                             </button>
@@ -304,7 +304,7 @@ const Assessment: React.FC = () => {
                         disabled={!isAnswered}
                         className={`flex items-center gap-2 px-8 py-4 rounded-full font-mono text-sm font-bold uppercase transition-all ${
                             isAnswered
-                                ? 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
+                                ? 'bg-art-orange text-white hover:bg-art-orange/80'
                                 : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                         }`}
                     >

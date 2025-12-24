@@ -13,7 +13,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
   'reality-distortion': {
     1: {
       title: 'Vision Architecture',
-      intro: "This is the first stage of your initiation into Reality Distortion. Before Steve Jobs unveiled the iPhone, he didn't say 'let me show you a new phone.' He said 'today, Apple reinvents the phone.' That's not arrogance. That's certainty. That's seeing a future so clearly that announcing it feels like stating fact, not making a claim. You are here because somewhere inside you, there is a future trying to be born—a vision that won't leave you alone. This stage is not about learning to pitch. It's about learning to see. When you can see clearly, the words take care of themselves. Capital flows toward certainty. Talent follows vision. Markets reorganize around inevitability. Your work here is to architect a vision so clear, so compelling, so obviously true that the world has no choice but to align with it.",
+      intro: "This is the first stage of your initiation into Reality Distortion. Before the iPhone was unveiled, the presenter didn't say 'let me show you a new phone.' He said 'today, Apple reinvents the phone.' That's not arrogance. That's certainty. That's seeing a future so clearly that announcing it feels like stating fact, not making a claim. You are here because somewhere inside you, there is a future trying to be born—a vision that won't leave you alone. This stage is not about learning to pitch. It's about learning to see. When you can see clearly, the words take care of themselves. Capital flows toward certainty. Talent follows vision. Markets reorganize around inevitability. Your work here is to architect a vision so clear, so compelling, so obviously true that the world has no choice but to align with it.",
       sections: [
         {
           heading: 'The Vision Stack: Three Layers of Inevitability',
@@ -25,7 +25,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         },
         {
           heading: 'Vision Gravity: The Pull Test',
-          content: "A real vision attracts. It pulls people toward it without pushing. You know your vision has gravity when: talented people take pay cuts to join you; investors lean forward in their chairs instead of checking their phones; journalists want to write about you before you have traction; customers evangelize before you have a marketing budget. If you're constantly explaining, convincing, pushing—your vision lacks gravity. The fix isn't better marketing. It's a stronger vision. Steve Jobs didn't convince people the iPhone was the future. He showed them a demo, and reality shifted. The audience gasped. That's gravity. How do you build it? Specificity and confidence. Vague visions repel. 'We're going to change the world' means nothing. 'We're going to put a computer in every pocket that's more powerful than the one that sent Apollo to the moon' creates gravity. Confidence compounds it. If you don't believe it's inevitable, no one else will either."
+          content: "A real vision attracts. It pulls people toward it without pushing. You know your vision has gravity when: talented people take pay cuts to join you; investors lean forward in their chairs instead of checking their phones; journalists want to write about you before you have traction; customers evangelize before you have a marketing budget. If you're constantly explaining, convincing, pushing—your vision lacks gravity. The fix isn't better marketing. It's a stronger vision. The iPhone wasn't sold to people as the future. It was demonstrated—and reality shifted. The audience gasped. That's gravity. How do you build it? Specificity and confidence. Vague visions repel. 'We're going to change the world' means nothing. 'We're going to put a computer in every pocket that's more powerful than the one that sent Apollo to the moon' creates gravity. Confidence compounds it. If you don't believe it's inevitable, no one else will either."
         },
         {
           heading: "The Anti-Vision: What You're Fighting Against",
@@ -33,8 +33,8 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Elon Musk and the SpaceX Vision",
-        story: "In 2001, Elon Musk wanted to inspire humanity about space exploration. His first idea was to land a greenhouse on Mars—a 'green plant on a red planet' as a symbol. He flew to Russia three times to buy refurbished ICBMs, but the Russians kept raising the price. On the flight home from the third failed trip, Musk opened a spreadsheet and started calculating the raw material costs of building a rocket. He realized the aerospace industry had a 1000% markup. That's when SpaceX's real vision crystallized: reduce the cost of space access by a factor of 10, and eventually 100, to make humanity a multiplanetary species. Not 'build rockets.' Not 'compete with Boeing.' Make humans a multiplanetary species. That vision attracted the best rocket engineers in the world to leave stable jobs and work insane hours for less money. It attracted billions in NASA contracts. It attracted investors who believed in the 1000-year mission, not the quarterly returns.",
+        name: "The SpaceX Vision",
+        story: "In 2001, a founder wanted to inspire humanity about space exploration. His first idea was to land a greenhouse on Mars—a 'green plant on a red planet' as a symbol. He flew to Russia three times to buy refurbished ICBMs, but the Russians kept raising the price. On the flight home from the third failed trip, he opened a spreadsheet and started calculating the raw material costs of building a rocket. He realized the aerospace industry had a 1000% markup. That's when SpaceX's real vision crystallized: reduce the cost of space access by a factor of 10, and eventually 100, to make humanity a multiplanetary species. Not 'build rockets.' Not 'compete with Boeing.' Make humans a multiplanetary species. That vision attracted the best rocket engineers in the world to leave stable jobs and work insane hours for less money. It attracted billions in NASA contracts. It attracted investors who believed in the 1000-year mission, not the quarterly returns.",
         lesson: "The vision that attracted everything wasn't about rockets or technology—it was about human survival and expansion. The technical challenges were in service of something larger. That's what made engineers quit Boeing. That's what made NASA write checks. That's what made it real."
       },
       framework: {
@@ -62,11 +62,11 @@ export const LESSON_CONTENT: Record<string, Record<number, {
     },
     2: {
       title: 'Narrative Control',
-      intro: "The second stage of your initiation: Narrative Control. This is where you learn that facts do not speak for themselves. They never have. The story you tell about those facts is what creates reality. Steve Jobs didn't have better products than his competitors—he had a better story. 'Think Different' wasn't a marketing campaign. It was a reality distortion field that made everyone who bought Apple feel like a creative revolutionary. Reid Hoffman didn't pitch LinkedIn as 'a professional social network.' He pitched it as 'the network that will power the next generation of careers.' Same product. Different story. The story raised $4.7 million. Here, you learn that you are not describing reality. You are authoring it.",
+      intro: "The second stage of your initiation: Narrative Control. This is where you learn that facts do not speak for themselves. They never have. The story you tell about those facts is what creates reality. Apple didn't have better products than its competitors—it had a better story. 'Think Different' wasn't a marketing campaign. It was a reality distortion field that made everyone who bought Apple feel like a creative revolutionary. LinkedIn wasn't pitched as 'a professional social network.' It was pitched as 'the network that will power the next generation of careers.' Same product. Different story. The story raised $4.7 million. Here, you learn that you are not describing reality. You are authoring it.",
       sections: [
         {
           heading: 'The Origin Story Architecture',
-          content: "Every billionaire has an origin story. Not the real one—the useful one. The garage where Apple started. The dorm room where Facebook began. The rejection letters that fueled Bezos. Your origin story isn't autobiography—it's strategy. It needs three elements: the moment of insight (when you saw what others couldn't), the struggle that proved your commitment (the sacrifice that shows you're all-in), and the mission that emerged (the reason you can't stop, even if you wanted to). Steve Jobs didn't talk about Wozniak doing the real engineering. He talked about the garage, the rebellion against IBM, the belief that computers should be beautiful. That's not lying—it's editing. What moments from your past, arranged correctly, create an origin story that makes investors believe you're the only person who could build this?"
+          content: "Every empire has an origin story. Not the real one—the useful one. The garage where Apple started. The dorm room where Facebook began. The rejection letters that fueled Amazon. Your origin story isn't autobiography—it's strategy. It needs three elements: the moment of insight (when you saw what others couldn't), the struggle that proved your commitment (the sacrifice that shows you're all-in), and the mission that emerged (the reason you can't stop, even if you wanted to). Apple's story wasn't about the engineering. It was about the garage, the rebellion against IBM, the belief that computers should be beautiful. That's not lying—it's editing. What moments from your past, arranged correctly, create an origin story that makes investors believe you're the only person who could build this?"
         },
         {
           heading: 'Strategic Enemy Selection',
@@ -111,7 +111,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
     },
     3: {
       title: 'The Pitch Deck',
-      intro: "The third stage of your initiation: The Pitch Deck. This is not about slides. This is about creating a reality artifact—a document that makes the future feel so inevitable that not investing feels like a career-ending mistake. When Steve Jobs unveiled the iPhone, the slide that mattered most wasn't a feature list. It was a simple image of the device with the words 'This changes everything.' That's not a pitch. That's a declaration. The best pitch decks don't describe your company. They create inevitability. They leave investors with a pit in their stomach—the fear of missing out on history. This stage gives you the exact architecture, the exact psychology, and the exact sequence that has raised billions.",
+      intro: "The third stage of your initiation: The Pitch Deck. This is not about slides. This is about creating a reality artifact—a document that makes the future feel so inevitable that not investing feels like a career-ending mistake. When the iPhone was unveiled, the slide that mattered most wasn't a feature list. It was a simple image of the device with the words 'This changes everything.' That's not a pitch. That's a declaration. The best pitch decks don't describe your company. They create inevitability. They leave investors with a pit in their stomach—the fear of missing out on history. This stage gives you the exact architecture, the exact psychology, and the exact sequence that has raised billions.",
       sections: [
         {
           heading: 'The 10-Slide Formula',
@@ -160,7 +160,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
     },
     4: {
       title: 'Media Manipulation',
-      intro: "The final stage of your Reality Distortion initiation: Media Manipulation. This is where vision becomes viral. Steve Jobs didn't just launch products—he created events. Cultural moments. The iPhone unveiling is studied in business schools not as a product launch, but as a masterclass in attention orchestration. You are about to learn that press doesn't find you. You manufacture it. Every TechCrunch feature is engineered. Every CNBC appearance is strategized. Every viral tweet is architected. The founders who think great products speak for themselves are the founders who stay unknown. Here, you learn to orchestrate attention—to turn media into a force multiplier for your reality distortion field.",
+      intro: "The final stage of your Reality Distortion initiation: Media Manipulation. This is where vision becomes viral. Apple didn't just launch products—it created events. Cultural moments. The iPhone unveiling is studied in business schools not as a product launch, but as a masterclass in attention orchestration. You are about to learn that press doesn't find you. You manufacture it. Every TechCrunch feature is engineered. Every CNBC appearance is strategized. Every viral tweet is architected. The founders who think great products speak for themselves are the founders who stay unknown. Here, you learn to orchestrate attention—to turn media into a force multiplier for your reality distortion field.",
       sections: [
         {
           heading: 'The Press Hook: What Makes News',
@@ -180,9 +180,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Elon Musk's Twitter Strategy",
-        story: "Elon Musk has over 150 million Twitter followers. Tesla spends $0 on advertising. That's not a coincidence. Musk uses Twitter as a direct channel to bypass traditional media entirely. When he wants to announce something, he tweets it. When he wants to shape a narrative, he tweets it. When he wants to attack a critic, he tweets it. The media then covers his tweets, giving him free amplification. His strategy: be genuinely interesting (not corporate), be controversial enough to get shared, respond to customers directly (creating viral moments), and mix business with personality. You don't have to be Musk. But you can apply the principle: your social media presence is a media channel you control entirely. Build it before you need it.",
-        lesson: "Musk doesn't wait for media coverage. He creates it. He controls the channel, the timing, and the message. That's power."
+        name: "The Tesla Twitter Strategy",
+        story: "Tesla's founder has over 150 million Twitter followers. Tesla spends $0 on advertising. That's not a coincidence. He uses Twitter as a direct channel to bypass traditional media entirely. When he wants to announce something, he tweets it. When he wants to shape a narrative, he tweets it. When he wants to attack a critic, he tweets it. The media then covers his tweets, giving him free amplification. The strategy: be genuinely interesting (not corporate), be controversial enough to get shared, respond to customers directly (creating viral moments), and mix business with personality. You can apply the principle: your social media presence is a media channel you control entirely. Build it before you need it.",
+        lesson: "He doesn't wait for media coverage. He creates it. He controls the channel, the timing, and the message. That's power."
       },
       framework: {
         name: "The Media Manufacturing Framework",
@@ -280,9 +280,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Warren Buffett's Cash Fortress",
-        story: "Warren Buffett keeps Berkshire Hathaway's cash reserves above $30 billion at all times. That's not inefficiency—it's strategy. When the 2008 financial crisis hit, Buffett had capital when no one else did. He invested $5 billion in Goldman Sachs at terms so favorable they were essentially a bailout. He bought Burlington Northern Santa Fe railroad. He made billions while competitors scrambled for survival. The fortress wasn't a drag on returns. It was the source of returns. When everyone else was selling, he was buying. When everyone else was desperate for capital, he was the capital provider. 'Be fearful when others are greedy, and greedy when others are fearful.' That aphorism only works if you have the cash to act. Most people are fearful when others are fearful because they don't have the fortress to buy when blood is in the streets.",
-        lesson: "Buffett's fortress gave him the power to act when others could only react. That's the purpose of the first 40%: to be the predator, not the prey."
+        name: "Berkshire Hathaway's Cash Fortress",
+        story: "Berkshire Hathaway keeps cash reserves above $30 billion at all times. That's not inefficiency—it's strategy. When the 2008 financial crisis hit, they had capital when no one else did. They invested $5 billion in Goldman Sachs at terms so favorable they were essentially a bailout. They bought Burlington Northern Santa Fe railroad. They made billions while competitors scrambled for survival. The fortress wasn't a drag on returns. It was the source of returns. When everyone else was selling, they were buying. When everyone else was desperate for capital, they were the capital provider. 'Be fearful when others are greedy, and greedy when others are fearful.' That aphorism only works if you have the cash to act. Most people are fearful when others are fearful because they don't have the fortress to buy when blood is in the streets.",
+        lesson: "The fortress gave them the power to act when others could only react. That's the purpose of the first 40%: to be the predator, not the prey."
       },
       framework: {
         name: "The 40/40/20 Implementation System",
@@ -313,7 +313,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
       sections: [
         {
           heading: 'Good Debt vs. Bad Debt: The Billionaire Distinction',
-          content: "Debt that funds consumption is a trap. Debt that funds appreciating assets is a lever. Car loans, credit cards, lifestyle debt—these are wealth destroyers. The interest compounds against you. You're paying for yesterday's consumption with tomorrow's earnings. Contrast this with real estate debt, business expansion loans, or margin on investments. These debts fund assets that appreciate or generate income. The asset services the debt and builds equity simultaneously. Billionaires ask one question before taking on debt: will this dollar of debt create more than a dollar of value? If yes, they borrow as much as they can. If no, they pay cash or don't buy. Elon Musk has billions in debt secured against his Tesla shares. The shares appreciate faster than the interest rate. The debt is free money. That's weaponized debt."
+          content: "Debt that funds consumption is a trap. Debt that funds appreciating assets is a lever. Car loans, credit cards, lifestyle debt—these are wealth destroyers. The interest compounds against you. You're paying for yesterday's consumption with tomorrow's earnings. Contrast this with real estate debt, business expansion loans, or margin on investments. These debts fund assets that appreciate or generate income. The asset services the debt and builds equity simultaneously. The ultra-wealthy ask one question before taking on debt: will this dollar of debt create more than a dollar of value? If yes, they borrow as much as they can. If no, they pay cash or don't buy. Tesla's founder has billions in debt secured against his shares. The shares appreciate faster than the interest rate. The debt is free money. That's weaponized debt."
         },
         {
           heading: 'The Arbitrage Principle',
@@ -462,7 +462,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
       sections: [
         {
           heading: 'The Buy, Borrow, Die Strategy',
-          content: "Here's how billionaires access their wealth without paying capital gains tax: they don't sell. Instead, they borrow against appreciated assets. When Jeff Bezos needs cash, he doesn't sell Amazon stock (which would trigger a $20+ billion capital gains bill). He takes a loan against his shares at 3-5% interest. The interest is tax-deductible against other income. The shares continue appreciating. When he dies, his heirs inherit the shares at the stepped-up basis—the current market value—meaning all the appreciation during his lifetime is never taxed. Ever. Buy. Borrow. Die. Three steps to generational wealth without capital gains tax. This isn't a loophole. It's the tax code as written. You can do it too—at any scale. Borrow against your real estate, your portfolio, your business. Deduct the interest. Never sell. Pass to heirs at stepped-up basis."
+          content: "Here's how the ultra-wealthy access their wealth without paying capital gains tax: they don't sell. Instead, they borrow against appreciated assets. When Amazon's founder needs cash, he doesn't sell stock (which would trigger a $20+ billion capital gains bill). He takes a loan against his shares at 3-5% interest. The interest is tax-deductible against other income. The shares continue appreciating. When he dies, his heirs inherit the shares at the stepped-up basis—the current market value—meaning all the appreciation during his lifetime is never taxed. Ever. Buy. Borrow. Die. Three steps to generational wealth without capital gains tax. This isn't a loophole. It's the tax code as written. You can do it too—at any scale. Borrow against your real estate, your portfolio, your business. Deduct the interest. Never sell. Pass to heirs at stepped-up basis."
         },
         {
           heading: 'Qualified Small Business Stock (QSBS)',
@@ -478,9 +478,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "How Mark Zuckerberg Gave Away $45 Billion Tax-Free",
-        story: "When Mark Zuckerberg pledged to give away 99% of his Facebook shares—worth $45 billion at the time—he didn't donate to a charity. He created the Chan Zuckerberg Initiative, a Limited Liability Company. Why an LLC instead of a foundation? Flexibility. A foundation must give away 5% of assets annually and cannot make political donations. An LLC can do anything—invest in companies, donate to campaigns, fund lobbying, or give to charity. The tax treatment: Zuckerberg doesn't get an immediate deduction, but when the LLC eventually gives to qualified charities, the contributions are deductible at that time. When the LLC invests and sells assets, it pays capital gains—but can donate the proceeds and avoid net tax. The structure also provides dynasty planning. The LLC can exist indefinitely, passing from generation to generation, with Zuckerberg's values embedded in its governance.",
-        lesson: "Zuckerberg's $45 billion pledge wasn't a tax deduction. It was a wealth preservation and control strategy disguised as philanthropy. Sophisticated structuring makes both possible."
+        name: "How Facebook's Founder Gave Away $45 Billion Tax-Free",
+        story: "When Facebook's founder pledged to give away 99% of his shares—worth $45 billion at the time—he didn't donate to a charity. He created an LLC. Why an LLC instead of a foundation? Flexibility. A foundation must give away 5% of assets annually and cannot make political donations. An LLC can do anything—invest in companies, donate to campaigns, fund lobbying, or give to charity. The tax treatment: he doesn't get an immediate deduction, but when the LLC eventually gives to qualified charities, the contributions are deductible at that time. When the LLC invests and sells assets, it pays capital gains—but can donate the proceeds and avoid net tax. The structure also provides dynasty planning. The LLC can exist indefinitely, passing from generation to generation, with his values embedded in its governance.",
+        lesson: "The $45 billion pledge wasn't a tax deduction. It was a wealth preservation and control strategy disguised as philanthropy. Sophisticated structuring makes both possible."
       },
       framework: {
         name: "The Tax Optimization Audit",
@@ -572,7 +572,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         },
         {
           heading: 'Generational Transfer: Building a Dynasty',
-          content: "Not every exit is a sale. For family businesses and long-term holders, transferring wealth to the next generation is the exit. The strategies: Gift tax exclusions allow $17,000 per person per year (2023) to pass gift-tax-free. Over time, substantial wealth transfers occur within exclusions. Grantor Retained Annuity Trusts (GRATs) let you transfer appreciating assets while retaining an annuity stream, potentially moving appreciation to heirs tax-free. Intentionally Defective Grantor Trusts (IDGTs) freeze estate values while allowing the trust to grow for beneficiaries. Family Limited Partnerships (FLPs) centralize control while transferring limited partnership interests at discounted values. The key: estate planning is a lifetime practice, not a deathbed exercise. The earlier you begin transferring wealth, the more effective the strategies. Warren Buffett's children will inherit billions—but much of his wealth was transferred through trusts and structures decades ago, minimizing estate tax exposure. Build the dynasty structure now. Fund it annually. By the time you exit, the machinery is already in place."
+          content: "Not every exit is a sale. For family businesses and long-term holders, transferring wealth to the next generation is the exit. The strategies: Gift tax exclusions allow $17,000 per person per year (2023) to pass gift-tax-free. Over time, substantial wealth transfers occur within exclusions. Grantor Retained Annuity Trusts (GRATs) let you transfer appreciating assets while retaining an annuity stream, potentially moving appreciation to heirs tax-free. Intentionally Defective Grantor Trusts (IDGTs) freeze estate values while allowing the trust to grow for beneficiaries. Family Limited Partnerships (FLPs) centralize control while transferring limited partnership interests at discounted values. The key: estate planning is a lifetime practice, not a deathbed exercise. The earlier you begin transferring wealth, the more effective the strategies. Berkshire Hathaway's heirs will inherit billions—but much of that wealth was transferred through trusts and structures decades ago, minimizing estate tax exposure. Build the dynasty structure now. Fund it annually. By the time you exit, the machinery is already in place."
         }
       ],
       caseStudy: {
@@ -627,9 +627,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Warren Buffett's Calendar",
-        story: "Warren Buffett's calendar is famously empty. He doesn't take meetings unless they're essential. He doesn't read emails. He doesn't attend conferences. He spends his days reading, thinking, and making decisions. When he does meet with someone, it's because that meeting will lead to a decision worth millions or billions. He's not being antisocial—he's being strategic. Every hour he spends in a non-essential meeting is an hour he can't spend reading an annual report that might reveal a $10 billion opportunity. His time is so valuable that he structures his entire life to protect it. The result: he's made more money per hour worked than almost anyone in history. Not because he works more hours. Because he works on the right things.",
-        lesson: "Buffett doesn't manage time. He protects it. He eliminates everything that doesn't require his unique judgment. That's the model."
+        name: "The Empty Calendar Strategy",
+        story: "Berkshire Hathaway's chairman has a famously empty calendar. He doesn't take meetings unless they're essential. He doesn't read emails. He doesn't attend conferences. He spends his days reading, thinking, and making decisions. When he does meet with someone, it's because that meeting will lead to a decision worth millions or billions. He's not being antisocial—he's being strategic. Every hour he spends in a non-essential meeting is an hour he can't spend reading an annual report that might reveal a $10 billion opportunity. His time is so valuable that he structures his entire life to protect it. The result: he's made more money per hour worked than almost anyone in history. Not because he works more hours. Because he works on the right things.",
+        lesson: "He doesn't manage time. He protects it. He eliminates everything that doesn't require his unique judgment. That's the model."
       },
       framework: {
         name: "The Time Arbitrage Framework",
@@ -664,7 +664,7 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         },
         {
           heading: 'Decision Fatigue: The Hidden Cost',
-          content: "Every decision you make depletes mental energy. The wealthy minimize decision fatigue by eliminating choices. They wear the same clothes. They eat the same breakfast. They automate routine decisions. Mark Zuckerberg wears gray t-shirts. Steve Jobs wore black turtlenecks. Not because they lack style—because they eliminated a decision. Every decision you don't make is energy preserved for decisions that matter. Automate what you can. Systematize what you can't automate. Delegate decisions that don't require your judgment. Reserve your decision-making capacity for the choices that create or destroy value. The average person makes 35,000 decisions per day. Most are trivial. The wealthy make fewer decisions, but each one matters more."
+          content: "Every decision you make depletes mental energy. The wealthy minimize decision fatigue by eliminating choices. They wear the same clothes. They eat the same breakfast. They automate routine decisions. Facebook's founder wears gray t-shirts. Apple's founder wore black turtlenecks. Not because they lack style—because they eliminated a decision. Every decision you don't make is energy preserved for decisions that matter. Automate what you can. Systematize what you can't automate. Delegate decisions that don't require your judgment. Reserve your decision-making capacity for the choices that create or destroy value. The average person makes 35,000 decisions per day. Most are trivial. The wealthy make fewer decisions, but each one matters more."
         },
         {
           heading: 'The Recovery Protocol',
@@ -676,9 +676,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Elon Musk's Work Schedule",
-        story: "Elon Musk works 80-100 hours per week, but he doesn't work randomly. He works in focused blocks. He eliminates distractions. He makes decisions quickly. He delegates everything except the highest-leverage work. He structures his days around what only he can do. When he's at Tesla, he's making production decisions. When he's at SpaceX, he's solving engineering problems. When he's on Twitter, he's managing narrative. He doesn't waste energy on low-leverage tasks. He doesn't attend meetings that don't require his input. He doesn't read emails that don't need his response. His energy goes to decisions that move companies forward. The result: he runs multiple billion-dollar companies simultaneously. Not by working more hours than everyone else. By working on the right things with maximum energy.",
-        lesson: "Musk doesn't manage time. He manages energy. He works when he's sharp. He delegates when he's not. He eliminates everything that doesn't require his unique capability."
+        name: "The Multi-Company Operator",
+        story: "Tesla's founder works 80-100 hours per week, but he doesn't work randomly. He works in focused blocks. He eliminates distractions. He makes decisions quickly. He delegates everything except the highest-leverage work. He structures his days around what only he can do. When he's at Tesla, he's making production decisions. When he's at SpaceX, he's solving engineering problems. When he's on X, he's managing narrative. He doesn't waste energy on low-leverage tasks. He doesn't attend meetings that don't require his input. He doesn't read emails that don't need his response. His energy goes to decisions that move companies forward. The result: he runs multiple billion-dollar companies simultaneously. Not by working more hours than everyone else. By working on the right things with maximum energy.",
+        lesson: "He doesn't manage time. He manages energy. He works when he's sharp. He delegates when he's not. He eliminates everything that doesn't require his unique capability."
       },
       framework: {
         name: "The Energy Optimization Framework",
@@ -774,9 +774,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Richard Branson's Leverage Stack",
-        story: "Richard Branson doesn't run 400 companies. He doesn't try to. He builds systems. He hires operators. He creates brands. He leverages his name, his network, and his capital. Virgin isn't one company. It's a system. A brand. A platform. Branson doesn't manage day-to-day operations. He makes strategic decisions. He builds relationships. He creates opportunities. He leverages his time, his capital, and his network to create value at scale. The result: 400 companies, billions in revenue, and a lifestyle that includes island-hopping and space travel. Not because he works 400 times harder. Because he created 400 times more leverage.",
-        lesson: "Branson doesn't work in his businesses. He works on his businesses. He creates leverage. He builds systems. He scales himself. That's the model."
+        name: "The Virgin Empire Leverage Stack",
+        story: "Virgin's founder doesn't run 400 companies. He doesn't try to. He builds systems. He hires operators. He creates brands. He leverages his name, his network, and his capital. Virgin isn't one company. It's a system. A brand. A platform. He doesn't manage day-to-day operations. He makes strategic decisions. He builds relationships. He creates opportunities. He leverages his time, his capital, and his network to create value at scale. The result: 400 companies, billions in revenue, and a lifestyle that includes island-hopping and space travel. Not because he works 400 times harder. Because he created 400 times more leverage.",
+        lesson: "He doesn't work in his businesses. He works on his businesses. He creates leverage. He builds systems. He scales himself. That's the model."
       },
       framework: {
         name: "The Complete Leverage Framework",
@@ -874,9 +874,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Elon Musk's Learning Protocol",
-        story: "Elon Musk taught himself rocket science by reading textbooks. When he started SpaceX, he didn't have an aerospace engineering degree. He learned. He read. He asked questions. He hired experts. He learned from them. He never stopped learning. Today, he's one of the most knowledgeable people in multiple industries. Not because he's naturally smarter. Because he never stops learning. He reads constantly. He asks questions constantly. He challenges assumptions constantly. His learning protocol is his competitive advantage.",
-        lesson: "Musk doesn't accept knowledge limits. He learns. He reads. He questions. He never stops. That's cognitive optimization."
+        name: "The SpaceX Learning Protocol",
+        story: "SpaceX's founder taught himself rocket science by reading textbooks. When he started SpaceX, he didn't have an aerospace engineering degree. He learned. He read. He asked questions. He hired experts. He learned from them. He never stopped learning. Today, he's one of the most knowledgeable people in multiple industries. Not because he's naturally smarter. Because he never stops learning. He reads constantly. He asks questions constantly. He challenges assumptions constantly. His learning protocol is his competitive advantage.",
+        lesson: "He doesn't accept knowledge limits. He learns. He reads. He questions. He never stops. That's cognitive optimization."
       },
       framework: {
         name: "The Cognitive Enhancement Framework",
@@ -2160,9 +2160,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Warren Buffett's Asymmetric Strategy",
-        story: "Warren Buffett doesn't just invest. He structures for asymmetry. He maximizes upside. He protects downside. He creates optionality. He doesn't just invest. He optimizes for asymmetry.",
-        lesson: "Buffett doesn't just invest. He structures. He optimizes. He creates asymmetry. That's asymmetric mastery."
+        name: "The Berkshire Asymmetric Strategy",
+        story: "Berkshire Hathaway's approach isn't just investing. It's structuring for asymmetry. Maximizing upside. Protecting downside. Creating optionality. Not just investing. Optimizing for asymmetry.",
+        lesson: "They don't just invest. They structure. They optimize. They create asymmetry. That's asymmetric mastery."
       },
       framework: {
         name: "The Complete Asymmetry Framework",
@@ -2211,9 +2211,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Elon Musk's Ascendance",
-        story: "Elon Musk doesn't just build companies. He ascends. He elevates thinking. He optimizes action. He maximizes impact. He doesn't just create value. He creates elevation.",
-        lesson: "Musk doesn't just build. He ascends. He elevates. He optimizes. That's the ascendance mindset."
+        name: "The Tesla/SpaceX Ascendance",
+        story: "Tesla and SpaceX weren't just built as companies. They represent ascendance. Elevating thinking. Optimizing action. Maximizing impact. Not just creating value. Creating elevation.",
+        lesson: "They don't just build. They ascend. They elevate. They optimize. That's the ascendance mindset."
       },
       framework: {
         name: "The Ascendance Mindset Framework",
@@ -2260,9 +2260,9 @@ export const LESSON_CONTENT: Record<string, Record<number, {
         }
       ],
       caseStudy: {
-        name: "Jeff Bezos' Systematic Approach",
-        story: "Jeff Bezos doesn't just build. He systematizes. He creates processes. He builds systems. He doesn't just ascend. He systematizes ascendance.",
-        lesson: "Bezos doesn't just build. He systematizes. He creates processes. He builds systems. That's systematic elevation."
+        name: "The Amazon Systematic Approach",
+        story: "Amazon wasn't just built. It was systematized. Processes were created. Systems were built. Not just ascending. Systematizing ascendance.",
+        lesson: "They don't just build. They systematize. They create processes. They build systems. That's systematic elevation."
       },
       framework: {
         name: "The Systematic Elevation Framework",

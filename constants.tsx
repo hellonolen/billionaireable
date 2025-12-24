@@ -1,15 +1,15 @@
 import { CardData, MarketAsset, ContentItem, CurriculumArea } from './types';
 
-// 12 Dashboard Cards representing the Billionaire's Radar
+// 12 Initiations - The Pillars of Transformation
 export const DASHBOARD_CARDS: CardData[] = [
   {
     id: 'reality-distortion',
     title: 'Reality Distortion',
     type: 'curriculum',
-    description: 'Vision Engine',
+    description: 'Bend perception. Shape futures.',
     colorTheme: 'orange',
     previewMetrics: [
-      { label: 'Archetype', value: 'Visionary' },
+      { label: 'Initiation', value: 'The Visionary' },
       { label: 'Status', value: 'Active', trend: 'up' },
     ],
   },
@@ -17,10 +17,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'liquidity-allocation',
     title: 'Liquidity & Allocation',
     type: 'curriculum',
-    description: 'Capital Architect',
+    description: 'Command capital. Deploy power.',
     colorTheme: 'green',
     previewMetrics: [
-      { label: 'Archetype', value: 'Allocator' },
+      { label: 'Initiation', value: 'The Allocator' },
       { label: 'Runway', value: '36mo', trend: 'up' },
     ],
   },
@@ -28,10 +28,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'holding-co',
     title: 'The Holding Co',
     type: 'curriculum',
-    description: 'Systems Builder',
+    description: 'Build the machine that builds machines.',
     colorTheme: 'blue',
     previewMetrics: [
-      { label: 'Archetype', value: 'Builder' },
+      { label: 'Initiation', value: 'The Architect' },
       { label: 'Entities', value: '7' },
     ],
   },
@@ -39,10 +39,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'time-arbitrage',
     title: 'Time Arbitrage',
     type: 'curriculum',
-    description: 'Leverage Strategist',
+    description: 'Buy back your hours. Multiply your impact.',
     colorTheme: 'yellow',
     previewMetrics: [
-      { label: 'Archetype', value: 'Leverager' },
+      { label: 'Initiation', value: 'The Optimizer' },
       { label: 'Leverage', value: '1000x', trend: 'up' },
     ],
   },
@@ -50,10 +50,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'bio-availability',
     title: 'Bio-Availability',
     type: 'curriculum',
-    description: 'Inner Mechanic',
+    description: 'Optimize the vessel. Unlock peak state.',
     colorTheme: 'orange',
     previewMetrics: [
-      { label: 'Archetype', value: 'Optimizer' },
+      { label: 'Initiation', value: 'The Performer' },
       { label: 'Energy', value: 'Peak' },
     ],
   },
@@ -61,10 +61,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'political-capital',
     title: 'Political Capital',
     type: 'curriculum',
-    description: 'Power Navigator',
+    description: 'Navigate power. Shape policy.',
     colorTheme: 'blue',
     previewMetrics: [
-      { label: 'Archetype', value: 'Navigator' },
+      { label: 'Initiation', value: 'The Operator' },
       { label: 'Access', value: 'High' },
     ],
   },
@@ -72,10 +72,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'syndicate',
     title: 'The Syndicate',
     type: 'curriculum',
-    description: 'Dealmaker',
+    description: 'Assemble the table. Control the flow.',
     colorTheme: 'green',
     previewMetrics: [
-      { label: 'Archetype', value: 'Dealmaker' },
+      { label: 'Initiation', value: 'The Connector' },
       { label: 'Flow', value: 'High' },
     ],
   },
@@ -83,10 +83,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'family-office',
     title: 'Family Office',
     type: 'curriculum',
-    description: 'Quiet Empire',
+    description: 'Build the quiet empire. Protect the legacy.',
     colorTheme: 'yellow',
     previewMetrics: [
-      { label: 'Archetype', value: 'Protector' },
+      { label: 'Initiation', value: 'The Steward' },
       { label: 'Risk', value: 'Low' },
     ],
   },
@@ -94,10 +94,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'dynasty-design',
     title: 'Dynasty Design',
     type: 'curriculum',
-    description: 'Legacy Steward',
+    description: 'Think in centuries. Build for generations.',
     colorTheme: 'orange',
     previewMetrics: [
-      { label: 'Archetype', value: 'Steward' },
+      { label: 'Initiation', value: 'The Builder' },
       { label: 'Horizon', value: '100yr' },
     ],
   },
@@ -105,10 +105,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'sovereign-flags',
     title: 'Sovereign Flags',
     type: 'curriculum',
-    description: 'Global Operator',
+    description: 'Plant flags. Transcend borders.',
     colorTheme: 'blue',
     previewMetrics: [
-      { label: 'Archetype', value: 'Operator' },
+      { label: 'Initiation', value: 'The Sovereign' },
       { label: 'Flags', value: '3' },
     ],
   },
@@ -116,10 +116,10 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'asymmetric-bets',
     title: 'Asymmetric Bets',
     type: 'curriculum',
-    description: 'Contrarian Gambler',
+    description: 'Risk little. Win everything.',
     colorTheme: 'green',
     previewMetrics: [
-      { label: 'Archetype', value: 'Contrarian' },
+      { label: 'Initiation', value: 'The Strategist' },
       { label: 'Upside', value: 'Uncapped' },
     ],
   },
@@ -127,16 +127,16 @@ export const DASHBOARD_CARDS: CardData[] = [
     id: 'ascendance',
     title: 'Ascendance',
     type: 'curriculum',
-    description: 'Intelligence Engine',
+    description: 'Transcend the game. Become the game.',
     colorTheme: 'yellow',
     previewMetrics: [
-      { label: 'Archetype', value: 'Intellect' },
+      { label: 'Initiation', value: 'The Transcendent' },
       { label: 'Clarity', value: '100%' },
     ],
   },
 ];
 
-// Detailed Data for all 12 skills
+// Detailed Data for all 12 Initiations
 export const SKILL_DATA: Record<string, {
   modules: { id: number; title: string; duration: string; status: 'completed' | 'active' | 'locked' }[];
   network: { name: string; type: string; access: string }[];
@@ -155,7 +155,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Top PR Firms', type: 'Communications', access: 'Direct' },
       { name: 'Ghostwriters', type: 'Content', access: 'Direct' },
     ],
-    insight: "Reality is negotiable. This skill isn't about lying; it's about projecting a future so compelling that capital, talent, and the market have no choice but to align with it. Steve Jobs didn't just build phones; he distorted reality to make them essential.",
+    insight: "Reality is negotiable. This initiation isn't about lying—it's about projecting a future so compelling that capital, talent, and the market have no choice but to align with it. The greatest companies weren't built on products. They were built on visions that bent reality.",
     tools: ['Vision Board Template', 'Press Release Framework', 'Keynote Deck Builder']
   },
   'liquidity-allocation': {
@@ -166,26 +166,26 @@ export const SKILL_DATA: Record<string, {
       { id: 4, title: 'Treasury Management', duration: '40 min', status: 'locked' },
     ],
     network: [
-      { name: 'Goldman Sachs PWM', type: 'Banking', access: 'Direct' },
-      { name: 'J.P. Morgan', type: 'Credit Lines', access: 'Direct' },
+      { name: 'Private Wealth Management', type: 'Banking', access: 'Direct' },
+      { name: 'Credit Line Specialists', type: 'Credit Lines', access: 'Direct' },
       { name: 'Tax Strategists', type: 'Advisory', access: 'Intro' },
     ],
-    insight: "Liquidity is oxygen. Allocation is muscle. Most founders die because they run out of air, or they get fat and lazy. This module teaches you how to keep the cash moving and the assets growing, ensuring you never face a runway crunch.",
+    insight: "Liquidity is oxygen. Allocation is muscle. Most founders die because they run out of air, or they get fat and lazy. This initiation teaches you how to keep the cash moving and the assets growing. You will never face a runway crunch again.",
     tools: ['Cash Flow Forecast', 'Allocation Matrix', 'Debt Service Calculator']
   },
   'holding-co': {
     modules: [
       { id: 1, title: 'Entity Structure 101', duration: '15 min', status: 'completed' },
-      { id: 2, title: 'The Berkshire Model', duration: '35 min', status: 'active' },
+      { id: 2, title: 'The Conglomerate Model', duration: '35 min', status: 'active' },
       { id: 3, title: 'Inter-Company Agreements', duration: '20 min', status: 'locked' },
       { id: 4, title: 'Consolidated Reporting', duration: '30 min', status: 'locked' },
     ],
     network: [
-      { name: 'Deloitte Legal', type: 'Corporate Law', access: 'Direct' },
+      { name: 'Corporate Counsel', type: 'Corporate Law', access: 'Direct' },
       { name: 'Offshore Counsel', type: 'Structuring', access: 'Intro' },
       { name: 'Audit Partners', type: 'Compliance', access: 'Direct' },
     ],
-    insight: "You are not your company. You are the architect of a system of companies. The Holding Company structure allows you to segregate risk, optimize tax, and build a diversified empire that survives any single failure.",
+    insight: "You are not your company. You are the architect of a system of companies. The Holding Company structure allows you to segregate risk, optimize tax, and build a diversified empire that survives any single failure. This is how dynasties are built.",
     tools: ['Entity Org Chart', 'Operating Agreement', 'Consolidation Dashboard']
   },
   'time-arbitrage': {
@@ -200,7 +200,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Executive VA Agencies', type: 'Staffing', access: 'Direct' },
       { name: 'Productivity Coaches', type: 'Performance', access: 'Intro' },
     ],
-    insight: "Time is the only asset you can't buy more of—unless you arbitrage it. By buying other people's time at a lower cost than your output value, you create infinite leverage. Stop doing $100/hr work.",
+    insight: "Time is the only asset you can't buy more of—unless you arbitrage it. By buying other people's time at a lower cost than your output value, you create infinite leverage. After this initiation, you will never do $100/hr work again.",
     tools: ['Delegation Matrix', 'EA Playbook', 'Weekly Review Protocol']
   },
   'bio-availability': {
@@ -215,7 +215,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Private Chefs', type: 'Nutrition', access: 'Intro' },
       { name: 'Sleep Coaches', type: 'Performance', access: 'Direct' },
     ],
-    insight: "Your body is the machine that builds the empire. If the machine breaks, the empire falls. Bio-availability is about maximizing the energy and clarity available to you at any given moment.",
+    insight: "Your body is the machine that builds the empire. If the machine breaks, the empire falls. This initiation is about maximizing the energy and clarity available to you at any given moment. You will become the highest-performing version of yourself.",
     tools: ['Bloodwork Panel Tracker', 'Supplement Stack', 'Sleep Protocol']
   },
   'political-capital': {
@@ -226,11 +226,11 @@ export const SKILL_DATA: Record<string, {
       { id: 4, title: 'Crisis Management', duration: '40 min', status: 'locked' },
     ],
     network: [
-      { name: 'K Street Lobbyists', type: 'Government', access: 'Intro' },
+      { name: 'Government Relations', type: 'Government', access: 'Intro' },
       { name: 'Crisis PR Firms', type: 'Reputation', access: 'Direct' },
       { name: 'Elite Clubs', type: 'Social', access: 'Intro' },
     ],
-    insight: "Business happens in boardrooms; deals happen in backrooms. Political capital is the invisible currency of influence. It's about who owes you a favor, and who will pick up the phone when you call at 2 AM.",
+    insight: "Business happens in boardrooms; deals happen in backrooms. Political capital is the invisible currency of influence. After this initiation, you will know who owes you a favor—and who will pick up the phone when you call at 2 AM.",
     tools: ['Stakeholder Map', 'Influence Ledger', 'Crisis Response Plan']
   },
   'syndicate': {
@@ -241,11 +241,11 @@ export const SKILL_DATA: Record<string, {
       { id: 4, title: 'The Art of the Exit', duration: '30 min', status: 'locked' },
     ],
     network: [
-      { name: 'Blackstone Group', type: 'Private Equity', access: 'Direct' },
-      { name: 'Sequoia Capital', type: 'Venture', access: 'Intro' },
-      { name: 'Rothschild & Co', type: 'Advisory', access: 'Direct' },
+      { name: 'Private Equity Networks', type: 'Private Equity', access: 'Direct' },
+      { name: 'Venture Capital Circles', type: 'Venture', access: 'Intro' },
+      { name: 'M&A Advisory', type: 'Advisory', access: 'Direct' },
     ],
-    insight: "Most investors chase deals. The Syndicate teaches you to attract them. By positioning yourself as a value-add partner, you move from 'begging for allocation' to 'selecting your partners'. This module focuses on the psychology of the deal as much as the mechanics.",
+    insight: "Most investors chase deals. This initiation teaches you to attract them. By positioning yourself as a value-add partner, you move from 'begging for allocation' to 'selecting your partners'. You will master the psychology of the deal.",
     tools: ['Deal Memo Template', 'Cap Table Modeler', 'Term Sheet Decoder']
   },
   'family-office': {
@@ -260,7 +260,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Top CIO Recruiters', type: 'Staffing', access: 'Intro' },
       { name: 'Trust Companies', type: 'Admin', access: 'Direct' },
     ],
-    insight: "A Family Office is not just wealth management — it's the operating system billionaires use. It handles everything from tax returns to travel logistics, freeing focus for high-impact decisions.",
+    insight: "A Family Office is not just wealth management—it's the operating system of the ultra-wealthy. It handles everything from tax returns to travel logistics, freeing your focus for high-impact decisions. This initiation shows you how to build yours.",
     tools: ['Investment Policy Statement', 'Staffing Org Chart', 'Administrative Systems Checklist']
   },
   'dynasty-design': {
@@ -275,7 +275,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Family Governance', type: 'Advisory', access: 'Intro' },
       { name: 'Philanthropy Advisors', type: 'Impact', access: 'Direct' },
     ],
-    insight: "Wealth is easy to lose. Dynasty Design is about ensuring your values and your capital survive for generations. It's about moving from 'rich kid' problems to 'stewardship' solutions.",
+    insight: "Wealth is easy to lose. This initiation is about ensuring your values and your capital survive for generations. You will move from 'rich kid' problems to 'stewardship' solutions. Your legacy will outlive you.",
     tools: ['Family Constitution Template', 'Trust Structure Map', 'Heir Curriculum']
   },
   'sovereign-flags': {
@@ -286,11 +286,11 @@ export const SKILL_DATA: Record<string, {
       { id: 4, title: 'Offshore Banking', duration: '35 min', status: 'locked' },
     ],
     network: [
-      { name: 'Henley & Partners', type: 'Citizenship', access: 'Direct' },
-      { name: 'Offshore Banks', type: 'Finance', access: 'Intro' },
+      { name: 'Citizenship Advisors', type: 'Citizenship', access: 'Direct' },
+      { name: 'International Banks', type: 'Finance', access: 'Intro' },
       { name: 'International Tax Counsel', type: 'Legal', access: 'Direct' },
     ],
-    insight: "Don't go where you're tolerated; go where you're celebrated. Sovereign Flags is about diversifying your political risk. If one government turns on you, you have three others ready to welcome you.",
+    insight: "Don't go where you're tolerated; go where you're celebrated. This initiation is about diversifying your political risk. If one government turns on you, you will have three others ready to welcome you.",
     tools: ['Residency Tracker', 'Passport Index', 'Tax Treaty Matrix']
   },
   'asymmetric-bets': {
@@ -305,7 +305,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Macro Strategists', type: 'Hedge Fund', access: 'Intro' },
       { name: 'Crypto OTC Desks', type: 'Trading', access: 'Direct' },
     ],
-    insight: "You don't get rich by being right 51% of the time. You get rich by being right once when the payout is 1000x. Asymmetric bets are about capping your downside while leaving your upside uncapped.",
+    insight: "You don't get rich by being right 51% of the time. You get rich by being right once when the payout is 1000x. This initiation teaches you to cap your downside while leaving your upside uncapped. You will learn to bet like the ultra-wealthy.",
     tools: ['Kelly Criterion Calculator', 'Portfolio Heatmap', 'Thesis Generator']
   },
   'ascendance': {
@@ -320,7 +320,7 @@ export const SKILL_DATA: Record<string, {
       { name: 'Mastermind Groups', type: 'Peer', access: 'Direct' },
       { name: 'Executive Coaches', type: 'Performance', access: 'Direct' },
     ],
-    insight: "The ultimate leverage is your mind. Ascendance is the practice of upgrading your operating system. Better inputs, better processing, better outputs. It's about seeing the matrix while others are just living in it.",
+    insight: "The ultimate leverage is your mind. This is the final initiation—the practice of upgrading your operating system. Better inputs, better processing, better outputs. You will see the matrix while others are just living in it.",
     tools: ['Decision Journal', 'Reading List', 'Mental Model Deck']
   },
 };

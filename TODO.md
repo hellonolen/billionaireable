@@ -57,38 +57,29 @@
 
 ---
 
-### 2. Resend Email Configuration
+### 2. Email It Configuration
 
-**Step 1: Create Resend Account**
-- [ ] Go to https://resend.com
+**Step 1: Create Email It Account**
+- [ ] Go to https://emailit.com
 - [ ] Sign up / Sign in
 
 **Step 2: Add Your Domain**
-- [ ] In Resend dashboard, go to **Domains**
-- [ ] Click **Add Domain**
-- [ ] Enter: `billionaireable.com`
-- [ ] Resend will give you DNS records to add
+- [ ] In Email It dashboard, go to **Domains**
+- [ ] Add: `billionaireable.com`
+- [ ] Follow instructions to verify SPF and DKIM records in Cloudflare
 
-**Step 3: Add DNS Records in Cloudflare**
-- [ ] Go to Cloudflare → billionaireable.com → **DNS**
-- [ ] Add the records Resend provides (usually):
-  - SPF record (TXT)
-  - DKIM record (TXT) 
-  - Optional: DMARC record (TXT)
-- [ ] Wait for verification (usually 5-15 minutes)
-
-**Step 4: Get API Key**
-- [ ] In Resend, go to **API Keys**
-- [ ] Create a new API key
+**Step 3: Get API Key**
+- [ ] In Email It dashboard, go to **API Keys**
+- [ ] Create a new API key (v2)
 - [ ] Copy the key
 
-**Step 5: Add to Convex**
+**Step 4: Add to Convex**
 - [ ] Go to Convex Dashboard → billionaireable project
 - [ ] Go to **Settings** → **Environment Variables**
-- [ ] Add: `RESEND_API_KEY` = your_api_key
+- [ ] Add: `EMAIL_IT_API_KEY` = your_api_key
 
-**Step 6: Update From Email (if needed)**
-- [ ] In `convex/auth.ts`, update the from address:
+**Step 5: Verify From Email**
+- [ ] Ensure the 'from' address matches your verified domain in `convex/auth.ts` and `convex/admin.ts`:
   ```javascript
   from: 'Billionaireable <noreply@billionaireable.com>'
   ```
@@ -113,7 +104,7 @@
 ## Completed
 
 - [x] Replace Clerk with Convex Magic Code auth
-- [x] Email verification via Resend
+- [x] Email verification via Email It
 - [x] Wire transfer only payment system
 - [x] Pricing page with Founder/Scaler/Owner tiers
 - [x] Auto-activation when payment verified
@@ -132,7 +123,7 @@
 ### Convex Dashboard (Backend)
 ```
 GEMINI_API_KEY=your_gemini_key
-RESEND_API_KEY=your_resend_key
+EMAIL_IT_API_KEY=your_emailit_key
 WIRE_WEBHOOK_SECRET=optional_webhook_secret
 ```
 

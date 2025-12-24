@@ -92,7 +92,7 @@ const Onboarding: React.FC = () => {
 
                         <button
                             onClick={() => setStep(2)}
-                            className="w-full bg-black dark:bg-white text-white dark:text-black py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center gap-3"
+                            className="w-full bg-art-orange text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-art-orange/80 transition-colors flex items-center justify-center gap-3"
                         >
                             Let's Go
                             <ArrowRight className="w-5 h-5" />
@@ -118,7 +118,7 @@ const Onboarding: React.FC = () => {
                                     key={area.id}
                                     onClick={() => handleAreaToggle(area.id)}
                                     className={`p-8 rounded-[32px] border-2 cursor-pointer transition-all ${selectedAreas.includes(area.id)
-                                        ? 'border-black dark:border-white bg-black dark:bg-white text-white dark:text-black shadow-2xl'
+                                        ? 'border-black dark:border-white bg-art-orange text-white shadow-2xl'
                                         : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600'
                                         }`}
                                 >
@@ -141,7 +141,7 @@ const Onboarding: React.FC = () => {
                         <button
                             onClick={() => setStep(3)}
                             disabled={selectedAreas.length === 0}
-                            className="w-full bg-black dark:bg-white text-white dark:text-black py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-art-orange text-white py-6 rounded-full font-mono text-sm font-bold uppercase hover:bg-art-orange/80 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Continue
                             <ArrowRight className="w-5 h-5" />

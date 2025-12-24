@@ -77,7 +77,7 @@ const ProtectedSubscriberRoute: React.FC<ProtectedSubscriberRouteProps> = ({
           <div className="space-y-3">
             <a
               href="/pricing"
-              className="block w-full px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+              className="block w-full px-6 py-3 bg-art-orange text-white rounded-full font-mono text-xs font-bold uppercase hover:bg-art-orange/80 transition-colors"
             >
               View Pricing
             </a>

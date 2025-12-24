@@ -17,13 +17,19 @@ const TIER_PRICING = {
     },
 };
 
-// Bank details for wire transfers - UPDATE THESE WITH YOUR REAL BANK INFO
+// Bank details for wire transfers
+// IMPORTANT: Set these values in your Convex environment or replace before production
 const WIRE_DETAILS = {
-    bankName: "Your Bank Name",
-    accountName: "Billionaireable LLC",
-    routingNumber: "XXXXXXXXX",
-    accountNumber: "XXXXXXXXX",
-    swiftCode: "XXXXXXXXX", // For international wires
+    // US Domestic Wire
+    bankName: process.env.WIRE_BANK_NAME || "Mercury Bank",
+    accountName: process.env.WIRE_ACCOUNT_NAME || "Billionaireable LLC",
+    routingNumber: process.env.WIRE_ROUTING || "084106768", // Mercury routing
+    accountNumber: process.env.WIRE_ACCOUNT || "SET_IN_ENV",
+    // International Wire (SWIFT)
+    swiftCode: process.env.WIRE_SWIFT || "MCRYUS33",
+    bankAddress: "Mercury, 548 Market St, San Francisco, CA 94104",
+    // Reference format
+    referencePrefix: "BILL",
 };
 
 // Create a payment application (user selects tier, gets wire details)
@@ -37,10 +43,10 @@ export const createPaymentApplication = mutation({
     },
     handler: async (ctx, args) => {
         const user = await ctx.db.get(args.userId);
-        
+
         // Generate unique wire reference
         const wireReference = `BILL-${Date.now().toString(36).toUpperCase()}`;
-        
+
         const applicationId = await ctx.db.insert("paymentApplications", {
             userId: args.userId,
             userEmail: user?.email || "",
@@ -54,7 +60,7 @@ export const createPaymentApplication = mutation({
             createdAt: Date.now(),
             updatedAt: Date.now(),
         });
-        
+
         return {
             applicationId,
             wireDetails: {
@@ -78,13 +84,13 @@ export const confirmWirePayment = mutation({
         const applications = await ctx.db
             .query("paymentApplications")
             .collect();
-            
+
         const application = applications.find(a => a.wireReference === args.wireReference);
-        
+
         if (!application) {
             return { success: false, reason: "reference_not_found" };
         }
-        
+
         // Verify amount (allow 1% variance for fees)
         if (args.amountReceived < application.amount * 0.99) {
             await ctx.db.patch(application._id, {
@@ -95,7 +101,7 @@ export const confirmWirePayment = mutation({
             });
             return { success: false, reason: "insufficient_amount" };
         }
-        
+
         // Payment verified → Activate subscription
         await ctx.db.patch(application._id, {
             status: "approved",
@@ -105,18 +111,18 @@ export const confirmWirePayment = mutation({
             amountReceived: args.amountReceived,
             updatedAt: Date.now(),
         });
-        
+
         // Calculate subscription period
         const periodEnd = application.billingCycle === "annual"
             ? Date.now() + 365 * 24 * 60 * 60 * 1000
             : Date.now() + 30 * 24 * 60 * 60 * 1000;
-            
+
         // Create or update subscription
         const existingSub = await ctx.db
             .query("subscriptions")
             .withIndex("by_user", (q) => q.eq("userId", application.userId))
             .first();
-            
+
         if (existingSub) {
             await ctx.db.patch(existingSub._id, {
                 plan: application.tier,
@@ -142,9 +148,9 @@ export const confirmWirePayment = mutation({
                 createdAt: Date.now(),
             });
         }
-        
-        return { 
-            success: true, 
+
+        return {
+            success: true,
             applicationId: application._id,
             tier: application.tier,
             userActivated: true,
@@ -160,7 +166,7 @@ export const getApplicationWithWireDetails = query({
     handler: async (ctx, args) => {
         const application = await ctx.db.get(args.applicationId);
         if (!application) return null;
-        
+
         return {
             ...application,
             wireDetails: {
@@ -212,7 +218,7 @@ export const updateApplicationStatus = mutation({
             notes: args.notes,
             updatedAt: Date.now(),
         });
-        
+
         // If approved, activate subscription
         if (args.status === "approved") {
             const application = await ctx.db.get(args.applicationId);
@@ -220,12 +226,12 @@ export const updateApplicationStatus = mutation({
                 const periodEnd = application.billingCycle === "annual"
                     ? Date.now() + 365 * 24 * 60 * 60 * 1000
                     : Date.now() + 30 * 24 * 60 * 60 * 1000;
-                    
+
                 const existingSub = await ctx.db
                     .query("subscriptions")
                     .withIndex("by_user", (q) => q.eq("userId", application.userId))
                     .first();
-                    
+
                 if (existingSub) {
                     await ctx.db.patch(existingSub._id, {
                         plan: application.tier,

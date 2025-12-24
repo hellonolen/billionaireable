@@ -38,7 +38,7 @@ const Home: React.FC = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="inline-flex items-center bg-black dark:bg-white text-white dark:text-black px-5 py-2 rounded-full mb-8"
+                            className="inline-flex items-center bg-art-orange text-white px-5 py-2 rounded-full mb-8"
                         >
                             <span className="font-mono text-xs font-bold uppercase tracking-widest">Your Framework for Why the "F" Not</span>
                         </motion.div>
@@ -74,7 +74,7 @@ const Home: React.FC = () => {
                         >
                             <button
                                 onClick={() => navigate('/free-assessment')}
-                                className="group flex items-center gap-3 bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-all shadow-2xl"
+                                className="group flex items-center gap-3 bg-art-orange text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-all shadow-2xl"
                             >
                                 Take Free Assessment
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -97,9 +97,9 @@ const Home: React.FC = () => {
                     >
                         <div className="bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                             {/* Chat Header */}
-                            <div className="bg-black text-white p-6 flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-art-orange flex items-center justify-center">
-                                    <span className="font-serif text-xl font-black text-black">B</span>
+                            <div className="bg-art-orange text-white p-6 flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+                                    <span className="font-serif text-xl font-black text-art-orange">B</span>
                                 </div>
                                 <div>
                                     <h3 className="font-black text-lg">Billionaireable</h3>
@@ -110,7 +110,7 @@ const Home: React.FC = () => {
                             <div className="p-8 space-y-6 bg-gray-50 dark:bg-gray-900/50 min-h-[200px]">
                                 {/* User Message */}
                                 <div className="flex justify-end">
-                                    <div className="bg-black text-white px-6 py-4 rounded-2xl rounded-tr-none max-w-md">
+                                    <div className="bg-art-orange text-white px-6 py-4 rounded-2xl rounded-tr-none max-w-md">
                                         <p className="font-medium">{typedText}<span className="animate-pulse">|</span></p>
                                     </div>
                                 </div>
@@ -254,7 +254,7 @@ const Home: React.FC = () => {
                             </p>
                             <button
                                 onClick={() => navigate('/waitlist')}
-                                className="group flex items-center gap-3 mx-auto bg-black text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-gray-900 transition-all shadow-2xl"
+                                className="group flex items-center gap-3 mx-auto bg-white text-black px-8 py-4 rounded-full font-mono text-sm font-bold uppercase tracking-widest hover:bg-gray-100 transition-all shadow-2xl"
                             >
                                 Become Billionaireable
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

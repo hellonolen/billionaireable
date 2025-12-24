@@ -40,7 +40,7 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) =
           </p>
           <a
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-art-orange text-white rounded-full font-mono text-xs font-bold uppercase hover:bg-art-orange/80 transition-colors"
           >
             Return Home
           </a>

@@ -102,7 +102,7 @@ const Community: React.FC = () => {
                 </p>
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="bg-white dark:bg-black text-black dark:text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                    className="bg-art-orange text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                 >
                     Access Intelligence →
                 </button>

@@ -223,7 +223,7 @@ const PaymentApplicationSubmitted: React.FC = () => {
                     </p>
                     <button
                         onClick={() => navigate('/skills/reality-distortion/1')}
-                        className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-sm font-bold uppercase transition-all hover:bg-gray-800 dark:hover:bg-gray-200"
+                        className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-art-orange text-white rounded-full font-mono text-sm font-bold uppercase transition-all hover:bg-art-orange/80"
                     >
                         Start Pillar 1 Free
                         <ArrowRight className="w-4 h-4" />

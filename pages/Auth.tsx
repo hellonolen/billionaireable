@@ -119,7 +119,7 @@ const Auth: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={loading || !email}
-                                    className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-sm font-bold uppercase flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                    className="w-full py-4 bg-art-orange text-white rounded-full font-mono text-sm font-bold uppercase flex items-center justify-center gap-2 hover:bg-art-orange/80 transition-colors disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -176,7 +176,7 @@ const Auth: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={loading || code.length !== 6}
-                                    className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-sm font-bold uppercase flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                    className="w-full py-4 bg-art-orange text-white rounded-full font-mono text-sm font-bold uppercase flex items-center justify-center gap-2 hover:bg-art-orange/80 transition-colors disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <Loader2 className="w-5 h-5 animate-spin" />

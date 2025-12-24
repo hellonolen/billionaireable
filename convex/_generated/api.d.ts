@@ -12,7 +12,9 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as billionaireable from "../billionaireable.js";
 import type * as conversations from "../conversations.js";
+import type * as exercises from "../exercises.js";
 import type * as http from "../http.js";
+import type * as lifeContext from "../lifeContext.js";
 import type * as openai from "../openai.js";
 import type * as payments from "../payments.js";
 import type * as progress from "../progress.js";
@@ -20,6 +22,7 @@ import type * as speech from "../speech.js";
 import type * as stripe from "../stripe.js";
 import type * as users from "../users.js";
 import type * as waitlist from "../waitlist.js";
+import type * as webSearch from "../webSearch.js";
 
 import type {
   ApiFromModules,
@@ -32,7 +35,9 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   billionaireable: typeof billionaireable;
   conversations: typeof conversations;
+  exercises: typeof exercises;
   http: typeof http;
+  lifeContext: typeof lifeContext;
   openai: typeof openai;
   payments: typeof payments;
   progress: typeof progress;
@@ -40,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   stripe: typeof stripe;
   users: typeof users;
   waitlist: typeof waitlist;
+  webSearch: typeof webSearch;
 }>;
 
 /**

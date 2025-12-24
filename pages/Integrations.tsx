@@ -177,7 +177,7 @@ const Integrations: React.FC = () => {
                                     ) : (
                                         <button
                                             onClick={() => handleConnect(integration.id)}
-                                            className="w-full bg-black text-white py-3 rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 transition-colors"
+                                            className="w-full bg-art-orange text-white py-3 rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 transition-colors"
                                         >
                                             Connect Now
                                         </button>

@@ -79,7 +79,7 @@ const CardModal: React.FC<CardModalProps> = ({ card, onClose }) => {
                             {/* Quick Actions */}
                             <h3 className="font-sans text-xl font-bold uppercase mb-4">Quick Actions</h3>
                             <div className="space-y-3">
-                                <button className="w-full bg-black text-white py-4 rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 transition-colors">
+                                <button className="w-full bg-art-orange text-white py-4 rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 transition-colors">
                                     Update Data
                                 </button>
                                 <button className="w-full bg-white border-2 border-black text-black py-4 rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-50 transition-colors">

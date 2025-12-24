@@ -36,7 +36,7 @@ const Intelligence: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="bg-black text-white px-8 py-4 rounded-full font-mono text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center gap-2 shadow-xl">
+          <button className="bg-art-orange text-white px-8 py-4 rounded-full font-mono text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center gap-2 shadow-xl">
             <Play className="w-4 h-4" />
             Start New Session
           </button>

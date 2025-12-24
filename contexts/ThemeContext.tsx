@@ -11,29 +11,19 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [theme, setTheme] = useState<Theme>('light');
+    // FORCED LIGHT MODE - Investors require light mode for accessibility
+    const [theme] = useState<Theme>('light');
 
     useEffect(() => {
-        // Check for saved preference, default to light
-        const saved = localStorage.getItem('billionaireable-theme') as Theme;
-        if (saved && (saved === 'light' || saved === 'dark')) {
-            setTheme(saved);
-        }
+        // Always ensure light mode - remove dark class if present
+        const root = document.documentElement;
+        root.classList.remove('dark');
+        localStorage.setItem('billionaireable-theme', 'light');
     }, []);
 
-    useEffect(() => {
-        // Apply theme to document
-        const root = document.documentElement;
-        if (theme === 'dark') {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-        localStorage.setItem('billionaireable-theme', theme);
-    }, [theme]);
-
+    // Toggle is disabled - always stays light
     const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+        // No-op: Light mode is enforced for investor accessibility
     };
 
     return (

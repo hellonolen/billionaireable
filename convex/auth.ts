@@ -68,7 +68,7 @@ export const requestCode = mutation({
     },
 });
 
-// Send the verification email via Resend
+// Send the verification email via Email It
 export const sendVerificationEmail = action({
     args: {
         email: v.string(),
@@ -77,10 +77,10 @@ export const sendVerificationEmail = action({
         name: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY;
+        const EMAIL_IT_API_KEY = process.env.EMAIL_IT_API_KEY;
 
-        if (!SMTP2GO_API_KEY) {
-            console.error("SMTP2GO_API_KEY not configured");
+        if (!EMAIL_IT_API_KEY) {
+            console.error("EMAIL_IT_API_KEY not configured");
             throw new Error("Email service not configured");
         }
 
@@ -122,30 +122,24 @@ export const sendVerificationEmail = action({
             </div>
         `;
 
-        // SMTP2GO API endpoint
-        const response = await fetch('https://api.smtp2go.com/v3/email/send', {
+        // Email It API endpoint
+        const response = await fetch('https://api.emailit.com/v2/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${EMAIL_IT_API_KEY}`
             },
             body: JSON.stringify({
-                api_key: SMTP2GO_API_KEY,
-                to: [args.email],
-                sender: 'Billionaireable <noreply@billionaireable.com>',
+                from: 'Billionaireable <noreply@billionaireable.com>',
+                to: args.email,
                 subject,
-                html_body: html,
+                html,
             }),
         });
 
         if (!response.ok) {
             const error = await response.text();
-            console.error("SMTP2GO error:", error);
-            throw new Error("Failed to send email");
-        }
-
-        const result = await response.json();
-        if (result.data?.error) {
-            console.error("SMTP2GO error:", result.data.error);
+            console.error("Email It error:", error);
             throw new Error("Failed to send email");
         }
 

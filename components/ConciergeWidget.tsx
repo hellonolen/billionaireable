@@ -14,7 +14,7 @@ interface Message {
 // Get the ordered list of pillars
 const PILLAR_ORDER = [
     'reality-distortion',
-    'liquidity-allocation', 
+    'liquidity-allocation',
     'holding-co',
     'time-arbitrage',
     'bio-availability',
@@ -35,17 +35,17 @@ const ConciergeWidget: React.FC = () => {
     const [isInitializing, setIsInitializing] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    
+
     // User and progress context
     const { user, isSignedIn } = useAuth();
     const { progress, getSkillCompletion } = useProgress();
-    
+
     // Convex queries and mutations
     const recentMessages = useQuery(
         api.conversations.getRecentMessages,
         user ? { userId: user._id, limit: 20 } : "skip"
     );
-    
+
     const createConversation = useMutation(api.conversations.createConversation);
     const addMessage = useMutation(api.conversations.addMessage);
     const chat = useAction(api.billionaireable.chat);
@@ -61,7 +61,7 @@ const ConciergeWidget: React.FC = () => {
     // Build dynamic system prompt with user context
     const buildSystemPrompt = () => {
         let contextInfo = '';
-        
+
         if (isSignedIn && user) {
             // Calculate current pillar based on progress
             let currentPillarIndex = 0;
@@ -75,17 +75,17 @@ const ConciergeWidget: React.FC = () => {
                     currentPillarIndex = i; // Completed all
                 }
             }
-            
+
             const currentPillar = PILLAR_ORDER[currentPillarIndex];
             const currentPillarName = PILLAR_NAMES[currentPillar] || currentPillar;
             const modulesCompleted = getSkillCompletion(currentPillar);
-            
+
             // Calculate total progress
             let totalModulesCompleted = 0;
             PILLAR_ORDER.forEach(pillar => {
                 totalModulesCompleted += getSkillCompletion(pillar);
             });
-            
+
             contextInfo = `
 USER CONTEXT (remember this - never ask them about it):
 - Name: ${user.name || 'Unknown'}
@@ -146,9 +146,9 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
     useEffect(() => {
         const initChat = async () => {
             if (!isOpen || messages.length > 0 || isInitializing) return;
-            
+
             setIsInitializing(true);
-            
+
             try {
                 // Load previous messages if signed in
                 if (recentMessages && recentMessages.length > 0) {
@@ -160,9 +160,9 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
                             role: m.role === 'user' ? 'user' : 'model',
                             text: m.content
                         }));
-                    
+
                     setMessages(historyMessages);
-                    
+
                     // Generate a contextual welcome back
                     const systemPrompt = buildSystemPrompt();
                     const response = await chat({
@@ -170,9 +170,9 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
                         history: historyMessages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', text: m.text })),
                         systemPrompt,
                     });
-                    
+
                     setMessages(prev => [...prev, { role: 'model', text: response }]);
-                    
+
                     // Save the welcome message
                     if (user) {
                         const convId = await createConversation({ userId: user._id });
@@ -192,9 +192,9 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
                         history: [],
                         systemPrompt,
                     });
-                    
+
                     setMessages([{ role: 'model', text: response }]);
-                    
+
                     // Create conversation and save
                     if (user) {
                         const convId = await createConversation({ userId: user._id });
@@ -220,7 +220,7 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
-        
+
         const userMessage = input.trim();
         setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
         setInput('');
@@ -228,22 +228,22 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
 
         try {
             // Build history from current messages
-            const history = messages.map(m => ({ 
-                role: m.role === 'user' ? 'user' : 'model', 
-                text: m.text 
+            const history = messages.map(m => ({
+                role: m.role === 'user' ? 'user' : 'model',
+                text: m.text
             }));
             history.push({ role: 'user', text: userMessage });
-            
+
             const systemPrompt = buildSystemPrompt();
-            
+
             const response = await chat({
                 message: userMessage,
                 history,
                 systemPrompt,
             });
-            
+
             setMessages(prev => [...prev, { role: 'model', text: response }]);
-            
+
             // Save both messages to Convex
             if (user && conversationId) {
                 await addMessage({
@@ -277,9 +277,9 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
             }
         } catch (error) {
             console.error('Chat error:', error);
-            setMessages(prev => [...prev, { 
-                role: 'model', 
-                text: "Let's refocus. What are you working on right now?" 
+            setMessages(prev => [...prev, {
+                role: 'model',
+                text: "Let's refocus. What are you working on right now?"
             }]);
         } finally {
             setIsLoading(false);
@@ -299,7 +299,7 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
             {!isOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="fixed bottom-20 right-6 w-14 h-14 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
+                    className="fixed bottom-20 right-6 w-14 h-14 bg-art-orange text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
                 >
                     <span className="font-black text-xl">B</span>
                 </button>
@@ -309,7 +309,7 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
             {isOpen && (
                 <div className="fixed bottom-20 right-6 w-[380px] h-[500px] bg-white dark:bg-gray-900 rounded-[24px] shadow-2xl flex flex-col overflow-hidden z-50 border border-gray-200 dark:border-gray-800">
                     {/* Header */}
-                    <div className="bg-black text-white p-4 flex items-center justify-between">
+                    <div className="bg-art-orange text-white p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-black">
                                 B
@@ -342,11 +342,10 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
                                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div
-                                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                                        msg.role === 'user'
-                                            ? 'bg-black text-white'
+                                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === 'user'
+                                            ? 'bg-art-orange text-white'
                                             : 'bg-gray-100 dark:bg-gray-800 text-black dark:text-white'
-                                    }`}
+                                        }`}
                                 >
                                     <p className="text-sm leading-relaxed">{msg.text}</p>
                                 </div>
@@ -376,7 +375,7 @@ Keep responses to 2-3 sentences. Direct. No fluff. Remember everything about thi
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || isLoading}
-                                className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="w-10 h-10 bg-art-orange text-white rounded-full flex items-center justify-center hover:bg-art-orange/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 <Send className="w-4 h-4" />
                             </button>

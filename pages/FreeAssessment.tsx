@@ -171,7 +171,7 @@ const FreeAssessment: React.FC = () => {
                     <div className="space-y-4">
                         <button
                             onClick={() => navigate('/skills/reality-distortion/1')}
-                            className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors flex items-center justify-center gap-3"
+                            className="w-full py-4 bg-art-orange text-white rounded-full font-mono text-sm font-bold uppercase hover:bg-art-orange/80 transition-colors flex items-center justify-center gap-3"
                         >
                             Start Free Module
                             <ArrowRight className="w-5 h-5" />

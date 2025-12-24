@@ -92,7 +92,7 @@ const Decisions: React.FC = () => {
                     </h1>
                     <p className="font-serif text-2xl text-gray-400">"Identity is forged in decisions, not intentions."</p>
                 </div>
-                <button className="bg-black text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 transition-colors">
+                <button className="bg-art-orange text-white px-8 py-4 rounded-full font-mono text-sm font-bold uppercase hover:bg-gray-800 transition-colors">
                     Log New Decision
                 </button>
             </div>

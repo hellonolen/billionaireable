@@ -108,7 +108,7 @@ const Navigation: React.FC = () => {
               </button>
               <button 
                 onClick={() => navigate('/signup')}
-                className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase bg-black dark:bg-white text-white dark:text-black rounded-full hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-colors shadow-lg"
+                className="px-5 py-2.5 text-[10px] font-bold tracking-widest uppercase bg-art-orange text-white rounded-full hover:bg-art-orange dark:hover:bg-art-orange dark:hover:text-white transition-colors shadow-lg"
               >
                 Get Started
               </button>

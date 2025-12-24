@@ -18,12 +18,12 @@ const Pricing: React.FC = () => {
             navigate('/login');
             return;
         }
-        
+
         setLoading(tier.name);
 
         try {
-const result = await createApplication({
-                    userId: user._id,
+            const result = await createApplication({
+                userId: user._id,
                 tier: tier.name.toLowerCase(),
                 billingCycle: isAnnual ? 'annual' : 'monthly',
                 amount: isAnnual ? tier.annualPrice : tier.monthlyPrice,
@@ -116,21 +116,19 @@ const result = await createApplication({
                     <div className="bg-white dark:bg-gray-900 rounded-full p-1 shadow-soft-xl border border-gray-200 dark:border-gray-800">
                         <button
                             onClick={() => setIsAnnual(false)}
-                            className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${
-                                !isAnnual
-                                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                            className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${!isAnnual
+                                    ? 'bg-art-orange text-white'
                                     : 'text-gray-500 hover:text-black dark:hover:text-white'
-                            }`}
+                                }`}
                         >
                             Monthly
                         </button>
                         <button
                             onClick={() => setIsAnnual(true)}
-                            className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${
-                                isAnnual
-                                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                            className={`px-6 py-3 rounded-full font-mono text-xs font-bold uppercase transition-all ${isAnnual
+                                    ? 'bg-art-orange text-white'
                                     : 'text-gray-500 hover:text-black dark:hover:text-white'
-                            }`}
+                                }`}
                         >
                             Annual <span className="text-art-green ml-1">Save 2 months</span>
                         </button>
@@ -143,9 +141,8 @@ const result = await createApplication({
                     {tiers.map((tier) => (
                         <div
                             key={tier.name}
-                            className={`relative bg-white dark:bg-gray-900 rounded-[32px] shadow-soft-xl border-2 ${
-                                tier.popular ? 'border-art-orange' : 'border-gray-200 dark:border-gray-700'
-                            } overflow-hidden flex flex-col`}
+                            className={`relative bg-white dark:bg-gray-900 rounded-[32px] shadow-soft-xl border-2 ${tier.popular ? 'border-art-orange' : 'border-gray-200 dark:border-gray-700'
+                                } overflow-hidden flex flex-col`}
                         >
                             {/* Popular Badge */}
                             {tier.popular && (
@@ -199,11 +196,10 @@ const result = await createApplication({
                                 <button
                                     onClick={() => handleSelectTier(tier)}
                                     disabled={loading === tier.name}
-                                    className={`w-full py-4 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-2 ${
-                                        tier.popular
+                                    className={`w-full py-4 rounded-full font-mono text-sm font-bold uppercase transition-all flex items-center justify-center gap-2 ${tier.popular
                                             ? 'bg-art-orange text-black hover:bg-art-orange/90'
-                                            : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
-                                    }`}
+                                            : 'bg-art-orange text-white hover:bg-art-orange/80'
+                                        }`}
                                 >
                                     {loading === tier.name ? (
                                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -218,6 +214,51 @@ const result = await createApplication({
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Social Proof / Testimonials */}
+                <div className="mt-24 max-w-5xl mx-auto">
+                    <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-center text-gray-400 mb-12">
+                        What Members Say
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="bg-white rounded-[24px] p-8 shadow-soft-xl border border-gray-100">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 bg-art-orange rounded-full flex items-center justify-center text-white font-black">M</div>
+                                <div>
+                                    <p className="font-sans font-bold text-black">Marcus T.</p>
+                                    <p className="font-mono text-[10px] text-gray-400 uppercase">Owner · 8 months</p>
+                                </div>
+                            </div>
+                            <p className="font-serif text-gray-600 leading-relaxed">
+                                "I've spent $200k+ on courses and masterminds. This is the first time someone told me what to actually do instead of what to think about. My holding company structure saved me $340k in taxes last year alone."
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-[24px] p-8 shadow-soft-xl border border-gray-100">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 bg-art-green rounded-full flex items-center justify-center text-white font-black">S</div>
+                                <div>
+                                    <p className="font-sans font-bold text-black">Samira K.</p>
+                                    <p className="font-mono text-[10px] text-gray-400 uppercase">Scaler · 14 months</p>
+                                </div>
+                            </div>
+                            <p className="font-serif text-gray-600 leading-relaxed">
+                                "Pillar 4 on Time Arbitrage changed how I run my days. I went from 60-hour weeks to 25 hours while doubling revenue. The AI remembers everything and keeps me accountable."
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-[24px] p-8 shadow-soft-xl border border-gray-100">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 bg-art-blue rounded-full flex items-center justify-center text-white font-black">J</div>
+                                <div>
+                                    <p className="font-sans font-bold text-black">James R.</p>
+                                    <p className="font-mono text-[10px] text-gray-400 uppercase">Founder · 5 months</p>
+                                </div>
+                            </div>
+                            <p className="font-serif text-gray-600 leading-relaxed">
+                                "Started as a Founder, upgraded to Scaler after month two. The framework isn't motivation — it's architecture. I now think in systems instead of tasks. That shift alone was worth 10x the investment."
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* FAQ */}
@@ -255,7 +296,7 @@ const result = await createApplication({
                 </div>
 
                 {/* Cancel Anytime */}
-                <div className="mt-20 max-w-3xl mx-auto bg-black dark:bg-white text-white dark:text-black rounded-[32px] p-12 text-center">
+                <div className="mt-20 max-w-3xl mx-auto bg-art-orange text-white rounded-[32px] p-12 text-center">
                     <h3 className="font-serif text-3xl font-black mb-4">Cancel Anytime</h3>
                     <p className="font-serif text-lg opacity-80">
                         You're in control. Cancel your subscription at any time. No contracts. No obligations. No refunds.

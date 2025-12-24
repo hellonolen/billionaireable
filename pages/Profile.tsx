@@ -65,7 +65,7 @@ const Profile: React.FC = () => {
                     </h1>
                     <button
                         onClick={() => navigate('/waitlist')}
-                        className="px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-sm font-bold uppercase"
+                        className="px-8 py-4 bg-art-orange text-white rounded-full font-mono text-sm font-bold uppercase"
                     >
                         Get Started
                     </button>
@@ -169,7 +169,7 @@ const Profile: React.FC = () => {
                         {!subscription?.hasSubscription && (
                             <button
                                 onClick={() => navigate('/pricing')}
-                                className="w-full py-3 bg-black dark:bg-white text-white dark:text-black rounded-full font-mono text-xs font-bold uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+                                className="w-full py-3 bg-art-orange text-white rounded-full font-mono text-xs font-bold uppercase hover:bg-art-orange/80 transition-colors"
                             >
                                 Upgrade
                             </button>
