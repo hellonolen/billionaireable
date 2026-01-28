@@ -5,41 +5,41 @@ const GW: React.FC = () => {
         {
             concept: "Core 4",
             original: "Body, Being, Balance, Business",
-            billionaire: "THE ENGINE",
-            definition: "The 4 integrated systems required to sustain $1B+ of power.",
-            suggestion: "Bio-Availability, Capital-Sovereignty, Legacy-Dynasty, Mental-Ascendance.",
+            billionaire: "THE CORE",
+            definition: "The 4 areas of your life that must be integrated to win.",
+            suggestion: "Health, Connection, Assets, and Meaning. Whole-man sovereignty.",
             priority: "CRITICAL"
         },
         {
             concept: "The Stack",
             original: "Facts, Feelings, Focus, Fruit",
-            billionaire: "THE AUDIT",
-            definition: "The daily strategic process to isolate facts from noise.",
-            suggestion: "Fact -> Bias -> Leverage -> Move. Execution without the friction of feelings.",
+            billionaire: "THE TRUTH",
+            definition: "The daily practice of getting quiet and finding clarity.",
+            suggestion: "Stripping away the noise to see the single move that matters today.",
             priority: "CRITICAL"
         },
         {
             concept: "The Pit",
             original: "Accountability and group exposure",
-            billionaire: "THE SYNDICATE",
-            definition: "The elite peer auditing of a billionaire's strategy.",
-            suggestion: "Intense, high-stakes review of your life's logic by the Inner Circle.",
+            billionaire: "THE CIRCLE",
+            definition: "A private place for the men who have your back.",
+            suggestion: "No boardrooms. Just truth and protection with the Inner Circle.",
             priority: "HIGH"
         },
         {
             concept: "The Code",
             original: "Rules of engagement for life",
-            billionaire: "THE STANDARD",
-            definition: "The non-negotiable protocols for maintaining sovereignty.",
-            suggestion: "SOPs for communication, investment, and health. No deviations.",
+            billionaire: "THE LIFE",
+            definition: "The simple rules you live by to stay free.",
+            suggestion: "The non-negotiable ways you protect your time, energy, and money.",
             priority: "HIGH"
         },
         {
             concept: "Warrior / King",
             original: "The identity of a developing man",
-            billionaire: "ARCHITECT / SOVEREIGN",
-            definition: "The shift from manual production to systemic command.",
-            suggestion: "Architect = Builder of Systems. Sovereign = Ruler of the Arena.",
+            billionaire: "THE SOVEREIGN",
+            definition: "The man who finally owns himself and his outcome.",
+            suggestion: "Living life on your own terms. Unchecked and unbothered.",
             priority: "CRITICAL"
         }
     ];
