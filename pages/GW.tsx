@@ -7,7 +7,7 @@ const GW: React.FC = () => {
             original: "Body, Being, Balance, Business",
             billionaire: "THE CORE",
             definition: "The 4 areas of your life that must be integrated to win.",
-            suggestion: "Health, Connection, Assets, and Meaning. Whole-man sovereignty.",
+            suggestion: "Health, Connection, Assets, and Meaning. Absolute self-sovereignty.",
             priority: "CRITICAL"
         },
         {
@@ -22,8 +22,8 @@ const GW: React.FC = () => {
             concept: "The Pit",
             original: "Accountability and group exposure",
             billionaire: "THE CIRCLE",
-            definition: "A private place for the men who have your back.",
-            suggestion: "No boardrooms. Just truth and protection with the Inner Circle.",
+            definition: "A private place for those who have your back.",
+            suggestion: "No boardrooms. Just truth and protection with your inner circle.",
             priority: "HIGH"
         },
         {
@@ -36,9 +36,9 @@ const GW: React.FC = () => {
         },
         {
             concept: "Warrior / King",
-            original: "The identity of a developing man",
+            original: "The identity of a developing individual",
             billionaire: "THE SOVEREIGN",
-            definition: "The man who finally owns himself and his outcome.",
+            definition: "The individual who finally owns themselves and their outcome.",
             suggestion: "Living life on your own terms. Unchecked and unbothered.",
             priority: "CRITICAL"
         }
@@ -165,7 +165,7 @@ const GW: React.FC = () => {
                     <h2 className="text-xl font-black mb-4 uppercase tracking-tighter">Clarified Vision</h2>
                     <p className="text-gray-500 leading-relaxed text-sm">
                         We've simplified the Garrett White framework into the **Billionaireable Weekend**.
-                        It is no longer a "men's program." It is an **Identity Intensive**.
+                        It is no longer a gender-specific program. It is an **Identity Intensive**.
                         The shift is from "The Path" to **"The Architecture"**.
                     </p>
                 </div>
