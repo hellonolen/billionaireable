@@ -1,10 +1,10 @@
-# Garrett White (Wake Up Warrior) vs. Billionaireable Alignment
+# GW (Wake Up Warrior) vs. Billionaireable Alignment
 
-This document outlines the core frameworks of Garrett J. White's "Wake Up Warrior" system and identifies how these components can be adopted or translated into the **Billionaireable** operating system.
+This document outlines the core frameworks of GW's "Wake Up Warrior" system and identifies how these components can be adopted or translated into the **Billionaireable** operating system.
 
 ## 1. Core Frameworks Comparison
 
-| Garrett White / Warrior | Billionaireable Alignment | Simplified Definition |
+| GW / Warrior | Billionaireable Alignment | Simplified Definition |
 | :--- | :--- | :--- |
 | **Core 4** | **THE CORE** | Health, Connection, Assets, and Meaning. Absolute self-sovereignty. |
 | **The Stack** | **THE TRUTH** | The daily practice of getting quiet and finding clarity. |

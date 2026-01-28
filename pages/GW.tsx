@@ -164,7 +164,7 @@ const GW: React.FC = () => {
                 <div className="flex-1 bg-white border border-gray-200 p-8 shadow-xl">
                     <h2 className="text-xl font-black mb-4 uppercase tracking-tighter">Clarified Vision</h2>
                     <p className="text-gray-500 leading-relaxed text-sm">
-                        We've simplified the Garrett White framework into the **Billionaireable Weekend**.
+                        We've simplified the GW framework into the **Billionaireable Weekend**.
                         It is no longer a gender-specific program. It is an **Identity Intensive**.
                         The shift is from "The Path" to **"The Architecture"**.
                     </p>
