@@ -9,6 +9,7 @@ import PageTransition from './components/PageTransition';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Markets from './pages/Markets';
+import GW from './pages/GW';
 import BioSelf from './pages/BioSelf';
 import DetailView from './pages/DetailView';
 import Intelligence from './pages/Intelligence';
@@ -76,6 +77,7 @@ const App: React.FC = () => {
                   <Route path="/home" element={<PageTransition><Home /></PageTransition>} />
                   <Route path="/dashboard" element={<ProtectedSubscriberRoute><PageTransition><Dashboard /></PageTransition></ProtectedSubscriberRoute>} />
                   <Route path="/wealth" element={<ProtectedSubscriberRoute><PageTransition><Wealth /></PageTransition></ProtectedSubscriberRoute>} />
+                  <Route path="/gw" element={<PageTransition><GW /></PageTransition>} />
                   <Route path="/markets" element={<ProtectedSubscriberRoute><PageTransition><Markets /></PageTransition></ProtectedSubscriberRoute>} />
                   <Route path="/intelligence" element={<ProtectedSubscriberRoute><PageTransition><Intelligence /></PageTransition></ProtectedSubscriberRoute>} />
                   <Route path="/strategy" element={<ProtectedSubscriberRoute><PageTransition><Strategy /></PageTransition></ProtectedSubscriberRoute>} />

@@ -137,3 +137,32 @@ export const getOnboardingProgress = query({
     return user?.onboardingProgress || null;
   },
 });
+// Ensure a user exists and is an admin
+export const ensureAdmin = mutation({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const email = args.email.toLowerCase().trim();
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .first();
+
+    if (existingUser) {
+      await ctx.db.patch(existingUser._id, {
+        isAdmin: true,
+        updatedAt: Date.now(),
+      });
+      return { success: true, userId: existingUser._id, status: "updated" };
+    } else {
+      const userId = await ctx.db.insert("users", {
+        email,
+        isAdmin: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      return { success: true, userId, status: "created" };
+    }
+  },
+});
