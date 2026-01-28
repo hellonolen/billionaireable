@@ -21,9 +21,9 @@ const GW: React.FC = () => {
         {
             concept: "The Pit",
             original: "Accountability and group exposure",
-            billionaire: "THE WAR ROOM",
-            definition: "The high-stakes peer scrutiny of a billionaire's architecture.",
-            suggestion: "Intense, closed-door auditing of your life's logic by elite peers.",
+            billionaire: "THE SYNDICATE",
+            definition: "The elite peer auditing of a billionaire's strategy.",
+            suggestion: "Intense, high-stakes review of your life's logic by the Inner Circle.",
             priority: "HIGH"
         },
         {
@@ -103,8 +103,8 @@ const GW: React.FC = () => {
                                     </td>
                                     <td className="border border-gray-300 p-3 text-center">
                                         <span className={`px-2 py-0.5 rounded-sm text-[8px] font-black border ${row.priority === 'CRITICAL' ? 'bg-black text-white border-black' :
-                                                row.priority === 'HIGH' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                                                    'bg-gray-100 text-gray-600 border-gray-200'
+                                            row.priority === 'HIGH' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                                                'bg-gray-100 text-gray-600 border-gray-200'
                                             }`}>
                                             {row.priority}
                                         </span>
