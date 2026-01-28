@@ -12,6 +12,7 @@ const ALL_PAGES = [
     { path: '/markets', label: 'Markets', description: 'Live market data, stocks, crypto, forex', category: 'Transformation' },
     { path: '/intelligence', label: 'Intelligence', description: 'Strategic briefings and content', category: 'Transformation' },
     { path: '/gw', label: 'GW Alignment', description: 'Garrett White comparison and alignment', category: 'Transformation' },
+    { path: '/oracle', label: 'The Oracle', description: 'Scenario simulation and voice interaction', category: 'Transformation' },
     { path: '/bio-self', label: 'BioSelf', description: 'Health, bloodwork, longevity biomarkers', category: 'Transformation' },
     { path: '/sovereign-map', label: 'Sovereign Map', description: 'Passports, residencies, global assets', category: 'Transformation' },
     { path: '/legacy-timeline', label: 'Legacy Timeline', description: '100-year dynasty planning, trusts', category: 'Transformation' },
